@@ -102,4 +102,3 @@ test_js/
 webpack_dist/[0-9]*.bundle.js
 webpack_dist/[0-9]*.bundle.js.map
 webpack_dist/bundle.js.map
-original_src/
