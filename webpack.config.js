@@ -2,7 +2,7 @@
  * @Author: freysu
  * @Date: 2024-11-18 05:05:32
  * @LastEditors: freysu
- * @LastEditTime: 2024-11-23 17:21:40
+ * @LastEditTime: 2024-11-23 17:30:06
  * @Description: file content
  */
 const path = require('path')
@@ -28,7 +28,7 @@ module.exports = {
     ]
   },
   devServer: {
-    contentBase: path.join(__dirname, 'dist'),
+    contentBase: path.join(__dirname, 'webpack_dist'),
     compress: true,
     port: 9000
   }

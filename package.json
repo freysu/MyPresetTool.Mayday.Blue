@@ -6,7 +6,7 @@
     "build": "webpack",
     "start": "webpack serve",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d . -r https://github.com/freysu/mypresets.mayday.blue -b gh-pages"
   },
   "homepage": "https://github.com/freysu/mypresets.mayday.blue",
   "devDependencies": {
