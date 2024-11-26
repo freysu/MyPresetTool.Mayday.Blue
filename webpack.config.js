@@ -2,7 +2,7 @@
  * @Author: freysu
  * @Date: 2024-11-18 05:05:32
  * @LastEditors: freysu
- * @LastEditTime: 2024-11-27 06:06:33
+ * @LastEditTime: 2024-11-27 06:46:20
  * @Description: file content
  */
 // const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
@@ -34,12 +34,7 @@ module.exports = {
     sideEffects: false,
   },
   devServer: {
-    host: '127.0.0.1',
-    port: '8080',
-    contentBase: path.resolve(__dirname, './'),
     compress: true,
-    open: true,
-    port: 9000,
     proxy: {
       '/api': {
         target: 'http://music.163.com/',
@@ -52,6 +47,5 @@ module.exports = {
     client: {
       overlay: true, // 显示错误和警告
     },
-    watchFiles: ['original_src/**/*.js', 'index.html'], // 自定义监听的文件
   },
 };
