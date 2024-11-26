@@ -2,7 +2,7 @@
  * @Author: freysu
  * @Date: 2024-11-21 04:20:51
  * @LastEditors: freysu
- * @LastEditTime: 2024-11-26 08:55:49
+ * @LastEditTime: 2024-11-26 06:18:41
  * @Description: file content
 -->
 <!DOCTYPE html>
@@ -18,8 +18,8 @@
     <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico" />
     <title>Mayday.Blue 预设工具</title>
     <!-- Bootstrap 5 CSS -->
-    <link href="css/atom-one-dark.min.css" rel="stylesheet" />
     <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/atom-one-dark.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="css/style.min.css" />
     <style>
       .total-percentage {
@@ -40,16 +40,6 @@
         box-sizing: border-box;
         border: 0.125em solid #364347;
         cursor: pointer;
-      }
-      /* 添加间距和布局优化 */
-      #timer {
-        font-size: 1.2rem;
-        color: #007bff; /* 可以根据实际设计调整颜色 */
-      }
-
-      #milliseconds {
-        font-size: 1rem;
-        color: #888; /* 淡色表示辅助信息 */
       }
     </style>
   </head>
@@ -94,7 +84,6 @@
         <div class="container">
           <div class="d-flex justify-content-between align-items-center">
             <h1 class="app-title mb-0">Mayday.Blue 预设工具</h1>
-
             <!-- Tabs -->
             <ul class="nav nav-tabs mb-0" role="tablist">
               <li class="nav-item">
@@ -104,7 +93,7 @@
                   data-bs-target="#generate-tool"
                   role="tab"
                 >
-                  生成预设代码
+                  预设代码生成器
                 </button>
               </li>
               <li class="nav-item">
@@ -114,11 +103,10 @@
                   data-bs-target="#color-visualizer"
                   role="tab"
                 >
-                  可视化颜色预设
+                  预设代码可视化
                 </button>
               </li>
             </ul>
-
             <ul class="nav nav-tabs mb-0" role="tablist">
               <li class="nav-item">
                 <a
@@ -129,7 +117,7 @@
                   title="使用帮助"
                 >
                   <i class="material-icons">help</i>
-                  <b>帮助中心</b>
+                  <b>使用帮助</b>
                 </a>
               </li>
               <li class="nav-item">
@@ -142,25 +130,25 @@
                     aria-expanded="false"
                   >
                     <i class="material-icons">settings</i>
-                    <b>外观设置</b>
+                    <b>外观</b>
                   </button>
                   <ul class="dropdown-menu" aria-labelledby="themeDropdown">
                     <li>
                       <button class="dropdown-item" data-bs-theme-value="light">
                         <i class="material-icons">sunny</i>
-                        浅色模式
+                        浅色
                       </button>
                     </li>
                     <li>
                       <button class="dropdown-item" data-bs-theme-value="dark">
                         <i class="material-icons">nights_stay</i>
-                        暗黑模式
+                        暗黑
                       </button>
                     </li>
                     <li>
                       <button class="dropdown-item" data-bs-theme-value="auto">
                         <i class="material-icons">brightness_auto</i>
-                        自动模式
+                        自动
                       </button>
                     </li>
                   </ul>
@@ -170,7 +158,6 @@
           </div>
         </div>
       </header>
-
       <!-- Main Content -->
       <main class="flex-grow-1 py-4">
         <div class="container">
@@ -183,13 +170,13 @@
                   <div class="card-header" id="guideHeading">
                     <h5 class="mb-0 align-middle">
                       <a
-                        class="toggleGuide text-left"
+                        class="toggleGuide text-left text-decoration-none"
                         data-bs-toggle="collapse"
                         data-bs-target="#guideCollapse"
                         aria-expanded="false"
                         aria-controls="guideCollapse"
                       >
-                        使用指南：如何生成预设代码
+                        预设代码生成器-使用指南
                       </a>
                     </h5>
                   </div>
@@ -197,68 +184,89 @@
                     <div class="card-body">
                       <ol class="mb-0">
                         <li>
-                          <h5 class="h6 mb-2">1. 上传音频文件（必填）</h5>
+                          <h5 class="h6 mb-2">一、上传音频（必填）</h5>
                           <ul class="mb-0 pl-3">
                             <li>
                               <i class="material-icons">audio_file</i>
-                              <span class="fw-bold text-danger">选择你的音乐</span>
+                              <span class="fw-bold text-danger">上传音频文件</span>
                               <br />
-                              只需点击“选择文件”上传你喜欢的音乐（支持 MP3、WAV、FLAC、AAC
+                              在对应区域点击“选择文件”，从您设备选一首任意的音频（支持
+                              <code>MP3</code>
+                              、
+                              <code>WAV</code>
+                              、
+                              <code>FLAC</code>
+                              、
+                              <code>AAC</code>
                               等格式）。
                               <br />
                               <span class="fst-italic text-secondary">
-                                我们会根据音频的节奏和旋律生成合适的颜色变化。
+                                此音频的节奏、旋律等特征将用于生成预设代码文本，例如节奏影响颜色变化速度，旋律与颜色亮度、饱和度相关。
                               </span>
                             </li>
                             <li>
                               <i class="material-icons">description</i>
                               <span class="fw-bold">上传歌词文件（可选）</span>
                               <br />
-                              如果有
+                              若有对应
                               <code>.lrc</code>
-                              格式的歌词文件，可以上传，帮助系统更好地理解歌曲情感。
+                              格式的歌词文件，可在对应区域上传。
                               <br />
                               <span class="fst-italic text-secondary">
-                                这样能让颜色效果与歌词情感更加匹配。
+                                这能助系统精准理解音乐情感，使生成的颜色序列更贴合歌曲意境。例如，欢快的歌词对应明亮鲜艳的颜色，抒情部分对应柔和温暖的颜色。
                               </span>
                             </li>
                           </ul>
                         </li>
                         <li>
-                          <h5 class="h6 mb-2">2. 设置颜色主题（必填）</h5>
+                          <h5 class="h6 mb-2">二、颜色主题配置（必填）</h5>
                           <ul class="mb-0 pl-3">
                             <li>
                               <i class="material-icons">add_circle</i>
-                              <span class="fw-bold text-danger">选择适合的主色调</span>
-                              <br />
-                              在“基础颜色”下拉框中选择代表歌曲情感的主色调。
-                              <br />
+                              <span class="fw-bold text-danger">
+                                1.在
+                                <code>Base</code>
+                                Color下拉菜单中挑选能代表该歌曲整体感觉的基础颜色。
+                              </span>
                             </li>
                             <li>
                               <i class="material-icons">add_circle</i>
-                              <span class="fw-bold text-danger">调整颜色范围</span>
-                              <br />
-                              确保每种颜色的比例加起来为100%，以便生成合适的配色方案。
+                              <span class="fw-bold text-danger">
+                                2.配置动态颜色范围，确保各范围总和为100%
+                              </span>
                             </li>
                             <li>
-                              <i class="material-icons">save</i>
-                              <span class="fw-bold text-danger">保存您的配置</span>
-                              <br />
-                              配置好后，点击“保存”按钮，保存当前设置。
-                              <br />
-                              <i class="material-icons">file_upload</i>
-                              如果已有配置文件，可以点击“导入”上传
-                              <code>.json</code>
-                              配置文件。
-                              <br />
-                              <i class="material-icons">file_download</i>
-                              点击“导出”保存您的配置为
-                              <code>.json</code>
-                              文件，方便以后使用。
+                              <span>
+                                <i class="material-icons">save</i>
+                                3.
+                                <span class="fw-bold text-danger">
+                                  完成颜色主题配置后，请点击
+                                  <code>保存</code>
+                                  !
+                                </span>
+                                <br />
+                                <span>
+                                  <i class="material-icons">file_upload</i>
+                                  若使用已有配置文件，可以点击
+                                  <code>导入</code>
+                                  并选择相应的
+                                  <code>.json</code>
+                                  文件导入。
+                                </span>
+                                <br />
+                                <span>
+                                  <i class="material-icons">file_download</i>
+                                  若想在其他歌曲中复用或分享创意，可以点击
+                                  <code>导出</code>
+                                  来保存
+                                  <code>.json</code>
+                                  格式的文件。
+                                </span>
+                              </span>
                             </li>
                             <li>
                               <i class="material-icons">palette</i>
-                              <span class="fw-bold text-success">颜色选项：</span>
+                              <span class="fw-bold text-success">可用颜色列表</span>
                               <ul>
                                 <li>
                                   <strong>red</strong>
@@ -288,104 +296,133 @@
                             </li>
                             <li>
                               <i class="material-icons">palette</i>
-                              <span class="fw-bold text-info">颜色范围说明：</span>
+                              <span class="fw-bold text-info">动态颜色范围解释：</span>
                               <ul>
                                 <li>
                                   <code>Low</code>
-                                  ：低频部分（如前奏、慢节奏段落）
+                                  Colors:对应音频柔和低频部分（前奏、间奏、节奏慢段落）
                                 </li>
                                 <li>
                                   <code>Mid</code>
-                                  ：中频部分（如主歌、节奏适中的段落）
+                                  Colors:对应中等强度频率部分（主歌、节奏适中段落）
                                 </li>
                                 <li>
                                   <code>High</code>
-                                  ：高频部分（如副歌、高潮段落）
+                                  Colors:对应音频强烈高频部分（副歌高潮、节奏强烈段落）
                                 </li>
                                 <li>
                                   <code>Accent</code>
-                                  ：关键转折处的颜色（如情感爆发点）
+                                  Colors:对应音频的关键处（旋律转折、情感爆发点）
                                 </li>
                               </ul>
                             </li>
                           </ul>
                         </li>
                         <li>
-                          <h5 class="h6 mb-2">3. 生成并获取颜色序列</h5>
+                          <h5 class="h6 mb-2">三、生成并获取颜色序列</h5>
                           <ul class="mb-0 pl-3">
                             <li>
                               <i class="material-icons">play_arrow</i>
-                              <b>点击“生成预设代码”按钮</b>
+                              <b>生成预设代码文本</b>
                               <br />
-                              程序将根据音频文件和您的颜色设置生成代码，结果将显示在下方的“生成结果”区域。
+                              点击
+                              <code>生成</code>
+                              ，程序会依据上传的音频及配置的颜色主题在
+                              <code>输出结果</code>
+                              区域呈现生成的预设代码。
                             </li>
                             <li>
                               <i class="material-icons">content_copy</i>
-                              <b>复制或下载结果</b>
+                              <b>复制与下载结果</b>
                               <br />
-                              点击“复制”按钮将代码复制到剪贴板，或者点击“下载”保存为
+                              可通过点击
+                              <code>复制</code>
+                              粘贴到
+                              <a
+                                href="#"
+                                class="pe-auto link-info link-underline-primary"
+                                onclick="document.querySelector(`.nav-tabs .nav-link[data-bs-target='#color-visualizer'
+    ]`) .click()"
+                              >
+                                预设代码可视化
+                                <span class="visually-hidden">预设代码可视化</span>
+                              </a>
+                              这个选项卡里预览效果或点击
+                              <code>下载</code>
+                              即可保存为
                               <code>.json</code>
-                              文件。
+                              文本文件，方便离线查看、编辑或分享。
                             </li>
                           </ul>
                         </li>
                         <li>
-                          <h5 class="h6 mb-2">4. 示例配置文件</h5>
+                          <h5 class="h6 mb-2">
+                            四、示例颜色主题配置
+                            <code>JSON</code>
+                            文件:
+                          </h5>
                           <ul class="mb-0 pl-3">
                             <li>
-                              以下是一个示例配置文件的
+                              1.示例
                               <code>JSON</code>
-                              格式：
+                              中
+                              <code>low</code>
+                              设置为100%白色。
+                              <br />
+                              2.示例
+                              <code>JSON</code>
+                              中
+                              <code>Mid</code>
+                              配置为30%黄色（
+                              <code>yel</code>
+                              ）和70%橙色（
+                              <code>ora</code>
+                              ）。颜色依此比例在黄橙之间混合变化，反映音乐的情感节奏，黄色欢快明亮，橙色增强活力，与音频此部分呼应。
+                              <br />
+                              3.示例
+                              <code>JSON</code>
+                              中
+                              <code>High</code>
+                              设置为30%橙色（
+                              <code>ora</code>
+                              ）和70%红色（
+                              <code>red</code>
+                              ）。红色表示强烈激情，在高潮部分高比例呈现，与橙色混合展现音乐高潮的热烈氛围，随音频变化在橙红之间动态过渡。
+                              <br />
+                              4.示例
+                              <code>JSON</code>
+                              中
+                              <code>Accent</code>
+                              中与
+                              <code>high</code>
+                              范围相同（30%橙色
+                              <code>ora</code>
+                              和70%红色
+                              <code>red</code>
+                              ），在关键处（旋律转折、情感爆发点）呈现。
                             </li>
                             <li>
-                              <pre><code class="language-json">{
-  "themeColors": {
-    "low": [{"color": "whi", "per": "100%"}],
-    "mid": [{"color": "yel", "per": "30%"}, {"color": "ora", "per": "70%"}],
-    "high": [{"color": "ora", "per": "30%"}, {"color": "red", "per": "70%"}],
-    "accent": [{"color": "ora", "per": "30%"}, {"color": "red", "per": "70%"}],
-    "base": "ora"
-  }
-}</code></pre>
-                            </li>
-                            <li>
-                              <h6>解释：</h6>
-                              <ul>
-                                <li>
-                                  <strong>low</strong>
-                                  ：低频部分的颜色配置。此处设置了
-                                  <code>whi</code>
-                                  （白色）为 100%，代表低频段完全使用白色。
-                                </li>
-                                <li>
-                                  <strong>mid</strong>
-                                  ：中频部分的颜色配置。此处设置了
-                                  <code>yel</code>
-                                  （黄色）为 30%，
-                                  <code>ora</code>
-                                  （橙色）为 70%，即中频段大部分是橙色，少部分为黄色。
-                                </li>
-                                <li>
-                                  <strong>high</strong>
-                                  ：高频部分的颜色配置。此处设置了
-                                  <code>ora</code>
-                                  （橙色）为 30%，
-                                  <code>red</code>
-                                  （红色）为 70%，高频段主要为红色。
-                                </li>
-                                <li>
-                                  <strong>accent</strong>
-                                  ：关键转折点的颜色配置。与
-                                  <code>high</code>
-                                  相似，此处设置了橙色和红色的比例。
-                                </li>
-                                <li>
-                                  <strong>base</strong>
-                                  ：设置主色调。此处的主色调为
-                                  <code>ora</code>
-                                  （橙色），用于标识歌曲的整体色调。
-                                </li>
-                              </ul>
+                              <!-- prettier-ignore -->
+                              <pre><code class="language-json">
+    {
+      "themeColors": {
+        "low": [{ "color": "whi", "per": "100%" }],
+        "mid": [
+          { "color": "yel", "per": "30%" },
+          { "color": "ora", "per": "70%" }
+        ],
+        "high": [
+          { "color": "ora", "per": "30%" },
+          { "color": "red", "per": "70%" }
+        ],
+        "accent": [
+          { "color": "ora", "per": "30%" },
+          { "color": "red", "per": "70%" }
+        ],
+        "base": "ora"
+      }
+    }
+  </code></pre>
                             </li>
                           </ul>
                         </li>
@@ -393,10 +430,9 @@
                     </div>
                   </div>
                 </div>
-
                 <div class="row mb-4">
+                  <!-- 文件表单和控制部分 -->
                   <div class="col-12 col-lg-3 mb-4 order-2">
-                    <!-- 文件表单和控制部分 -->
                     <div class="card shadow-sm">
                       <div class="card-header" id="fileFormHeading">
                         <h2
@@ -406,7 +442,7 @@
                           aria-expanded="true"
                           aria-controls="fileFormCollapse"
                         >
-                          （一）配置文件
+                          表单配置区
                         </h2>
                       </div>
                       <div
@@ -421,8 +457,8 @@
                                 for="audioFileInput_generate_tool"
                                 class="form-label d-flex align-items-center"
                               >
-                                <i class="material-icons me-2">music_note</i>
-                                1. 选择你的音乐
+                                <i class="material-icons me-2">audio_file</i>
+                                1. 选择音乐文件（必选）
                               </label>
                               <input
                                 type="file"
@@ -431,7 +467,6 @@
                                 accept="audio/*"
                                 autocomplete="off"
                               />
-                              <small class="text-muted">支持 MP3, WAV, FLAC 等格式</small>
                             </div>
                             <div class="mb-3">
                               <label
@@ -439,7 +474,7 @@
                                 class="form-label d-flex align-items-center"
                               >
                                 <i class="material-icons me-2">description</i>
-                                2. 上传歌词（可选）
+                                2. 添加歌词文件 (可选)
                               </label>
                               <input
                                 type="file"
@@ -448,30 +483,27 @@
                                 accept=".lrc"
                                 autocomplete="off"
                               />
-                              <small class="text-muted">
-                                同步歌词可以让灯光更精准哦！格式要求：.lrc
-                              </small>
                             </div>
                           </form>
                         </div>
                       </div>
                     </div>
-                    <!-- 文件信息解析区 -->
+                    <!-- File Info Section -->
                     <div class="card shadow-sm mb-4 d-none">
                       <div class="card-header">
-                        <h2 class="h5 mb-0">文件信息</h2>
+                        <h2 class="h5 mb-0">Parse File Info</h2>
                       </div>
                       <div class="card-body">
-                        <div id="audioFileInfo" class="mb-2 p-2 rounded">音频文件信息</div>
-                        <div id="lrcFileInfo" class="mb-2 p-2 rounded">歌词文件信息</div>
+                        <div id="audioFileInfo" class="mb-2 p-2 rounded">11</div>
+                        <div id="lrcFileInfo" class="mb-2 p-2 rounded">22</div>
                       </div>
                     </div>
-                    <!-- 进度情况区 -->
                     <div class="card shadow-sm mb-4 d-none" id="processing" style="height: 10rem">
                       <div class="card-header">
-                        <h2 class="h5 mb-0">当前进度</h2>
+                        <h2 class="h5 mb-0">进度情况</h2>
                       </div>
                       <div class="card-body">
+                        <!-- 进度条 -->
                         <div class="progress mb-3" style="height: 25px">
                           <div
                             id="progressBar"
@@ -485,38 +517,41 @@
                             <span id="progressText">0%</span>
                           </div>
                         </div>
+                        <!-- 未开始状态 -->
                         <div id="statusNotStarted" class="text-center d-none">
                           <div class="text-primary" role="status">
                             <span class="visually-hidden">准备中...</span>
                           </div>
-                          <h6>准备开始</h6>
+                          <h6>待开始</h6>
                         </div>
+                        <!-- 处理中状态 -->
                         <div id="statusProcessing" class="text-center d-none">
                           <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">处理中...</span>
                           </div>
                           <h6>处理中...</h6>
                         </div>
+                        <!-- 已完成状态 -->
                         <div id="statusCompleted" class="text-center d-none">
                           <div class="text-success" role="status">
                             <span class="visually-hidden">已完成</span>
                           </div>
-                          <h6>完成啦！</h6>
+                          <h6>已完成</h6>
                         </div>
                       </div>
                     </div>
                     <div class="card shadow-sm mb-4">
-                      <div class="btn-group btn-group-lg>">
+                      <div class="d-grid gap-2">
                         <button
-                          class="btn btn-primary btn-lg d-flex align-items-center justify-content-center"
+                          class="btn btn-primary d-flex align-items-center justify-content-center"
                           id="generate-btn"
                           data-bs-toggle="tooltip"
                           data-bs-placement="top"
-                          title="生成预设代码"
+                          title="生成预设代码文本"
                           disabled
                         >
                           <i class="material-icons me-2">bolt</i>
-                          生成预设代码
+                          生成预设代码文本
                         </button>
                       </div>
                     </div>
@@ -535,7 +570,7 @@
                           aria-expanded="true"
                           aria-controls="themeConfigCollapse"
                         >
-                          （二）颜色主题配置
+                          颜色主题配置
                         </h2>
                         <div class="text-end">
                           <button class="btn btn-outline-secondary" id="themeConfig_saveConfig">
@@ -606,7 +641,7 @@
                       <div
                         class="card-header card-header d-flex justify-content-between align-items-center"
                       >
-                        <h2 class="h5 w-100">生成结果</h2>
+                        <h2 class="h5 w-100">输出结果</h2>
                         <div class="flex-shrink-1 text-end">
                           <button class="btn btn-outline-primary btn-sm" id="copy-btn">
                             <i class="material-icons me-2">content_copy</i>
@@ -624,7 +659,7 @@
                           class="form-control font-monospace"
                           readonly
                           spellcheck="false"
-                          placeholder="生成的代码会出现在这里..."
+                          placeholder="Generated output will appear here..."
                           style="resize: vertical"
                         ></textarea>
                       </div>
@@ -649,7 +684,7 @@
                         aria-expanded="false"
                         aria-controls="guide1Collapse"
                       >
-                        🎨 使用指南：如何预览已有的预设代码
+                        预设代码可视化工具-使用指南
                       </a>
                     </h5>
                   </div>
@@ -657,13 +692,13 @@
                     <div class="card-body">
                       <ol class="mb-0">
                         <li>
-                          <h5 class="h6 mb-2">1. 上传音频（必填）</h5>
+                          <h5 class="h6 mb-2">一、上传音频（必填）</h5>
                           <ul class="mb-0 pl-3">
                             <li>
                               <i class="material-icons">audio_file</i>
-                              <span class="fw-bold text-danger">选择你的音乐</span>
+                              <span class="fw-bold text-danger">上传音频文件</span>
                               <br />
-                              点击“选择文件”上传音频（支持
+                              在对应区域点击“选择文件”，从您设备选一首任意的音频（支持
                               <code>MP3</code>
                               、
                               <code>WAV</code>
@@ -671,113 +706,133 @@
                               <code>FLAC</code>
                               、
                               <code>AAC</code>
-                              格式）。
+                              等格式）。
                               <br />
                               <span class="fst-italic text-secondary">
-                                音频特征将影响颜色变化的节奏和亮度哦！
+                                此音频的节奏、旋律等特征将用于生成预设代码文本，例如节奏影响颜色变化速度，旋律与颜色亮度、饱和度相关。
                               </span>
                             </li>
                           </ul>
                         </li>
                         <li>
-                          <h5 class="h6 mb-2">2. 上传或输入预设代码（必填）</h5>
+                          <h5 class="h6 mb-2">二、上传预设代码文件或输入预设代码文本（可选）</h5>
                           <ul class="mb-0 pl-3">
                             <li>
                               <i class="material-icons">file_upload</i>
-                              <span class="fw-bold text-danger">上传预设代码文件</span>
+                              <span class="fw-bold">上传预设代码文件</span>
                               <br />
-                              可以上传一个预设代码文件，帮助系统更好地理解音乐情感和节奏！
+                              若有对应的预设代码文件，可以在对应区域点击“选择文件”进行上传。
+                              <br />
+                              <span class="fst-italic text-secondary">
+                                预设代码文件可以帮助系统更好地理解音乐的情感和节奏，从而生成更符合预期的颜色序列。
+                              </span>
                             </li>
                             <li>
                               <i class="material-icons">edit</i>
-                              <span class="fw-bold text-danger">手动输入代码</span>
+                              <span class="fw-bold">手动输入预设代码</span>
                               <br />
-                              如果没有文件，别担心，你可以直接输入代码！
+                              如果没有预设代码文件，可以在预设代码输入区手动输入预设代码。
                               <br />
-                              <span class="fw-bold text-info">
-                                <ul>
-                                  <li>时间戳必须为 100ms 的整数倍。</li>
-                                  <li>相邻时间点之间的最小间隔为 200ms。</li>
-                                  <li>
-                                    支持注释，注释需以
-                                    <code>//</code>
-                                    开头。
-                                  </li>
-                                  <li>
-                                    [格式]: 时间(ms), 颜色
-                                    <br />
-                                    [示例]:
-                                    <pre><code>
-    0,pin2 // XXXX
-    500,pin2 
-    1000,sky3
-    1500,pin4
-                                    </code></pre>
-                                  </li>
-                                </ul>
+                              <span class="fst-italic text-secondary">
+                                预设代码格式为：时间(ms), 颜色。例如：0, pin2；500, pin2；1000,
+                                sky3；1500, pin4。
                               </span>
                             </li>
                           </ul>
                         </li>
                         <li>
-                          <h5 class="h6 mb-2">3. 查看预览效果</h5>
+                          <h5 class="h6 mb-2">三、查看颜色预览和音频可视化效果</h5>
                           <ul class="mb-0 pl-3">
                             <li>
                               <i class="material-icons">palette</i>
-                              <span class="fw-bold">颜色预览</span>
+                              <span class="fw-bold">颜色预览区</span>
                               <br />
-                              看到颜色随时间变化，带来真实效果！
+                              在颜色预览区可以看到根据预设代码生成的颜色变化效果。
+                              <br />
+                              <span class="fst-italic text-secondary">
+                                颜色预览区会实时显示当前时间点的颜色，并显示颜色变化的时间轴。
+                              </span>
                             </li>
                             <li>
                               <i class="material-icons">music_note</i>
                               <span class="fw-bold">音频可视化</span>
                               <br />
-                              选择频谱图或波形图，看到音频的起伏，调整代码更精准！
+                              在音频可视化区域可以选择不同的可视化模式（频谱图或波形图），以直观地看到音频的变化。
+                              <br />
+                              <span class="fst-italic text-secondary">
+                                音频可视化可以帮助用户更好地理解音频的节奏和旋律，从而调整预设代码以达到更好的效果。
+                              </span>
                             </li>
                           </ul>
                         </li>
                         <li>
-                          <h5 class="h6 mb-2">4. 控制动画播放</h5>
+                          <h5 class="h6 mb-2">四、使用控制按钮或快捷键操作动画</h5>
                           <ul class="mb-0 pl-3">
                             <span class="fst-italic text-secondary">
-                              提示: [Windows:Ctrl, OS X:Command!] 按下 "Ctrl/Cmd + ."
-                              可以查看快捷键说明！
+                              提示: [Windows :Ctrl, OS X: Command!]
+                              <br />
+                              按下"Ctrl/Cmd +
+                              ."可以查看快捷键说明！在编辑文本时，快捷键会暂时禁用。切到其他选项卡会暂时禁用。
                             </span>
                             <li>
                               <i class="material-icons">play_arrow</i>
-                              <span class="fw-bold">开始播放 (Ctrl/Cmd+Enter)</span>
+                              <span class="fw-bold">开始 (Ctrl/Cmd + Enter)</span>
                               <br />
-                              点击“开始”播放动画，跟随节奏变化！
+                              点击“开始”按钮，动画将按照预设代码的时间和颜色变化开始播放。
+                              <br />
+                              <span class="fst-italic text-secondary">
+                                动画开始后，可以在颜色预览区和音频可视化区域看到效果。
+                              </span>
                             </li>
                             <li>
                               <i class="material-icons">pause</i>
-                              <span class="fw-bold">暂停播放 (Space)</span>
+                              <span class="fw-bold">暂停 (Space)</span>
                               <br />
-                              暂停动画，稍作休息！
+                              点击“暂停”按钮，动画将暂时停止播放。
+                              <br />
+                              <span class="fst-italic text-secondary">
+                                暂停后，可以通过点击“继续”按钮恢复播放。
+                              </span>
                             </li>
                             <li>
                               <i class="material-icons">play_arrow</i>
-                              <span class="fw-bold">继续播放 (Space)</span>
+                              <span class="fw-bold">继续 (Space)</span>
                               <br />
-                              继续播放，重新享受精彩！
+                              点击“继续”按钮，动画将从暂停的位置继续播放。
+                              <br />
+                              <span class="fst-italic text-secondary">
+                                继续播放后，可以在颜色预览区和音频可视化区域看到效果。
+                              </span>
                             </li>
                             <li>
                               <i class="material-icons">stop</i>
-                              <span class="fw-bold">停止 (Esc 或 Ctrl/Cmd+S)</span>
+                              <span class="fw-bold">停止 (Esc 或 Ctrl/Cmd + S)</span>
                               <br />
-                              停止播放，准备重新调整。
+                              点击“停止”按钮，动画将完全停止播放。
+                              <br />
+                              <span class="fst-italic text-secondary">
+                                停止后，可以通过点击“开始”按钮重新开始播放。
+                              </span>
                             </li>
                             <li>
                               <i class="material-icons">replay</i>
-                              <span class="fw-bold">重新开始 (Ctrl/Cmd+R)</span>
+                              <span class="fw-bold">重新开始 (Ctrl/Cmd + R)</span>
                               <br />
-                              从头开始，回顾每一个精彩瞬间！
+                              点击“重新开始”按钮，动画将从头开始播放。
+                              <br />
+                              <span class="fst-italic text-secondary">
+                                重新开始后，可以在颜色预览区和音频可视化区域看到效果。
+                              </span>
                             </li>
                             <li>
                               <i class="material-icons">clear</i>
-                              <span class="fw-bold">清除 (Ctrl/Cmd+Backspace)</span>
+                              <span class="fw-bold">清除 (Ctrl/Cmd + Backspace)</span>
                               <br />
-                              清除所有设置，重新开始。
+                              点击“清除”按钮，将清除所有预设代码和动画效果。
+                              <br />
+                              <span class="fst-italic text-secondary">
+                                清除后，可以重新上传音频和预设代码文件，或手动输入新的预设代码。
+                              </span>
                             </li>
                           </ul>
                         </li>
@@ -785,8 +840,8 @@
                     </div>
                   </div>
                 </div>
-                <!-- Left Column - Configuration -->
                 <div class="row">
+                  <!-- Left Column - Configuration -->
                   <div class="col-12 col-lg-4 mb-4">
                     <div class="card shadow-sm">
                       <div class="card-header" id="preview_config-heading">
@@ -797,7 +852,7 @@
                           aria-expanded="true"
                           aria-controls="preview_configCollapse"
                         >
-                          🎤 预览文件配置
+                          预览文件配置
                         </h2>
                       </div>
                       <div
@@ -806,7 +861,8 @@
                         aria-labelledby="preview_config-heading"
                       >
                         <div class="card-body">
-                          <h3 class="h6 mb-3 mt-4">1. 选择你的音乐</h3>
+                          <h3 class="h6 mb-3 mt-4">1. 将您的音频文件上传到这里 (可选)</h3>
+                          <!-- 音频拖放区域 -->
                           <div
                             class="drop-zone rounded border-2 border-dashed p-4 mb-4 text-center"
                             id="audioDropZone"
@@ -833,15 +889,20 @@
                               <circle cx="18" cy="16" r="3" />
                             </svg>
                             <p class="mb-2">
-                              将音频文件拖到这里
+                              1. 将您的音频文件拖放到这里
                               <br />
                               或
                               <strong>点击浏览</strong>
                             </p>
-                            <small class="text-muted">支持格式：AAC, FLAC, MP3, WAV</small>
+                            <small class="text-muted">
+                              支持的格式：AAC, FLAC, MP3, WAV, OGG, M4A
+                            </small>
                           </div>
-
-                          <h3 class="h6 mb-3 mt-4">2. 上传或输入预设代码</h3>
+                          <!-- 预设代码输入配置 -->
+                          <h3 class="h6 mb-3 mt-4">
+                            2. 将您的预设代码文件上传到这里或输入到下方的文本框 (必选)
+                          </h3>
+                          <!-- 预设代码文件拖放区域 -->
                           <div
                             class="drop-zone rounded border-2 border-dashed p-4 mb-4 text-center"
                             id="dropZone"
@@ -868,33 +929,32 @@
                               <line x1="12" y1="3" x2="12" y2="15" />
                             </svg>
                             <p class="mb-2">
-                              将预设代码文件拖到这里
+                              将您的预设代码文件拖放到这里
                               <br />
                               或
                               <strong>点击浏览</strong>
                             </p>
-                            <small class="text-muted">支持格式：.txt</small>
-                          </div>
-                          <!-- Sequence Input -->
-                          <div class="card shadow-sm">
-                            <div class="card-header">
-                              <h2 class="h5 mb-0">预设代码输入区</h2>
-                            </div>
-                            <div class="card-body">
-                              <textarea
-                                id="input"
-                                class="form-control font-monospace"
-                                rows="8"
-                                spellcheck="false"
-                                placeholder="在这里输入你的预设代码...&#13;&#10;&#13;&#10;[格式]: 时间(ms), 颜色&#13;&#10;[示例]:&#13;&#10;0,pin2&#13;&#10;500,pin2&#13;&#10;1000,sky3&#13;&#10;1500,pin4"
-                              ></textarea>
-                            </div>
+                            <small class="text-muted">支持的格式：.txt</small>
                           </div>
                         </div>
                       </div>
                     </div>
+                    <!-- Sequence Input -->
+                    <div class="card shadow-sm">
+                      <div class="card-header">
+                        <h2 class="h5 mb-0">预设代码输入区</h2>
+                      </div>
+                      <div class="card-body">
+                        <textarea
+                          id="input"
+                          class="form-control font-monospace"
+                          rows="8"
+                          spellcheck="false"
+                          placeholder="在这里输入你的预设代码...&#13;&#10;&#13;&#10;[格式]: 时间(ms), 颜色&#13;&#10;[示例]:&#13;&#10;0,pin2&#13;&#10;500,pin2&#13;&#10;1000,sky3&#13;&#10;1500,pin4"
+                        ></textarea>
+                      </div>
+                    </div>
                   </div>
-
                   <!-- Right Column - Visualization -->
                   <div class="col-12 col-lg-8">
                     <div class="card shadow-sm mb-4">
@@ -941,7 +1001,7 @@
                               class="control-button btn btn-outline-success d-flex align-items-center justify-content-center"
                             >
                               <i class="material-icons">play_arrow</i>
-                              开始播放
+                              开始
                             </button>
                             <button
                               id="pause"
@@ -985,25 +1045,15 @@
                     <!-- Color Preview -->
                     <div class="card shadow-sm mb-4">
                       <div class="card-header">
-                        <h2 class="h5 mb-0">颜色预览</h2>
+                        <h2 class="h5 mb-0">
+                          颜色预览区 (
+                          <span id="timer" class="text-center font-monospace h5 mb-0">
+                            [00:00:00] => 0ms
+                          </span>
+                          )
+                        </h2>
                       </div>
                       <div class="card-body p-0">
-                        <div class="d-flex justify-content-between align-items-center">
-                          <!-- 歌曲进度 -->
-                          <div>
-                            <span class="fw-bold">歌曲进度</span>
-                            <br />
-                            <span id="timer" class="text-center font-monospace h5 mb-0">
-                              [00:00:00]
-                            </span>
-                          </div>
-                          <!-- 转换后的毫秒 -->
-                          <div>
-                            <span class="fw-bold">转换后的毫秒</span>
-                            <br />
-                            <span class="text-muted" id="milliseconds">0ms</span>
-                          </div>
-                        </div>
                         <div class="color-preview" id="colorElement">
                           <div class="color-info" id="colorInfo"></div>
                         </div>
@@ -1121,11 +1171,7 @@
         </div>
       </div>
     </div>
-    <script
-      src="https://unpkg.com/wavesurfer.js@7.8.9/dist/wavesurfer.min.js"
-      crossorigin="anonymous"
-      defer
-    ></script>
+    <script src="https://unpkg.com/wavesurfer.js" crossorigin="anonymous" defer></script>
     <script
       src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"
       crossorigin="anonymous"

@@ -499,14 +499,55 @@ class ThemeConfigForm {
   constructor() {
     this.themeConfig = {
       themeColors: {
-        low: [{ color: 'blu', per: '100%' }],
-        mid: [{ color: 'blu', per: '100%' }],
-        high: [{ color: 'blu', per: '100%' }],
-        accent: [{ color: 'blu', per: '100%' }],
-        base: 'blu',
+        low: [
+          { color: 'whi', per: '30%' },
+          { color: 'red', per: '70%' },
+        ],
+        mid: [
+          { color: 'yel', per: '20%' },
+          { color: 'ora', per: '30%' },
+          { color: 'sky', per: '20%' },
+          { color: 'red', per: '30%' },
+        ],
+        high: [
+          { color: 'ora', per: '40%' },
+          { color: 'red', per: '60%' },
+        ],
+        accent: [
+          { color: 'sky', per: '50%' },
+          { color: 'yel', per: '50%' },
+        ],
+        base: 'red',
       },
     };
     this.sections = ['low', 'mid', 'high', 'accent'];
+  }
+
+  _addEventListeners() {
+    // Add Color buttons
+    document.querySelectorAll('.add-color-btn').forEach((button) => {
+      button.addEventListener('click', (e) => {
+        const section = e.currentTarget.dataset.section;
+        this.addColorItem(section);
+      });
+    });
+
+    // Export button
+    const exportBtn = document.querySelector('#themeConfig_exportConfig');
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => this.exportConfig());
+    }
+
+    // Import input
+    const importInput = document.querySelector('#themeConfig_importConfig');
+    if (importInput) {
+      importInput.addEventListener('change', (e) => this.importConfig(e.target));
+    }
+
+    const saveInput = document.querySelector('#themeConfig_saveConfig');
+    if (saveInput) {
+      saveInput.addEventListener('click', (e) => this.saveConfig());
+    }
   }
 
   createSectionContainers() {
@@ -544,6 +585,13 @@ class ThemeConfigForm {
 
     container.innerHTML = '';
 
+    // 先显示总百分比
+    const totalPercentageDiv = document.createElement('div');
+    totalPercentageDiv.id = `${section}TotalPercentage`;
+    totalPercentageDiv.className = 'total-percentage';
+    container.appendChild(totalPercentageDiv); // 在列表上方添加总和显示
+    this.calculateTotalPercentage(section); // 计算并显示总和
+
     this.themeConfig.themeColors[section].forEach((item, index) => {
       const itemDiv = document.createElement('div');
       itemDiv.className = 'row mb-2 align-items-center';
@@ -551,9 +599,9 @@ class ThemeConfigForm {
             <div class="col">
                 ${this.createColorSelect(section, index, item.color).outerHTML}
             </div>
-            <div class="col">
-                <div class="input-group">
-                    <input type="number" class="form-control percentage-input" 
+            <div class="col d-flex">
+                <div class="input-group flex-grow-1">
+                    <input type="number" class="form-control percentage-input"
                            value="${parseInt(item.per, 10)}"
                            min="0" max="100"
                            data-section="${section}"
@@ -598,55 +646,76 @@ class ThemeConfigForm {
     });
   }
 
-  _addEventListeners() {
-    // Add Color buttons
-    document.querySelectorAll('.add-color-btn').forEach((button) => {
-      button.addEventListener('click', (e) => {
-        const section = e.currentTarget.dataset.section;
-        this.addColorItem(section);
-      });
-    });
-
-    // Export button
-    const exportBtn = document.querySelector('#themeConfig_exportConfig');
-    if (exportBtn) {
-      exportBtn.addEventListener('click', () => this.exportConfig());
-    }
-
-    // Import input
-    const importInput = document.querySelector('#themeConfig_importConfig');
-    if (importInput) {
-      importInput.addEventListener('change', (e) => this.importConfig(e.target));
-    }
-
-    const saveInput = document.querySelector('#themeConfig_saveConfig');
-    if (saveInput) {
-      saveInput.addEventListener('click', (e) => this.saveConfig());
-    }
-  }
-
   createColorSelect(section, index, currentValue) {
+    const div = document.createElement('div');
+    div.className = 'd-flex align-items-center';
+
+    // 获取颜色的 hex 值
+    const hexColor = ColorManager.COLOR_TO_HEX[currentValue];
+
+    // 创建颜色样本 (Swatch)
+    const swatch = document.createElement('span');
+    swatch.className = 'swatch';
+    swatch.title = hexColor; // 鼠标悬停时显示颜色代码
+    swatch.style.backgroundColor = hexColor; // 设置背景色为当前颜色的 hex 值
+
+    // 创建下拉选择框
     const select = document.createElement('select');
     select.className = 'form-select';
-    // Add options based on ColorManager.COLORS
-    Object.values(ColorManager.COLORS).forEach((color) => {
+
+    // 填充颜色选择框
+    Object.values(ColorManager.AVAILABLE_COLORS).forEach((color) => {
       const option = document.createElement('option');
       option.value = color;
       option.textContent = color.toUpperCase();
       option.selected = color === currentValue;
       select.appendChild(option);
     });
-    return select;
+
+    // 当选择改变时，更新颜色样本 (Swatch) 和选中的颜色
+    select.addEventListener('change', (e) => {
+      const newColor = e.target.value;
+      const newHexColor = ColorManager.COLOR_TO_HEX[newColor];
+
+      // 更新对应颜色项的 swatch 背景色
+      swatch.style.backgroundColor = newHexColor;
+      swatch.title = newHexColor;
+
+      // 更新配置中的颜色
+      index !== null && this.updateColor(section, index, newColor);
+    });
+
+    // 将 Swatch 和 Select 插入 div 中
+    div.appendChild(swatch);
+    div.appendChild(select);
+
+    return div;
   }
 
+  // 添加颜色项，增加校验总和
   addColorItem(section) {
-    this.themeConfig.themeColors[section].push({
-      color: ColorManager.COLORS.BLU,
-      per: 0,
-    });
+    const totalPercentage = this.calculateTotalPercentage(section);
+    if (totalPercentage === 100) {
+      showNotification(
+        '无法添加更多颜色！ 🎨',
+        '该部分的颜色百分比已满（100%），无法添加更多颜色',
+        { type: 'warning', duration: 3000 },
+      );
+      return;
+    }
+
+    // 如果已达到最大百分比限制，禁止添加新颜色
+    if (this.themeConfig.themeColors[section].length >= 10) {
+      showNotification('最多只能添加10个颜色！ ⚠️', '每个部分的颜色数量已达上限', {
+        type: 'warning',
+        duration: 3000,
+      });
+      return;
+    }
+
+    this.themeConfig.themeColors[section].push({ color: ColorManager.COLORS.BLU, per: '1%' }); // 设置最小1%的百分比
     this.renderColorItems(section);
     this.validatePercentages(section);
-
     showNotification('颜色已添加! ✨', '新的颜色选项已添加到您的调色板', {
       type: 'success',
       duration: 2000,
@@ -669,15 +738,39 @@ class ThemeConfigForm {
 
   updateColor(section, index, value) {
     this.themeConfig.themeColors[section][index].color = value;
+    // 调用渲染方法来重新计算总百分比并更新显示
+    this.calculateTotalPercentage(section);
+    this.renderColorItems(section);
   }
 
+  // 更新百分比，避免出现0%的情况
   updatePercentage(section, index, value) {
-    this.themeConfig.themeColors[section][index].per = parseInt(value, 10) + '%';
-    this.validatePercentages(section) &&
-      showNotification('百分比已更新！📊', '您的颜色分布已更新', {
-        type: 'success',
-        duration: 2000,
+    const percentage = parseInt(value, 10);
+    if (percentage === 0) {
+      showNotification('无效百分比! ⚠️', '百分比不能为0，请设置一个大于0的值', {
+        type: 'error',
+        duration: 3000,
       });
+      return;
+    }
+    this.themeConfig.themeColors[section][index].per = `${percentage}%`;
+    this.validatePercentages(section);
+    this.calculateTotalPercentage(section);
+    showNotification('百分比已更新！📊', '您的颜色分布已更新', { type: 'success', duration: 2000 });
+  }
+
+  calculateTotalPercentage(section) {
+    const items = this.themeConfig.themeColors[section];
+    const total = items.reduce((sum, item) => sum + parseInt(item.per, 10), 0);
+    this.updatePercentageDisplay(section, total); // 更新显示
+    return total;
+  }
+
+  updatePercentageDisplay(section, total) {
+    const totalDisplay = document.getElementById(`${section}TotalPercentage`);
+    if (totalDisplay) {
+      totalDisplay.textContent = `总百分比: ${total}%`;
+    }
   }
 
   validatePercentages(section) {
@@ -1794,6 +1887,19 @@ class ColorManager {
     RAI: 'rai',
   };
 
+  static AVAILABLE_COLORS = ['red', 'ora', 'yel', 'sky', 'blu', 'pur', 'pin', 'whi'];
+
+  static COLOR_TO_HEX = {
+    red: '#FF0000',
+    ora: '#FFA500', // 橙色
+    yel: '#FFFF00', // 黄色
+    sky: '#87CEEB', // 天蓝色
+    blu: '#0000FF', // 蓝色
+    pur: '#800080', // 紫色
+    pin: '#FFC0CB', // 粉红色
+    whi: '#FFFFFF', // 白色
+  };
+
   static INTENSITIES = ['1', '2', '3', '4', 'T'];
 
   static SPECIAL_INTENSITIES = {
@@ -2382,35 +2488,6 @@ class AnimationController {
     this.element.appendChild(fragment);
   }
 
-  // animate(currentTime = 0) {
-  //   if (this.isPaused) return;
-
-  //   // Frame throttling for performance
-  //   if (this.lastFrameTime && currentTime - this.lastFrameTime < 16) {
-  //     this.animationFrame = requestAnimationFrame((time) => this.animate(time));
-  //     return;
-  //   }
-  //   this.lastFrameTime = currentTime;
-
-  //   const elapsed = currentTime - this.startTime;
-  //   this.updateDisplay(elapsed);
-
-  //   const frame = this.timeline?.getFrameAtTime(elapsed);
-  //   if (frame) {
-  //     const hexColor = ColorConfig.getColorCode(frame.color);
-  //     if (hexColor) {
-  //       this.element.style.backgroundColor = hexColor;
-  //       this.updateColorInfo(frame.color, hexColor, frame.time);
-  //     }
-  //   }
-
-  //   if (elapsed <= this.timeline.getDuration() + 1000) {
-  //     this.animationFrame = requestAnimationFrame((time) => this.animate(time));
-  //   } else {
-  //     this.stop();
-  //   }
-  // }
-
   animate(currentTimeStamp = 0) {
     if (this.isPaused) return;
 
@@ -2445,9 +2522,8 @@ class AnimationController {
   }
 
   updateDisplay(time) {
-    this.timerDisplay.textContent = `[${formatTimestamp(time, 'mm:ss:ms')}] => ${Math.floor(
-      time,
-    )}ms `;
+    this.timerDisplay.textContent = formatTimestamp(time, 'mm:ss:ms');
+    document.querySelector('#milliseconds ').textContent = `${Math.floor(time)}ms`;
   }
 
   updateAnimation(currentTime) {
@@ -2463,7 +2539,6 @@ class AnimationController {
   }
 
   updateProgress(audioCurrentTimeStamp) {
-    console.log('audioCurrentTimeStamp: ', audioCurrentTimeStamp);
     this.audioCurrentTimeStamp = audioCurrentTimeStamp;
     this.animate();
   }
@@ -3524,7 +3599,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     my_debugger.showError('Highlight.js not found. Skipping code highlighting.');
   }
 
-  const ANNOUNCEMENT_CONTENT_backup = `<h6>制作者<a
+  const ANNOUNCEMENT_CONTENT_backup = `
+<div class="card shadow-sm mb-4">
+        <div class="card-header">
+          <h2 class="modal-title" id="announcementModalLabel">欢迎wmls来玩!</h2>
+        </div>
+        <div class="modal-body">
+<h6>制作者<a
   href="https://www.xiaohongshu.com/user/profile/5c1610720000000005018c49"
   target="_blank">（小红书@那一转眼只剩我🥕)</a>留言：</h6>
 <p>本工具旨在帮助五月天演唱会的观众和组织者轻松生成荧光棒的控制代码，实现更加炫酷的灯光效果。通过简单的配置，你可以生成自定义的荧光棒控制代码，并在实时预览中查看基础效果。生成算法还在持续优化!本工具还在迭代!<br>感谢<a
@@ -3548,23 +3629,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 <ul>
   <li>生成的代码可以直接复制并粘贴到你的<strong><code style="font-family: 'Lato', sans-serif;">Mayday.Blue</code></strong>中。</li>
   <li>支持导出和导入颜色主题配置，方便保存和分享创意。</li>
-</ul>`;
+</ul>
+        </div>
+      </div>
+  `;
 
   // 检查是否为新用户
   if (!localStorage.getItem('isNewUser')) {
     try {
       showModalNotification(
         '公告📢 - 2024/11/23 15:20',
-        `
-      <div class="card shadow-sm mb-4">
-        <div class="card-header">
-          <h2 class="modal-title" id="announcementModalLabel">欢迎wmls来玩!</h2>
-        </div>
-        <div class="modal-body">
-          <iframe id="myIframe" src="https://sx5w7odpp7p.feishu.cn/docx/IcuIdkFKJofwhsxfW4GcVdGSnQd" width="100%" height="600px"></iframe>
-        </div>
-      </div>
-      `,
+        `<iframe id="myIframe" src="https://sx5w7odpp7p.feishu.cn/docx/IcuIdkFKJofwhsxfW4GcVdGSnQd" width="100%" height="600px"></iframe>`,
         {
           type: 'info',
           size: 'large',
@@ -3591,7 +3666,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     } catch (error) {
       console.error('显示公告时发生错误:', error);
-      document.querySelector('#notificationModal .modal-body').innerHTML =
+      document.querySelector('#notificationModal #modalBody').innerHTML =
         ANNOUNCEMENT_CONTENT_backup;
     }
   }
