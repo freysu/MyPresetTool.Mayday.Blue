@@ -3684,7 +3684,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 包装搜索请求，增加去抖功能
   const debouncedFetchSongData = debounce(fetchSongData, 500);
   const debouncedFetchSongList = debounce(fetchSongList, 500);
-
   debouncedFetchSongList({ query: '一颗苹果', limit: 100, offset: 0 })
     .then((songs) => {
       console.log('songs: ', songs);
