@@ -2,7 +2,7 @@
  * @Author: freysu
  * @Date: 2024-11-18 05:05:32
  * @LastEditors: freysu
- * @LastEditTime: 2024-11-27 06:00:24
+ * @LastEditTime: 2024-11-27 06:06:33
  * @Description: file content
  */
 // const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
@@ -11,8 +11,9 @@ const path = require('path');
 
 module.exports = {
   entry: './original_src/index.js',
-  mode: 'development',
-  devtool: 'source-map',
+  // mode: 'development',
+  mode: 'production',
+  // devtool: 'source-map',
   output: {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'webpack_dist'),
