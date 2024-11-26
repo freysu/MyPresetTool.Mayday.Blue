@@ -3101,6 +3101,16 @@ function formatTimestamp(milliseconds, format = 'dd HH:mm:ss') {
     .replace('ms', formattedMilliseconds);
 }
 
+import { fetchSongData, fetchSongList } from './fetch_music_data.js';
+// 简单的去抖函数实现
+function debounce(fn, delay) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), delay);
+  };
+}
+
 window.addEventListener('load', () => {
   const fileInputs = document.querySelectorAll('input[type="file"]');
   const hasAutoFilled = Array.from(fileInputs).some((input) => input.value !== '');
@@ -3670,4 +3680,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         ANNOUNCEMENT_CONTENT_backup;
     }
   }
+
+  // 包装搜索请求，增加去抖功能
+  const debouncedFetchSongData = debounce(fetchSongData, 500);
+  const debouncedFetchSongList = debounce(fetchSongList, 500);
+
+  debouncedFetchSongList({ query: '一颗苹果', limit: 100, offset: 0 })
+    .then((songs) => {
+      console.log('songs: ', songs);
+      // for (let i = 0; i < songs.length; i++) {
+      //   const song = songs[i];
+      //   const songId = song.id;
+      // }
+      debouncedFetchSongData({ id: songs[0].id, type: 'json', level: 'standard' }) // 使用songs第一个结果作为测试
+        .then((data) => {
+          console.log(data); // 输出请求的数据
+        })
+        .catch((error) => {
+          console.error('debouncedFetchSongData - 数据请求失败', error);
+        });
+    })
+    .catch((error) => {
+      console.error('debouncedFetchSongList - 数据请求失败', error);
+    });
 });
