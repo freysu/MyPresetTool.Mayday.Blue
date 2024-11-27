@@ -1277,7 +1277,7 @@ class AudioAnalyzer {
             return
           }
 
-          const searchUrl = `https://neteasecloudmusicapi.vercel.app/cloudsearch?keywords=${keyword}&type=${searchType}&limit=100&offset=0`
+          const searchUrl = `https://netease-cloud-music-api-freysu.vercel.app/cloudsearch?keywords=${keyword}&type=${searchType}&limit=100&offset=0`
           try {
             const response = await fetch(searchUrl)
             if (!response.ok) {
