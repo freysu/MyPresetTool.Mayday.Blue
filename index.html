@@ -7,65 +7,150 @@
 -->
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="description" content="Mayday.Blue 预设工具，生成音乐相关的五月天荧光棒预设代码。" />
-    <meta name="keywords" content="音乐, 五月天, 荧光棒预设, 代码生成" />
-    <meta name="author" content="FreySu" />
-    <meta http-equiv="Content-Language" contect="zh-CN" />
-    <meta http-equiv="windows-Target" contect="_top" />
-    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico" />
-    <title>Mayday.Blue 预设工具</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="css/atom-one-dark.min.css" rel="stylesheet" />
-    <link href="css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="css/style.min.css" />
-    <style>
-      .total-percentage {
-        font-weight: bold;
-        font-size: 1.1rem;
-        color: #333;
-        margin-bottom: 10px;
-      }
-      .swatch {
-        font-size: 16px;
-        display: inline-block;
-        width: 2em;
-        height: 2em;
-        background: #ccc;
-        border-radius: 0.25em;
-        margin-left: 0.25em;
-        margin-bottom: 0.25em;
-        box-sizing: border-box;
-        border: 0.125em solid #364347;
-        cursor: pointer;
-      }
-      /* 添加间距和布局优化 */
-      #timer {
-        font-size: 1.2rem;
-        color: #007bff; /* 可以根据实际设计调整颜色 */
-      }
 
-      #milliseconds {
-        font-size: 1rem;
-        color: #888; /* 淡色表示辅助信息 */
-      }
-    </style>
-    <script
-      src="https://js.fundebug.cn/fundebug.2.8.6.min.js"
-      apikey="33af664e86e0eb2b56643810e04d20105e3621fd117e7751f112b09929efe908"
-      crossorigin="anonymous"
-    ></script>
-    <script src="https://js.fundebug.cn/fundebug.revideo.0.7.1.min.js"></script>
-  </head>
-  <body>
-    <div class="app-wrapper d-flex flex-column min-vh-100">
-      <!-- Loading Spinner (in HTML body, visible during loading) -->
-      <div
-        id="loadingOverlay"
-        class="loading-overlay"
-        style="
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Mayday.Blue 预设工具，生成音乐相关的五月天荧光棒预设代码。" />
+  <meta name="keywords" content="音乐, 五月天, 荧光棒预设, 代码生成" />
+  <meta name="author" content="FreySu" />
+  <meta http-equiv="Content-Language" contect="zh-CN" />
+  <meta http-equiv="windows-Target" contect="_top" />
+  <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico" />
+  <title>Mayday.Blue 预设工具</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="css/atom-one-dark.min.css" rel="stylesheet" />
+  <link href="css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.min.css" />
+  <style>
+    .total-percentage {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .swatch {
+      font-size: 16px;
+      display: inline-block;
+      width: 2em;
+      height: 2em;
+      background: #ccc;
+      border-radius: 0.25em;
+      margin-left: 0.25em;
+      margin-bottom: 0.25em;
+      box-sizing: border-box;
+      border: 0.125em solid #364347;
+      cursor: pointer;
+    }
+
+    /* 添加间距和布局优化 */
+    #timer {
+      font-size: 1.2rem;
+      color: #007bff;
+      /* 可以根据实际设计调整颜色 */
+    }
+
+    #milliseconds {
+      font-size: 1rem;
+      color: #888;
+      /* 淡色表示辅助信息 */
+    }
+
+
+    /* 搜索部分样式 */
+    .search-section {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .search-section input,
+    .search-section select {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-right: 0.5rem;
+    }
+
+    .search-section button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .search-section button:hover {
+      background-color: #0056b3;
+    }
+
+    /* 搜索结果样式 */
+    .search-results-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .search-results-list-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid #ddd;
+      transition: background-color 0.3s;
+    }
+
+    .search-results-list-item:last-child {
+      border-bottom: none;
+    }
+
+    .search-results-list-item:hover {
+      background-color: #f8f8f8;
+    }
+
+    .album-cover {
+      width: 50px;
+      height: 50px;
+      margin-right: 1rem;
+      border-radius: 4px;
+    }
+
+    .search-results-list-item h5 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .search-results-list-item p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #666;
+    }
+
+    .select-song-btn {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px;
+      background-color: #007bff;
+      color: #fff;
+      cursor: pointer;
+      margin-left: auto;
+    }
+
+    .select-song-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+  <script src="https://js.fundebug.cn/fundebug.2.8.6.min.js"
+    apikey="33af664e86e0eb2b56643810e04d20105e3621fd117e7751f112b09929efe908" crossorigin="anonymous"></script>
+  <script src="https://js.fundebug.cn/fundebug.revideo.0.7.1.min.js"></script>
+</head>
+
+<body>
+  <div class="app-wrapper d-flex flex-column min-vh-100">
+    <!-- Loading Spinner (in HTML body, visible during loading) -->
+    <div id="loadingOverlay" class="loading-overlay" style="
           position: fixed;
           top: 0;
           left: 0;
@@ -76,275 +161,246 @@
           display: flex;
           justify-content: center;
           align-items: center;
-        "
-      >
-        <div
-          class="d-flex justify-content-center align-items-center"
-          style="
+        ">
+      <div class="d-flex justify-content-center align-items-center" style="
             position: fixed;
             top: 50%;
             left: 50%;
             z-index: 9999;
             transform: translate(-50%, -50%);
-          "
-          id="loadingSpinner"
-        >
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
+          " id="loadingSpinner">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
         </div>
       </div>
+    </div>
 
-      <!-- Header -->
-      <header class="app-header py-3">
-        <div class="container">
-          <div class="d-flex justify-content-between align-items-center">
-            <h1 class="app-title mb-0">Mayday.Blue 预设工具</h1>
+    <!-- Header -->
+    <header class="app-header py-3">
+      <div class="container">
+        <div class="d-flex justify-content-between align-items-center">
+          <h1 class="app-title mb-0">Mayday.Blue 预设工具</h1>
 
-            <!-- Tabs -->
-            <ul class="nav nav-tabs mb-0" role="tablist">
-              <li class="nav-item">
-                <button
-                  class="nav-link active"
-                  data-bs-toggle="tab"
-                  data-bs-target="#generate-tool"
-                  role="tab"
-                >
-                  生成预设代码
+          <!-- Tabs -->
+          <ul class="nav nav-tabs mb-0" role="tablist">
+            <li class="nav-item">
+              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#generate-tool" role="tab">
+                生成预设代码
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#color-visualizer" role="tab">
+                可视化颜色预设
+              </button>
+            </li>
+          </ul>
+
+          <ul class="nav nav-tabs mb-0" role="tablist">
+            <li class="nav-item">
+              <a class="btn btn-outline-danger rounded-pill"
+                href="https://sx5w7odpp7p.feishu.cn/docx/IcuIdkFKJofwhsxfW4GcVdGSnQd" target="_blank"
+                id="openHelperPage" title="使用帮助">
+                <i class="material-icons">help</i>
+                <b>帮助中心</b>
+              </a>
+            </li>
+            <li class="nav-item">
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="themeDropdown"
+                  data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="material-icons">settings</i>
+                  <b>外观设置</b>
                 </button>
-              </li>
-              <li class="nav-item">
-                <button
-                  class="nav-link"
-                  data-bs-toggle="tab"
-                  data-bs-target="#color-visualizer"
-                  role="tab"
-                >
-                  可视化颜色预设
-                </button>
-              </li>
-            </ul>
-
-            <ul class="nav nav-tabs mb-0" role="tablist">
-              <li class="nav-item">
-                <a
-                  class="btn btn-outline-danger rounded-pill"
-                  href="https://sx5w7odpp7p.feishu.cn/docx/IcuIdkFKJofwhsxfW4GcVdGSnQd"
-                  target="_blank"
-                  id="openHelperPage"
-                  title="使用帮助"
-                >
-                  <i class="material-icons">help</i>
-                  <b>帮助中心</b>
-                </a>
-              </li>
-              <li class="nav-item">
-                <div class="dropdown">
-                  <button
-                    class="btn btn-secondary dropdown-toggle"
-                    type="button"
-                    id="themeDropdown"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    <i class="material-icons">settings</i>
-                    <b>外观设置</b>
-                  </button>
-                  <ul class="dropdown-menu" aria-labelledby="themeDropdown">
-                    <li>
-                      <button class="dropdown-item" data-bs-theme-value="light">
-                        <i class="material-icons">sunny</i>
-                        浅色模式
-                      </button>
-                    </li>
-                    <li>
-                      <button class="dropdown-item" data-bs-theme-value="dark">
-                        <i class="material-icons">nights_stay</i>
-                        暗黑模式
-                      </button>
-                    </li>
-                    <li>
-                      <button class="dropdown-item" data-bs-theme-value="auto">
-                        <i class="material-icons">brightness_auto</i>
-                        自动模式
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-              </li>
-            </ul>
-          </div>
+                <ul class="dropdown-menu" aria-labelledby="themeDropdown">
+                  <li>
+                    <button class="dropdown-item" data-bs-theme-value="light">
+                      <i class="material-icons">sunny</i>
+                      浅色模式
+                    </button>
+                  </li>
+                  <li>
+                    <button class="dropdown-item" data-bs-theme-value="dark">
+                      <i class="material-icons">nights_stay</i>
+                      暗黑模式
+                    </button>
+                  </li>
+                  <li>
+                    <button class="dropdown-item" data-bs-theme-value="auto">
+                      <i class="material-icons">brightness_auto</i>
+                      自动模式
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </li>
+          </ul>
         </div>
-      </header>
+      </div>
+    </header>
 
-      <!-- Main Content -->
-      <main class="flex-grow-1 py-4">
-        <div class="container">
-          <!-- Generate Tool Tab Content -->
-          <div class="tab-content">
-            <div class="tab-pane fade active show" id="generate-tool" role="tabpanel">
-              <div class="container-fluid">
-                <!-- 操作指南折叠展开 -->
-                <div class="card shadow-sm mb-4">
-                  <div class="card-header" id="guideHeading">
-                    <h5 class="mb-0 align-middle">
-                      <a
-                        class="toggleGuide text-left"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#guideCollapse"
-                        aria-expanded="false"
-                        aria-controls="guideCollapse"
-                      >
-                        使用指南：如何生成预设代码
-                      </a>
-                    </h5>
-                  </div>
-                  <div id="guideCollapse" class="collapse hide" aria-labelledby="guideHeading">
-                    <div class="card-body">
-                      <ol class="mb-0">
-                        <li>
-                          <h5 class="h6 mb-2">1. 上传音频文件（必填）</h5>
-                          <ul class="mb-0 pl-3">
-                            <li>
-                              <i class="material-icons">audio_file</i>
-                              <span class="fw-bold text-danger">选择你的音乐</span>
-                              <br />
-                              只需点击“选择文件”上传你喜欢的音乐（支持 MP3、WAV、FLAC、AAC
-                              等格式）。
-                              <br />
-                              <span class="fst-italic text-secondary">
-                                我们会根据音频的节奏和旋律生成合适的颜色变化。
-                              </span>
-                            </li>
-                            <li>
-                              <i class="material-icons">description</i>
-                              <span class="fw-bold">上传歌词文件（可选）</span>
-                              <br />
-                              如果有
-                              <code>.lrc</code>
-                              格式的歌词文件，可以上传，帮助系统更好地理解歌曲情感。
-                              <br />
-                              <span class="fst-italic text-secondary">
-                                这样能让颜色效果与歌词情感更加匹配。
-                              </span>
-                            </li>
-                          </ul>
-                        </li>
-                        <li>
-                          <h5 class="h6 mb-2">2. 设置颜色主题（必填）</h5>
-                          <ul class="mb-0 pl-3">
-                            <li>
-                              <i class="material-icons">add_circle</i>
-                              <span class="fw-bold text-danger">选择适合的主色调</span>
-                              <br />
-                              在“基础颜色”下拉框中选择代表歌曲情感的主色调。
-                              <br />
-                            </li>
-                            <li>
-                              <i class="material-icons">add_circle</i>
-                              <span class="fw-bold text-danger">调整颜色范围</span>
-                              <br />
-                              确保每种颜色的比例加起来为100%，以便生成合适的配色方案。
-                            </li>
-                            <li>
-                              <i class="material-icons">save</i>
-                              <span class="fw-bold text-danger">保存您的配置</span>
-                              <br />
-                              配置好后，点击“保存”按钮，保存当前设置。
-                              <br />
-                              <i class="material-icons">file_upload</i>
-                              如果已有配置文件，可以点击“导入”上传
-                              <code>.json</code>
-                              配置文件。
-                              <br />
-                              <i class="material-icons">file_download</i>
-                              点击“导出”保存您的配置为
-                              <code>.json</code>
-                              文件，方便以后使用。
-                            </li>
-                            <li>
-                              <i class="material-icons">palette</i>
-                              <span class="fw-bold text-success">颜色选项：</span>
-                              <ul>
-                                <li>
-                                  <strong>red</strong>
-                                  ：红色
-                                </li>
-                                <li>
-                                  <strong>ora</strong>
-                                  ：橙色
-                                </li>
-                                <li>
-                                  <strong>yel</strong>
-                                  ：黄色
-                                </li>
-                                <li>
-                                  <strong>sky</strong>
-                                  ：天蓝色
-                                </li>
-                                <li>
-                                  <strong>blu</strong>
-                                  ：蓝色
-                                </li>
-                                <li>
-                                  <strong>pur</strong>
-                                  ：紫色
-                                </li>
-                              </ul>
-                            </li>
-                            <li>
-                              <i class="material-icons">palette</i>
-                              <span class="fw-bold text-info">颜色范围说明：</span>
-                              <ul>
-                                <li>
-                                  <code>Low</code>
-                                  ：低频部分（如前奏、慢节奏段落）
-                                </li>
-                                <li>
-                                  <code>Mid</code>
-                                  ：中频部分（如主歌、节奏适中的段落）
-                                </li>
-                                <li>
-                                  <code>High</code>
-                                  ：高频部分（如副歌、高潮段落）
-                                </li>
-                                <li>
-                                  <code>Accent</code>
-                                  ：关键转折处的颜色（如情感爆发点）
-                                </li>
-                              </ul>
-                            </li>
-                          </ul>
-                        </li>
-                        <li>
-                          <h5 class="h6 mb-2">3. 生成并获取颜色序列</h5>
-                          <ul class="mb-0 pl-3">
-                            <li>
-                              <i class="material-icons">play_arrow</i>
-                              <b>点击“生成预设代码”按钮</b>
-                              <br />
-                              程序将根据音频文件和您的颜色设置生成代码，结果将显示在下方的“生成结果”区域。
-                            </li>
-                            <li>
-                              <i class="material-icons">content_copy</i>
-                              <b>复制或下载结果</b>
-                              <br />
-                              点击“复制”按钮将代码复制到剪贴板，或者点击“下载”保存为
-                              <code>.json</code>
-                              文件。
-                            </li>
-                          </ul>
-                        </li>
-                        <li>
-                          <h5 class="h6 mb-2">4. 示例配置文件</h5>
-                          <ul class="mb-0 pl-3">
-                            <li>
-                              以下是一个示例配置文件的
-                              <code>JSON</code>
-                              格式：
-                            </li>
-                            <li>
-                              <pre><code class="language-json">{
+    <!-- Main Content -->
+    <main class="flex-grow-1 py-4">
+      <div class="container">
+        <!-- Generate Tool Tab Content -->
+        <div class="tab-content">
+          <div class="tab-pane fade active show" id="generate-tool" role="tabpanel">
+            <div class="container-fluid">
+              <!-- 操作指南折叠展开 -->
+              <div class="card shadow-sm mb-4">
+                <div class="card-header" id="guideHeading">
+                  <h5 class="mb-0 align-middle">
+                    <a class="toggleGuide text-left" data-bs-toggle="collapse" data-bs-target="#guideCollapse"
+                      aria-expanded="false" aria-controls="guideCollapse">
+                      使用指南：如何生成预设代码
+                    </a>
+                  </h5>
+                </div>
+                <div id="guideCollapse" class="collapse hide" aria-labelledby="guideHeading">
+                  <div class="card-body">
+                    <ol class="mb-0">
+                      <li>
+                        <h5 class="h6 mb-2">1. 上传音频文件（必填）</h5>
+                        <ul class="mb-0 pl-3">
+                          <li>
+                            <i class="material-icons">audio_file</i>
+                            <span class="fw-bold text-danger">选择你的音乐</span>
+                            <br />
+                            只需点击“选择文件”上传你喜欢的音乐（支持 MP3、WAV、FLAC、AAC
+                            等格式）。
+                            <br />
+                            <span class="fst-italic text-secondary">
+                              我们会根据音频的节奏和旋律生成合适的颜色变化。
+                            </span>
+                          </li>
+                          <li>
+                            <i class="material-icons">description</i>
+                            <span class="fw-bold">上传歌词文件（可选）</span>
+                            <br />
+                            如果有
+                            <code>.lrc</code>
+                            格式的歌词文件，可以上传，帮助系统更好地理解歌曲情感。
+                            <br />
+                            <span class="fst-italic text-secondary">
+                              这样能让颜色效果与歌词情感更加匹配。
+                            </span>
+                          </li>
+                        </ul>
+                      </li>
+                      <li>
+                        <h5 class="h6 mb-2">2. 设置颜色主题（必填）</h5>
+                        <ul class="mb-0 pl-3">
+                          <li>
+                            <i class="material-icons">add_circle</i>
+                            <span class="fw-bold text-danger">选择适合的主色调</span>
+                            <br />
+                            在“基础颜色”下拉框中选择代表歌曲情感的主色调。
+                            <br />
+                          </li>
+                          <li>
+                            <i class="material-icons">add_circle</i>
+                            <span class="fw-bold text-danger">调整颜色范围</span>
+                            <br />
+                            确保每种颜色的比例加起来为100%，以便生成合适的配色方案。
+                          </li>
+                          <li>
+                            <i class="material-icons">save</i>
+                            <span class="fw-bold text-danger">保存您的配置</span>
+                            <br />
+                            配置好后，点击“保存”按钮，保存当前设置。
+                            <br />
+                            <i class="material-icons">file_upload</i>
+                            如果已有配置文件，可以点击“导入”上传
+                            <code>.json</code>
+                            配置文件。
+                            <br />
+                            <i class="material-icons">file_download</i>
+                            点击“导出”保存您的配置为
+                            <code>.json</code>
+                            文件，方便以后使用。
+                          </li>
+                          <li>
+                            <i class="material-icons">palette</i>
+                            <span class="fw-bold text-success">颜色选项：</span>
+                            <ul>
+                              <li>
+                                <strong>red</strong>
+                                ：红色
+                              </li>
+                              <li>
+                                <strong>ora</strong>
+                                ：橙色
+                              </li>
+                              <li>
+                                <strong>yel</strong>
+                                ：黄色
+                              </li>
+                              <li>
+                                <strong>sky</strong>
+                                ：天蓝色
+                              </li>
+                              <li>
+                                <strong>blu</strong>
+                                ：蓝色
+                              </li>
+                              <li>
+                                <strong>pur</strong>
+                                ：紫色
+                              </li>
+                            </ul>
+                          </li>
+                          <li>
+                            <i class="material-icons">palette</i>
+                            <span class="fw-bold text-info">颜色范围说明：</span>
+                            <ul>
+                              <li>
+                                <code>Low</code>
+                                ：低频部分（如前奏、慢节奏段落）
+                              </li>
+                              <li>
+                                <code>Mid</code>
+                                ：中频部分（如主歌、节奏适中的段落）
+                              </li>
+                              <li>
+                                <code>High</code>
+                                ：高频部分（如副歌、高潮段落）
+                              </li>
+                              <li>
+                                <code>Accent</code>
+                                ：关键转折处的颜色（如情感爆发点）
+                              </li>
+                            </ul>
+                          </li>
+                        </ul>
+                      </li>
+                      <li>
+                        <h5 class="h6 mb-2">3. 生成并获取颜色序列</h5>
+                        <ul class="mb-0 pl-3">
+                          <li>
+                            <i class="material-icons">play_arrow</i>
+                            <b>点击“生成预设代码”按钮</b>
+                            <br />
+                            程序将根据音频文件和您的颜色设置生成代码，结果将显示在下方的“生成结果”区域。
+                          </li>
+                          <li>
+                            <i class="material-icons">content_copy</i>
+                            <b>复制或下载结果</b>
+                            <br />
+                            点击“复制”按钮将代码复制到剪贴板，或者点击“下载”保存为
+                            <code>.json</code>
+                            文件。
+                          </li>
+                        </ul>
+                      </li>
+                      <li>
+                        <h5 class="h6 mb-2">4. 示例配置文件</h5>
+                        <ul class="mb-0 pl-3">
+                          <li>
+                            以下是一个示例配置文件的
+                            <code>JSON</code>
+                            格式：
+                          </li>
+                          <li>
+                            <pre><code class="language-json">{
   "themeColors": {
     "low": [{"color": "whi", "per": "100%"}],
     "mid": [{"color": "yel", "per": "30%"}, {"color": "ora", "per": "70%"}],
@@ -353,107 +409,107 @@
     "base": "ora"
   }
 }</code></pre>
-                            </li>
-                            <li>
-                              <h6>解释：</h6>
-                              <ul>
-                                <li>
-                                  <strong>low</strong>
-                                  ：低频部分的颜色配置。此处设置了
-                                  <code>whi</code>
-                                  （白色）为 100%，代表低频段完全使用白色。
-                                </li>
-                                <li>
-                                  <strong>mid</strong>
-                                  ：中频部分的颜色配置。此处设置了
-                                  <code>yel</code>
-                                  （黄色）为 30%，
-                                  <code>ora</code>
-                                  （橙色）为 70%，即中频段大部分是橙色，少部分为黄色。
-                                </li>
-                                <li>
-                                  <strong>high</strong>
-                                  ：高频部分的颜色配置。此处设置了
-                                  <code>ora</code>
-                                  （橙色）为 30%，
-                                  <code>red</code>
-                                  （红色）为 70%，高频段主要为红色。
-                                </li>
-                                <li>
-                                  <strong>accent</strong>
-                                  ：关键转折点的颜色配置。与
-                                  <code>high</code>
-                                  相似，此处设置了橙色和红色的比例。
-                                </li>
-                                <li>
-                                  <strong>base</strong>
-                                  ：设置主色调。此处的主色调为
-                                  <code>ora</code>
-                                  （橙色），用于标识歌曲的整体色调。
-                                </li>
-                              </ul>
-                            </li>
-                          </ul>
-                        </li>
-                      </ol>
-                    </div>
+                          </li>
+                          <li>
+                            <h6>解释：</h6>
+                            <ul>
+                              <li>
+                                <strong>low</strong>
+                                ：低频部分的颜色配置。此处设置了
+                                <code>whi</code>
+                                （白色）为 100%，代表低频段完全使用白色。
+                              </li>
+                              <li>
+                                <strong>mid</strong>
+                                ：中频部分的颜色配置。此处设置了
+                                <code>yel</code>
+                                （黄色）为 30%，
+                                <code>ora</code>
+                                （橙色）为 70%，即中频段大部分是橙色，少部分为黄色。
+                              </li>
+                              <li>
+                                <strong>high</strong>
+                                ：高频部分的颜色配置。此处设置了
+                                <code>ora</code>
+                                （橙色）为 30%，
+                                <code>red</code>
+                                （红色）为 70%，高频段主要为红色。
+                              </li>
+                              <li>
+                                <strong>accent</strong>
+                                ：关键转折点的颜色配置。与
+                                <code>high</code>
+                                相似，此处设置了橙色和红色的比例。
+                              </li>
+                              <li>
+                                <strong>base</strong>
+                                ：设置主色调。此处的主色调为
+                                <code>ora</code>
+                                （橙色），用于标识歌曲的整体色调。
+                              </li>
+                            </ul>
+                          </li>
+                        </ul>
+                      </li>
+                    </ol>
                   </div>
                 </div>
+              </div>
+              <div class="row mb-4">
+                <div class="col-12 col-lg-3 mb-4 order-2">
+                  <!-- 文件表单和控制部分 -->
+                  <div class="card shadow-sm">
+                    <div class="card-header" id="fileFormHeading">
+                      <h2 class="h5 mb-0" data-bs-toggle="collapse" data-bs-target="#fileFormCollapse"
+                        aria-expanded="true" aria-controls="fileFormCollapse">
+                        （一）配置文件
+                      </h2>
+                    </div>
+                    <div id="fileFormCollapse" class="collapse show" aria-labelledby="fileFormHeading">
+                      <div class="card-body">
+                        <h6 class="h6 mb-0"><i class="material-icons me-2">music_note</i>1. 选择你的音乐</h6>
 
-                <div class="row mb-4">
-                  <div class="col-12 col-lg-3 mb-4 order-2">
-                    <!-- 文件表单和控制部分 -->
-                    <div class="card shadow-sm">
-                      <div class="card-header" id="fileFormHeading">
-                        <h2
-                          class="h5 mb-0"
-                          data-bs-toggle="collapse"
-                          data-bs-target="#fileFormCollapse"
-                          aria-expanded="true"
-                          aria-controls="fileFormCollapse"
-                        >
-                          （一）配置文件
-                        </h2>
-                      </div>
-                      <div
-                        id="fileFormCollapse"
-                        class="collapse show"
-                        aria-labelledby="fileFormHeading"
-                      >
-                        <div class="card-body">
+                        <div class="mb-3">
+                          <label class="form-label d-flex align-items-center">
+                            请选择音乐来源
+                          </label>
+                          <div class="form-check">
+                            <input class="form-check-input" type="radio" name="musicSource" id="searchRadio"
+                              value="search" checked>
+                            <label class="form-check-label" for="searchRadio">
+                              联网搜索
+                            </label>
+                          </div>
+                          <div class="form-check">
+                            <input class="form-check-input" type="radio" name="musicSource" id="uploadRadio"
+                              value="upload">
+                            <label class="form-check-label" for="uploadRadio">
+                              手动上传
+                            </label>
+                          </div>
+                        </div>
+
+                        <div id="searchSection" style="display: block;">
+                          <button class="form-control" id="searchEntry__generate_tool">点我去搜索</button>
+                        </div>
+
+                        <div id="uploadSection" style="display: none;">
                           <form>
                             <div class="mb-3">
-                              <label
-                                for="audioFileInput_generate_tool"
-                                class="form-label d-flex align-items-center"
-                              >
-                                <i class="material-icons me-2">music_note</i>
-                                1. 选择你的音乐
+                              <label for="audioFileInput_generate_tool" class="form-label d-flex align-items-center">
+                                手动上传
                               </label>
-                              <input
-                                type="file"
-                                class="form-control"
-                                id="audioFileInput_generate_tool"
-                                accept="audio/*"
-                                autocomplete="off"
-                              />
+                              <input type="file" class="form-control" id="audioFileInput_generate_tool" accept="audio/*"
+                                autocomplete="off" />
                               <small class="text-muted">支持 MP3, WAV, FLAC 等格式</small>
                             </div>
                             <div class="mb-3">
-                              <label
-                                for="lrcFileInput_generate_tool"
-                                class="form-label d-flex align-items-center"
-                              >
+                              <label for="lrcFileInput_generate_tool" class="h6 form-label d-flex align-items-center">
                                 <i class="material-icons me-2">description</i>
                                 2. 上传歌词（可选）
                               </label>
-                              <input
-                                type="file"
-                                class="form-control"
-                                id="lrcFileInput_generate_tool"
-                                accept=".lrc"
-                                autocomplete="off"
-                              />
+                              <input type="file" class="form-control" id="lrcFileInput_generate_tool" accept=".lrc"
+                                autocomplete="off" />
                               <small class="text-muted">
                                 同步歌词可以让灯光更精准哦！格式要求：.lrc
                               </small>
@@ -462,589 +518,458 @@
                         </div>
                       </div>
                     </div>
-                    <!-- 文件信息解析区 -->
-                    <div class="card shadow-sm mb-4 d-none">
-                      <div class="card-header">
-                        <h2 class="h5 mb-0">文件信息</h2>
+                  </div>
+                  <!-- 文件信息解析区 -->
+                  <div class="card shadow-sm mb-4 d-none">
+                    <div class="card-header">
+                      <h2 class="h5 mb-0">文件信息</h2>
+                    </div>
+                    <div class="card-body">
+                      <div id="audioFileInfo" class="mb-2 p-2 rounded">音频文件信息</div>
+                      <div id="lrcFileInfo" class="mb-2 p-2 rounded">歌词文件信息</div>
+                    </div>
+                  </div>
+                  <!-- 进度情况区 -->
+                  <div class="card shadow-sm mb-4 d-none" id="processing" style="height: 10rem">
+                    <div class="card-header">
+                      <h2 class="h5 mb-0">当前进度</h2>
+                    </div>
+                    <div class="card-body">
+                      <div class="progress mb-3" style="height: 25px">
+                        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                          role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                          <span id="progressText">0%</span>
+                        </div>
                       </div>
-                      <div class="card-body">
-                        <div id="audioFileInfo" class="mb-2 p-2 rounded">音频文件信息</div>
-                        <div id="lrcFileInfo" class="mb-2 p-2 rounded">歌词文件信息</div>
+                      <div id="statusNotStarted" class="text-center d-none">
+                        <div class="text-primary" role="status">
+                          <span class="visually-hidden">准备中...</span>
+                        </div>
+                        <h6>准备开始</h6>
+                      </div>
+                      <div id="statusProcessing" class="text-center d-none">
+                        <div class="spinner-border text-primary" role="status">
+                          <span class="visually-hidden">处理中...</span>
+                        </div>
+                        <h6>处理中...</h6>
+                      </div>
+                      <div id="statusCompleted" class="text-center d-none">
+                        <div class="text-success" role="status">
+                          <span class="visually-hidden">已完成</span>
+                        </div>
+                        <h6>完成啦！</h6>
                       </div>
                     </div>
-                    <!-- 进度情况区 -->
-                    <div class="card shadow-sm mb-4 d-none" id="processing" style="height: 10rem">
-                      <div class="card-header">
-                        <h2 class="h5 mb-0">当前进度</h2>
-                      </div>
-                      <div class="card-body">
-                        <div class="progress mb-3" style="height: 25px">
-                          <div
-                            id="progressBar"
-                            class="progress-bar progress-bar-striped progress-bar-animated"
-                            role="progressbar"
-                            style="width: 0%"
-                            aria-valuenow="0"
-                            aria-valuemin="0"
-                            aria-valuemax="100"
-                          >
-                            <span id="progressText">0%</span>
-                          </div>
-                        </div>
-                        <div id="statusNotStarted" class="text-center d-none">
-                          <div class="text-primary" role="status">
-                            <span class="visually-hidden">准备中...</span>
-                          </div>
-                          <h6>准备开始</h6>
-                        </div>
-                        <div id="statusProcessing" class="text-center d-none">
-                          <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">处理中...</span>
-                          </div>
-                          <h6>处理中...</h6>
-                        </div>
-                        <div id="statusCompleted" class="text-center d-none">
-                          <div class="text-success" role="status">
-                            <span class="visually-hidden">已完成</span>
-                          </div>
-                          <h6>完成啦！</h6>
-                        </div>
+                  </div>
+                  <div class="card shadow-sm mb-4">
+                    <div class="btn-group btn-group-lg>">
+                      <button class="btn btn-primary btn-lg d-flex align-items-center justify-content-center"
+                        id="generate-btn" data-bs-toggle="tooltip" data-bs-placement="top" title="生成预设代码" disabled>
+                        <i class="material-icons me-2">bolt</i>
+                        生成预设代码
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <!-- 主题颜色配置部分 -->
+                <div class="col-12 col-lg-6 mb-4 order-3">
+                  <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center" id="themeConfigHeading">
+                      <h2 class="h5 me-auto text-wrap" data-bs-toggle="collapse" data-bs-target="#themeConfigCollapse"
+                        aria-expanded="true" aria-controls="themeConfigCollapse">
+                        （二）颜色主题配置
+                      </h2>
+                      <div class="text-end">
+                        <button class="btn btn-outline-secondary" id="themeConfig_saveConfig">
+                          <i class="material-icons" aria-hidden="true">save</i>
+                          保存
+                        </button>
+                        <button class="btn btn-outline-secondary" id="themeConfig_exportConfig">
+                          <i class="material-icons">file_download</i>
+                          导出
+                        </button>
+                        <button class="btn btn-outline-secondary">
+                          <label for="themeConfig_importConfig" class="mb-0" style="cursor: pointer">
+                            <i class="material-icons">file_upload</i>
+                            导入
+                          </label>
+                        </button>
+                        <input type="file" id="themeConfig_importConfig" accept=".json" class="d-none"
+                          autocomplete="off" />
                       </div>
                     </div>
-                    <div class="card shadow-sm mb-4">
-                      <div class="btn-group btn-group-lg>">
-                        <button
-                          class="btn btn-primary btn-lg d-flex align-items-center justify-content-center"
-                          id="generate-btn"
-                          data-bs-toggle="tooltip"
-                          data-bs-placement="top"
-                          title="生成预设代码"
-                          disabled
-                        >
-                          <i class="material-icons me-2">bolt</i>
-                          生成预设代码
+                    <div id="themeConfigCollapse" class="collapse show" aria-labelledby="themeConfigHeading">
+                      <div class="card-body">
+                        <form id="themeConfigForm">
+                          <!-- Base Color -->
+                          <div class="mb-4">
+                            <h6 class="text-capitalize mb-4" data-bs-toggle="tooltip" data-bs-placement="top"
+                              title="请选择1种基础颜色 - 主色调。">
+                              Base Color
+                            </h6>
+                            <div id="baseColorContainer"></div>
+                          </div>
+                          <!-- Dynamic Color Sections -->
+                          <div class="mb-3" id="colorSections">
+                            <div id="loadingSpinner" class="spinner-border text-primary" role="status">
+                              <span class="visually-hidden">动态颜色配置区正在加载中...</span>
+                            </div>
+                            动态颜色配置区正在加载中...
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- 输出部分 -->
+                <div class="col-12 col-lg-3 mb-4 order-4">
+                  <div class="card shadow-sm h-100">
+                    <div class="card-header card-header d-flex justify-content-between align-items-center">
+                      <h2 class="h5 w-100">生成结果</h2>
+                      <div class="flex-shrink-1 text-end">
+                        <button class="btn btn-outline-primary btn-sm" id="copy-btn">
+                          <i class="material-icons me-2">content_copy</i>
+                          复制
+                        </button>
+                        <button class="btn btn-outline-primary btn-sm" id="download-btn">
+                          <i class="material-icons me-2">download</i>
+                          下载
                         </button>
                       </div>
                     </div>
-                  </div>
-                  <!-- 主题颜色配置部分 -->
-                  <div class="col-12 col-lg-6 mb-4 order-3">
-                    <div class="card">
-                      <div
-                        class="card-header d-flex justify-content-between align-items-center"
-                        id="themeConfigHeading"
-                      >
-                        <h2
-                          class="h5 me-auto text-wrap"
-                          data-bs-toggle="collapse"
-                          data-bs-target="#themeConfigCollapse"
-                          aria-expanded="true"
-                          aria-controls="themeConfigCollapse"
-                        >
-                          （二）颜色主题配置
-                        </h2>
-                        <div class="text-end">
-                          <button class="btn btn-outline-secondary" id="themeConfig_saveConfig">
-                            <i class="material-icons" aria-hidden="true">save</i>
-                            保存
-                          </button>
-                          <button class="btn btn-outline-secondary" id="themeConfig_exportConfig">
-                            <i class="material-icons">file_download</i>
-                            导出
-                          </button>
-                          <button class="btn btn-outline-secondary">
-                            <label
-                              for="themeConfig_importConfig"
-                              class="mb-0"
-                              style="cursor: pointer"
-                            >
-                              <i class="material-icons">file_upload</i>
-                              导入
-                            </label>
-                          </button>
-                          <input
-                            type="file"
-                            id="themeConfig_importConfig"
-                            accept=".json"
-                            class="d-none"
-                            autocomplete="off"
-                          />
-                        </div>
-                      </div>
-                      <div
-                        id="themeConfigCollapse"
-                        class="collapse show"
-                        aria-labelledby="themeConfigHeading"
-                      >
-                        <div class="card-body">
-                          <form id="themeConfigForm">
-                            <!-- Base Color -->
-                            <div class="mb-4">
-                              <h6
-                                class="text-capitalize mb-4"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="top"
-                                title="请选择1种基础颜色 - 主色调。"
-                              >
-                                Base Color
-                              </h6>
-                              <div id="baseColorContainer"></div>
-                            </div>
-                            <!-- Dynamic Color Sections -->
-                            <div class="mb-3" id="colorSections">
-                              <div
-                                id="loadingSpinner"
-                                class="spinner-border text-primary"
-                                role="status"
-                              >
-                                <span class="visually-hidden">动态颜色配置区正在加载中...</span>
-                              </div>
-                              动态颜色配置区正在加载中...
-                            </div>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <!-- 输出部分 -->
-                  <div class="col-12 col-lg-3 mb-4 order-4">
-                    <div class="card shadow-sm h-100">
-                      <div
-                        class="card-header card-header d-flex justify-content-between align-items-center"
-                      >
-                        <h2 class="h5 w-100">生成结果</h2>
-                        <div class="flex-shrink-1 text-end">
-                          <button class="btn btn-outline-primary btn-sm" id="copy-btn">
-                            <i class="material-icons me-2">content_copy</i>
-                            复制
-                          </button>
-                          <button class="btn btn-outline-primary btn-sm" id="download-btn">
-                            <i class="material-icons me-2">download</i>
-                            下载
-                          </button>
-                        </div>
-                      </div>
-                      <div class="card-body">
-                        <textarea
-                          id="output-result"
-                          class="form-control font-monospace"
-                          readonly
-                          spellcheck="false"
-                          placeholder="生成的代码会出现在这里..."
-                          style="resize: vertical"
-                        ></textarea>
-                      </div>
+                    <div class="card-body">
+                      <textarea id="output-result" class="form-control font-monospace" readonly spellcheck="false"
+                        placeholder="生成的代码会出现在这里..." style="resize: vertical"></textarea>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <!-- Color Visualizer Tab Content -->
-          <div class="tab-content">
-            <div class="tab-pane fade" id="color-visualizer" role="tabpanel">
-              <div class="container-fluid">
-                <!-- 操作指南折叠展开 -->
-                <div class="card shadow-sm mb-4">
-                  <div class="card-header" id="guide1Heading">
-                    <h5 class="mb-0 align-middle">
-                      <a
-                        class="toggleGuide text-left text-decoration-none"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#guide1Collapse"
-                        aria-expanded="false"
-                        aria-controls="guide1Collapse"
-                      >
-                        🎨 使用指南：如何预览已有的预设代码
-                      </a>
-                    </h5>
-                  </div>
-                  <div id="guide1Collapse" class="collapse hide" aria-labelledby="guide1Heading">
-                    <div class="card-body">
-                      <ol class="mb-0">
-                        <li>
-                          <h5 class="h6 mb-2">1. 上传音频（必填）</h5>
-                          <ul class="mb-0 pl-3">
-                            <li>
-                              <i class="material-icons">audio_file</i>
-                              <span class="fw-bold text-danger">选择你的音乐</span>
-                              <br />
-                              点击“选择文件”上传音频（支持
-                              <code>MP3</code>
-                              、
-                              <code>WAV</code>
-                              、
-                              <code>FLAC</code>
-                              、
-                              <code>AAC</code>
-                              格式）。
-                              <br />
-                              <span class="fst-italic text-secondary">
-                                音频特征将影响颜色变化的节奏和亮度哦！
-                              </span>
-                            </li>
-                          </ul>
-                        </li>
-                        <li>
-                          <h5 class="h6 mb-2">2. 上传或输入预设代码（必填）</h5>
-                          <ul class="mb-0 pl-3">
-                            <li>
-                              <i class="material-icons">file_upload</i>
-                              <span class="fw-bold text-danger">上传预设代码文件</span>
-                              <br />
-                              可以上传一个预设代码文件，帮助系统更好地理解音乐情感和节奏！
-                            </li>
-                            <li>
-                              <i class="material-icons">edit</i>
-                              <span class="fw-bold text-danger">手动输入代码</span>
-                              <br />
-                              如果没有文件，别担心，你可以直接输入代码！
-                              <br />
-                              <span class="fw-bold text-info">
-                                <ul>
-                                  <li>时间戳必须为 100ms 的整数倍。</li>
-                                  <li>相邻时间点之间的最小间隔为 200ms。</li>
-                                  <li>
-                                    支持注释，注释需以
-                                    <code>//</code>
-                                    开头。
-                                  </li>
-                                  <li>
-                                    [格式]: 时间(ms), 颜色
-                                    <br />
-                                    [示例]:
-                                    <pre><code>
+        </div>
+        <!-- Color Visualizer Tab Content -->
+        <div class="tab-content">
+          <div class="tab-pane fade" id="color-visualizer" role="tabpanel">
+            <div class="container-fluid">
+              <!-- 操作指南折叠展开 -->
+              <div class="card shadow-sm mb-4">
+                <div class="card-header" id="guide1Heading">
+                  <h5 class="mb-0 align-middle">
+                    <a class="toggleGuide text-left text-decoration-none" data-bs-toggle="collapse"
+                      data-bs-target="#guide1Collapse" aria-expanded="false" aria-controls="guide1Collapse">
+                      🎨 使用指南：如何预览已有的预设代码
+                    </a>
+                  </h5>
+                </div>
+                <div id="guide1Collapse" class="collapse hide" aria-labelledby="guide1Heading">
+                  <div class="card-body">
+                    <ol class="mb-0">
+                      <li>
+                        <h5 class="h6 mb-2">1. 上传音频（必填）</h5>
+                        <ul class="mb-0 pl-3">
+                          <li>
+                            <i class="material-icons">audio_file</i>
+                            <span class="fw-bold text-danger">选择你的音乐</span>
+                            <br />
+                            点击“选择文件”上传音频（支持
+                            <code>MP3</code>
+                            、
+                            <code>WAV</code>
+                            、
+                            <code>FLAC</code>
+                            、
+                            <code>AAC</code>
+                            格式）。
+                            <br />
+                            <span class="fst-italic text-secondary">
+                              音频特征将影响颜色变化的节奏和亮度哦！
+                            </span>
+                          </li>
+                        </ul>
+                      </li>
+                      <li>
+                        <h5 class="h6 mb-2">2. 上传或输入预设代码（必填）</h5>
+                        <ul class="mb-0 pl-3">
+                          <li>
+                            <i class="material-icons">file_upload</i>
+                            <span class="fw-bold text-danger">上传预设代码文件</span>
+                            <br />
+                            可以上传一个预设代码文件，帮助系统更好地理解音乐情感和节奏！
+                          </li>
+                          <li>
+                            <i class="material-icons">edit</i>
+                            <span class="fw-bold text-danger">手动输入代码</span>
+                            <br />
+                            如果没有文件，别担心，你可以直接输入代码！
+                            <br />
+                            <span class="fw-bold text-info">
+                              <ul>
+                                <li>时间戳必须为 100ms 的整数倍。</li>
+                                <li>相邻时间点之间的最小间隔为 200ms。</li>
+                                <li>
+                                  支持注释，注释需以
+                                  <code>//</code>
+                                  开头。
+                                </li>
+                                <li>
+                                  [格式]: 时间(ms), 颜色
+                                  <br />
+                                  [示例]:
+                                  <pre><code>
     0,pin2 // XXXX
     500,pin2 
     1000,sky3
     1500,pin4
                                     </code></pre>
-                                  </li>
-                                </ul>
-                              </span>
-                            </li>
-                          </ul>
-                        </li>
-                        <li>
-                          <h5 class="h6 mb-2">3. 查看预览效果</h5>
-                          <ul class="mb-0 pl-3">
-                            <li>
-                              <i class="material-icons">palette</i>
-                              <span class="fw-bold">颜色预览</span>
-                              <br />
-                              看到颜色随时间变化，带来真实效果！
-                            </li>
-                            <li>
-                              <i class="material-icons">music_note</i>
-                              <span class="fw-bold">音频可视化</span>
-                              <br />
-                              选择频谱图或波形图，看到音频的起伏，调整代码更精准！
-                            </li>
-                          </ul>
-                        </li>
-                        <li>
-                          <h5 class="h6 mb-2">4. 控制动画播放</h5>
-                          <ul class="mb-0 pl-3">
-                            <span class="fst-italic text-secondary">
-                              提示: [Windows:Ctrl, OS X:Command!] 按下 "Ctrl/Cmd + ."
-                              可以查看快捷键说明！
+                                </li>
+                              </ul>
                             </span>
-                            <li>
-                              <i class="material-icons">play_arrow</i>
-                              <span class="fw-bold">开始播放 (Ctrl/Cmd+Enter)</span>
-                              <br />
-                              点击“开始”播放动画，跟随节奏变化！
-                            </li>
-                            <li>
-                              <i class="material-icons">pause</i>
-                              <span class="fw-bold">暂停播放 (Space)</span>
-                              <br />
-                              暂停动画，稍作休息！
-                            </li>
-                            <li>
-                              <i class="material-icons">play_arrow</i>
-                              <span class="fw-bold">继续播放 (Space)</span>
-                              <br />
-                              继续播放，重新享受精彩！
-                            </li>
-                            <li>
-                              <i class="material-icons">stop</i>
-                              <span class="fw-bold">停止 (Esc 或 Ctrl/Cmd+S)</span>
-                              <br />
-                              停止播放，准备重新调整。
-                            </li>
-                            <li>
-                              <i class="material-icons">replay</i>
-                              <span class="fw-bold">重新开始 (Ctrl/Cmd+R)</span>
-                              <br />
-                              从头开始，回顾每一个精彩瞬间！
-                            </li>
-                            <li>
-                              <i class="material-icons">clear</i>
-                              <span class="fw-bold">清除 (Ctrl/Cmd+Backspace)</span>
-                              <br />
-                              清除所有设置，重新开始。
-                            </li>
-                          </ul>
-                        </li>
-                      </ol>
+                          </li>
+                        </ul>
+                      </li>
+                      <li>
+                        <h5 class="h6 mb-2">3. 查看预览效果</h5>
+                        <ul class="mb-0 pl-3">
+                          <li>
+                            <i class="material-icons">palette</i>
+                            <span class="fw-bold">颜色预览</span>
+                            <br />
+                            看到颜色随时间变化，带来真实效果！
+                          </li>
+                          <li>
+                            <i class="material-icons">music_note</i>
+                            <span class="fw-bold">音频可视化</span>
+                            <br />
+                            选择频谱图或波形图，看到音频的起伏，调整代码更精准！
+                          </li>
+                        </ul>
+                      </li>
+                      <li>
+                        <h5 class="h6 mb-2">4. 控制动画播放</h5>
+                        <ul class="mb-0 pl-3">
+                          <span class="fst-italic text-secondary">
+                            提示: [Windows:Ctrl, OS X:Command!] 按下 "Ctrl/Cmd + ."
+                            可以查看快捷键说明！
+                          </span>
+                          <li>
+                            <i class="material-icons">play_arrow</i>
+                            <span class="fw-bold">开始播放 (Ctrl/Cmd+Enter)</span>
+                            <br />
+                            点击“开始”播放动画，跟随节奏变化！
+                          </li>
+                          <li>
+                            <i class="material-icons">pause</i>
+                            <span class="fw-bold">暂停播放 (Space)</span>
+                            <br />
+                            暂停动画，稍作休息！
+                          </li>
+                          <li>
+                            <i class="material-icons">play_arrow</i>
+                            <span class="fw-bold">继续播放 (Space)</span>
+                            <br />
+                            继续播放，重新享受精彩！
+                          </li>
+                          <li>
+                            <i class="material-icons">stop</i>
+                            <span class="fw-bold">停止 (Esc 或 Ctrl/Cmd+S)</span>
+                            <br />
+                            停止播放，准备重新调整。
+                          </li>
+                          <li>
+                            <i class="material-icons">replay</i>
+                            <span class="fw-bold">重新开始 (Ctrl/Cmd+R)</span>
+                            <br />
+                            从头开始，回顾每一个精彩瞬间！
+                          </li>
+                          <li>
+                            <i class="material-icons">clear</i>
+                            <span class="fw-bold">清除 (Ctrl/Cmd+Backspace)</span>
+                            <br />
+                            清除所有设置，重新开始。
+                          </li>
+                        </ul>
+                      </li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+              <!-- Left Column - Configuration -->
+              <div class="row">
+                <div class="col-12 col-lg-4 mb-4">
+                  <div class="card shadow-sm">
+                    <div class="card-header" id="preview_config-heading">
+                      <h2 class="h5 mb-0" data-bs-toggle="collapse" data-bs-target="#preview_configCollapse"
+                        aria-expanded="true" aria-controls="preview_configCollapse">
+                        🎤 预览文件配置
+                      </h2>
+                    </div>
+                    <div id="preview_configCollapse" class="collapse show" aria-labelledby="preview_config-heading">
+                      <div class="card-body">
+                        <h3 class="h6 mb-3 mt-4">1. 选择你的音乐</h3>
+                        <div class="drop-zone rounded border-2 border-dashed p-4 mb-4 text-center" id="audioDropZone">
+                          <input type="file" id="audioInput" class="d-none" accept="audio/*" aria-label="导入音频文件"
+                            autocomplete="off" />
+                          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" class="mb-3">
+                            <path d="M9 18V5l12-2v13" />
+                            <circle cx="6" cy="18" r="3" />
+                            <circle cx="18" cy="16" r="3" />
+                          </svg>
+                          <p class="mb-2">
+                            将音频文件拖到这里
+                            <br />
+                            或
+                            <strong>点击浏览</strong>
+                          </p>
+                          <small class="text-muted">支持格式：AAC, FLAC, MP3, WAV</small>
+                        </div>
+
+                        <h3 class="h6 mb-3 mt-4">2. 上传或输入预设代码</h3>
+                        <div class="drop-zone rounded border-2 border-dashed p-4 mb-4 text-center" id="dropZone">
+                          <input type="file" id="fileInput" class="d-none" accept=".txt" aria-label="导入预设代码文件"
+                            autocomplete="off" />
+                          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" class="mb-3">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                          </svg>
+                          <p class="mb-2">
+                            将预设代码文件拖到这里
+                            <br />
+                            或
+                            <strong>点击浏览</strong>
+                          </p>
+                          <small class="text-muted">支持格式：.txt</small>
+                        </div>
+                        <!-- Sequence Input -->
+                        <div class="card shadow-sm">
+                          <div class="card-header">
+                            <h2 class="h5 mb-0">预设代码输入区</h2>
+                          </div>
+                          <div class="card-body">
+                            <textarea id="input" class="form-control font-monospace" rows="8" spellcheck="false"
+                              placeholder="在这里输入你的预设代码...&#13;&#10;&#13;&#10;[格式]: 时间(ms), 颜色&#13;&#10;[示例]:&#13;&#10;0,pin2&#13;&#10;500,pin2&#13;&#10;1000,sky3&#13;&#10;1500,pin4"></textarea>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-                <!-- Left Column - Configuration -->
-                <div class="row">
-                  <div class="col-12 col-lg-4 mb-4">
-                    <div class="card shadow-sm">
-                      <div class="card-header" id="preview_config-heading">
-                        <h2
-                          class="h5 mb-0"
-                          data-bs-toggle="collapse"
-                          data-bs-target="#preview_configCollapse"
-                          aria-expanded="true"
-                          aria-controls="preview_configCollapse"
-                        >
-                          🎤 预览文件配置
-                        </h2>
-                      </div>
-                      <div
-                        id="preview_configCollapse"
-                        class="collapse show"
-                        aria-labelledby="preview_config-heading"
-                      >
-                        <div class="card-body">
-                          <h3 class="h6 mb-3 mt-4">1. 选择你的音乐</h3>
-                          <div
-                            class="drop-zone rounded border-2 border-dashed p-4 mb-4 text-center"
-                            id="audioDropZone"
-                          >
-                            <input
-                              type="file"
-                              id="audioInput"
-                              class="d-none"
-                              accept="audio/*"
-                              aria-label="导入音频文件"
-                              autocomplete="off"
-                            />
-                            <svg
-                              width="40"
-                              height="40"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              class="mb-3"
-                            >
-                              <path d="M9 18V5l12-2v13" />
-                              <circle cx="6" cy="18" r="3" />
-                              <circle cx="18" cy="16" r="3" />
-                            </svg>
-                            <p class="mb-2">
-                              将音频文件拖到这里
-                              <br />
-                              或
-                              <strong>点击浏览</strong>
-                            </p>
-                            <small class="text-muted">支持格式：AAC, FLAC, MP3, WAV</small>
-                          </div>
 
-                          <h3 class="h6 mb-3 mt-4">2. 上传或输入预设代码</h3>
-                          <div
-                            class="drop-zone rounded border-2 border-dashed p-4 mb-4 text-center"
-                            id="dropZone"
-                          >
-                            <input
-                              type="file"
-                              id="fileInput"
-                              class="d-none"
-                              accept=".txt"
-                              aria-label="导入预设代码文件"
-                              autocomplete="off"
-                            />
-                            <svg
-                              width="40"
-                              height="40"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              class="mb-3"
-                            >
-                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                              <polyline points="17 8 12 3 7 8" />
-                              <line x1="12" y1="3" x2="12" y2="15" />
-                            </svg>
-                            <p class="mb-2">
-                              将预设代码文件拖到这里
-                              <br />
-                              或
-                              <strong>点击浏览</strong>
-                            </p>
-                            <small class="text-muted">支持格式：.txt</small>
-                          </div>
-                          <!-- Sequence Input -->
-                          <div class="card shadow-sm">
-                            <div class="card-header">
-                              <h2 class="h5 mb-0">预设代码输入区</h2>
+                <!-- Right Column - Visualization -->
+                <div class="col-12 col-lg-8">
+                  <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                      <h2 class="h5 mb-0">
+                        控制面板
+                        <small>(按下"Ctrl/Cmd + ."可以查看快捷键说明！)</small>
+                      </h2>
+                    </div>
+                    <div class="card-body">
+                      <div class="controls-column">
+                        <div id="audioControls" class="audio-controls">
+                          <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                              <span id="audioFileName" class="text-truncate">
+                                没有选择音频文件
+                              </span>
                             </div>
-                            <div class="card-body">
-                              <textarea
-                                id="input"
-                                class="form-control font-monospace"
-                                rows="8"
-                                spellcheck="false"
-                                placeholder="在这里输入你的预设代码...&#13;&#10;&#13;&#10;[格式]: 时间(ms), 颜色&#13;&#10;[示例]:&#13;&#10;0,pin2&#13;&#10;500,pin2&#13;&#10;1000,sky3&#13;&#10;1500,pin4"
-                              ></textarea>
+                            <div class="position-relative">
+                              <div id="wavesurfer_color_preview"></div>
+                              <input type="range" class="form-range" id="audioProgress" min="0" max="100" value="0"
+                                step="0.1" />
+                              <div class="d-flex justify-content-left" id="audioDuration">
+                                <span id="currentTime">00:00</span>
+                                /
+                                <span id="totalTime">00:00</span>
+                                , [已播放:
+                                <span id="currentPer">0%</span>
+                                ]
+                              </div>
                             </div>
                           </div>
+                        </div>
+                        <div class="controls">
+                          <button id="run"
+                            class="control-button btn btn-outline-success d-flex align-items-center justify-content-center">
+                            <i class="material-icons">play_arrow</i>
+                            开始播放
+                          </button>
+                          <button id="pause"
+                            class="control-button btn btn-outline-warning d-flex align-items-center justify-content-center">
+                            <i class="material-icons">pause</i>
+                            暂停
+                          </button>
+                          <button id="resume"
+                            class="control-button btn btn-outline-primary d-flex align-items-center justify-content-center">
+                            <i class="material-icons">play_arrow</i>
+                            继续
+                          </button>
+                          <button id="stop"
+                            class="control-button btn btn-outline-danger d-flex align-items-center justify-content-center">
+                            <i class="material-icons">stop</i>
+                            停止
+                          </button>
+                          <button id="restart"
+                            class="control-button btn btn-outline-secondary d-flex align-items-center justify-content-center">
+                            <i class="material-icons">replay</i>
+                            重新开始
+                          </button>
+                          <button id="clear"
+                            class="control-button btn btn-outline-secondary d-flex align-items-center justify-content-center">
+                            <i class="material-icons">clear</i>
+                            清除
+                          </button>
                         </div>
                       </div>
                     </div>
                   </div>
-
-                  <!-- Right Column - Visualization -->
-                  <div class="col-12 col-lg-8">
-                    <div class="card shadow-sm mb-4">
-                      <div class="card-header">
-                        <h2 class="h5 mb-0">
-                          控制面板
-                          <small>(按下"Ctrl/Cmd + ."可以查看快捷键说明！)</small>
+                  <!-- Color Preview -->
+                  <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                      <h2 class="h5 mb-0">颜色预览</h2>
+                    </div>
+                    <div class="card-body p-0">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <!-- 歌曲进度 -->
+                        <div>
+                          <span class="fw-bold">歌曲进度</span>
+                          <br />
+                          <span id="timer" class="text-center font-monospace h5 mb-0">
+                            [00:00:00]
+                          </span>
+                        </div>
+                        <!-- 转换后的毫秒 -->
+                        <div>
+                          <span class="fw-bold">转换后的毫秒</span>
+                          <br />
+                          <span class="text-muted" id="milliseconds">0ms</span>
+                        </div>
+                      </div>
+                      <div class="color-preview" id="colorElement">
+                        <div class="color-info" id="colorInfo"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card shadow-sm mb-4">
+                    <div class="card-header" id="audioVisualizationHeading">
+                      <div class="d-flex align-items-center mb-3">
+                        <h2 class="h5 mb-0" data-bs-toggle="collapse" data-bs-target="#audioVisualizationCollapse"
+                          aria-expanded="true" aria-controls="audioVisualizationCollapse">
+                          音频可视化(点击可隐藏)
                         </h2>
+                        <select id="visualizationType" class="form-select w-auto">
+                          <option value="frequency">频谱图</option>
+                          <option value="waveform">波形图</option>
+                        </select>
                       </div>
+                    </div>
+                    <div id="audioVisualizationCollapse" class="collapse show"
+                      aria-labelledby="audioVisualizationHeading">
                       <div class="card-body">
-                        <div class="controls-column">
-                          <div id="audioControls" class="audio-controls">
-                            <div class="mb-3">
-                              <div class="d-flex justify-content-between mb-2">
-                                <span id="audioFileName" class="text-truncate">
-                                  没有选择音频文件
-                                </span>
-                              </div>
-                              <div class="position-relative">
-                                <div id="wavesurfer_color_preview"></div>
-                                <input
-                                  type="range"
-                                  class="form-range"
-                                  id="audioProgress"
-                                  min="0"
-                                  max="100"
-                                  value="0"
-                                  step="0.1"
-                                />
-                                <div class="d-flex justify-content-left" id="audioDuration">
-                                  <span id="currentTime">00:00</span>
-                                  /
-                                  <span id="totalTime">00:00</span>
-                                  , [已播放:
-                                  <span id="currentPer">0%</span>
-                                  ]
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <div class="controls">
-                            <button
-                              id="run"
-                              class="control-button btn btn-outline-success d-flex align-items-center justify-content-center"
-                            >
-                              <i class="material-icons">play_arrow</i>
-                              开始播放
-                            </button>
-                            <button
-                              id="pause"
-                              class="control-button btn btn-outline-warning d-flex align-items-center justify-content-center"
-                            >
-                              <i class="material-icons">pause</i>
-                              暂停
-                            </button>
-                            <button
-                              id="resume"
-                              class="control-button btn btn-outline-primary d-flex align-items-center justify-content-center"
-                            >
-                              <i class="material-icons">play_arrow</i>
-                              继续
-                            </button>
-                            <button
-                              id="stop"
-                              class="control-button btn btn-outline-danger d-flex align-items-center justify-content-center"
-                            >
-                              <i class="material-icons">stop</i>
-                              停止
-                            </button>
-                            <button
-                              id="restart"
-                              class="control-button btn btn-outline-secondary d-flex align-items-center justify-content-center"
-                            >
-                              <i class="material-icons">replay</i>
-                              重新开始
-                            </button>
-                            <button
-                              id="clear"
-                              class="control-button btn btn-outline-secondary d-flex align-items-center justify-content-center"
-                            >
-                              <i class="material-icons">clear</i>
-                              清除
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- Color Preview -->
-                    <div class="card shadow-sm mb-4">
-                      <div class="card-header">
-                        <h2 class="h5 mb-0">颜色预览</h2>
-                      </div>
-                      <div class="card-body p-0">
-                        <div class="d-flex justify-content-between align-items-center">
-                          <!-- 歌曲进度 -->
-                          <div>
-                            <span class="fw-bold">歌曲进度</span>
-                            <br />
-                            <span id="timer" class="text-center font-monospace h5 mb-0">
-                              [00:00:00]
-                            </span>
-                          </div>
-                          <!-- 转换后的毫秒 -->
-                          <div>
-                            <span class="fw-bold">转换后的毫秒</span>
-                            <br />
-                            <span class="text-muted" id="milliseconds">0ms</span>
-                          </div>
-                        </div>
-                        <div class="color-preview" id="colorElement">
-                          <div class="color-info" id="colorInfo"></div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="card shadow-sm mb-4">
-                      <div class="card-header" id="audioVisualizationHeading">
-                        <div class="d-flex align-items-center mb-3">
-                          <h2
-                            class="h5 mb-0"
-                            data-bs-toggle="collapse"
-                            data-bs-target="#audioVisualizationCollapse"
-                            aria-expanded="true"
-                            aria-controls="audioVisualizationCollapse"
-                          >
-                            音频可视化(点击可隐藏)
-                          </h2>
-                          <select id="visualizationType" class="form-select w-auto">
-                            <option value="frequency">频谱图</option>
-                            <option value="waveform">波形图</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div
-                        id="audioVisualizationCollapse"
-                        class="collapse show"
-                        aria-labelledby="audioVisualizationHeading"
-                      >
-                        <div class="card-body">
-                          <canvas
-                            id="visualizer"
-                            class="w-100"
-                            style="max-height: 18.75rem; min-height: 9.375rem"
-                          ></canvas>
-                        </div>
+                        <canvas id="visualizer" class="w-100"
+                          style="max-height: 18.75rem; min-height: 9.375rem"></canvas>
                       </div>
                     </div>
                   </div>
@@ -1053,99 +978,70 @@
             </div>
           </div>
         </div>
-      </main>
-      <footer class="app-footer py-3">
-        <div class="container text-center">
-          <p>
-            版权所有 © 2024
-            <a
-              href="https://www.xiaohongshu.com/user/profile/5c1610720000000005018c49"
-              target="_blank"
-            >
-              小红书@那一转眼只剩我🥕
-            </a>
-          </p>
-          <p>
-            感谢
-            <a
-              href="https://www.xiaohongshu.com/user/profile/5d7e751900000000010010bd"
-              target="_blank"
-            >
-              小红书@Diu🥕
-            </a>
-            大佬开发的
-            <code style="font-family: Lato, sans-serif">Mayday.Blue</code>
-            小程序
-          </p>
-        </div>
-      </footer>
-    </div>
-    <!-- Toast Container -->
-    <div
-      class="toast-container position-fixed bottom-0 end-0 p-3"
-      style="z-index: 1111100; transform: translate3d(0, 36px, 0)"
-    >
-      <div id="programToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-          <span id="toastIcon" class="me-2"></span>
-          <strong id="toastTitle" class="me-auto"></strong>
-          <small id="toastTimeDiff" class="text-muted"></small>
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="toast"
-            aria-label="Close"
-          ></button>
-        </div>
-        <div class="toast-body">
-          <span id="toastMessage"></span>
-          <div id="toastButtons" class="mt-2 pt-2 border-top d-flex gap-2"></div>
-        </div>
+      </div>
+    </main>
+    <footer class="app-footer py-3">
+      <div class="container text-center">
+        <p>
+          版权所有 © 2024
+          <a href="https://www.xiaohongshu.com/user/profile/5c1610720000000005018c49" target="_blank">
+            小红书@那一转眼只剩我🥕
+          </a>
+        </p>
+        <p>
+          感谢
+          <a href="https://www.xiaohongshu.com/user/profile/5d7e751900000000010010bd" target="_blank">
+            小红书@Diu🥕
+          </a>
+          大佬开发的
+          <code style="font-family: Lato, sans-serif">Mayday.Blue</code>
+          小程序
+        </p>
+      </div>
+    </footer>
+  </div>
+  <!-- Toast Container -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3"
+    style="z-index: 1111100; transform: translate3d(0, 36px, 0)">
+    <div id="programToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <span id="toastIcon" class="me-2"></span>
+        <strong id="toastTitle" class="me-auto"></strong>
+        <small id="toastTimeDiff" class="text-muted"></small>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body">
+        <span id="toastMessage"></span>
+        <div id="toastButtons" class="mt-2 pt-2 border-top d-flex gap-2"></div>
       </div>
     </div>
-    <!-- Modal Template -->
-    <div
-      class="modal fade"
-      id="notificationModal"
-      tabindex="-1"
-      aria-labelledby="modalTitle"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="modalTitle"></h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body" id="modalBody" style="max-height: 30rem; overflow: auto"></div>
-          <div class="modal-footer" id="modalFooter"></div>
+  </div>
+  <!-- Modal Template -->
+  <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+        <div class="modal-body" id="modalBody" style="max-height: 30rem; overflow: auto"></div>
+        <div class="modal-footer" id="modalFooter"></div>
       </div>
     </div>
-    <script
-      src="https://unpkg.com/wavesurfer.js@7.8.9/dist/wavesurfer.min.js"
-      crossorigin="anonymous"
-      defer
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"
-      crossorigin="anonymous"
-      defer
-    ></script>
-    <!-- Bootstrap JS -->
-    <script src="original_src/bootstrap.bundle.min.js" defer></script>
-    <script src="original_src/mousetrap.min.js" defer></script>
-    <script src="original_src/highlight.min.js" defer></script>
-    <!-- <script
+  </div>
+  <script src="https://unpkg.com/wavesurfer.js@7.8.9/dist/wavesurfer.min.js" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js" crossorigin="anonymous"
+    defer></script>
+  <!-- Bootstrap JS -->
+  <script src="original_src/bootstrap.bundle.min.js" defer></script>
+  <script src="original_src/mousetrap.min.js" defer></script>
+  <script src="original_src/highlight.min.js" defer></script>
+  <!-- <script
       src="https://cdn.jsdelivr.net/npm/segmentit@2.0.3/dist/umd/segmentit.min.js"
       crossorigin="anonymous"
       defer
     ></script> -->
-    <script src="webpack_dist/bundle.js" defer></script>
-  </body>
+  <script src="webpack_dist/bundle.js" defer></script>
+</body>
+
 </html>
