@@ -177,7 +177,7 @@ if (!document.querySelector('.toast-container')) {
     <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1111100; transform: translate3d(0px, 36px, 0px);">
       <div id="programToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
-          <span id="toastIcon" class="me-2"></span>
+          <span id="toastIcon" class="me-2 fw-bold"></span>
           <strong id="toastTitle" class="me-auto"></strong>
           <small id="toastTimeDiff" class="text-muted"></small>
           <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
@@ -222,11 +222,17 @@ const notificationConfig = {
     warning: '⚠️',
     error: '❌',
   },
-  colors: {
-    info: '#0dcaf0',
-    success: '#198754',
-    warning: '#ffc107',
-    error: '#dc3545',
+  style_bg_color_classname: {
+    info: 'bg-info',
+    success: 'bg-success',
+    warning: 'bg-warning',
+    error: 'bg-danger',
+  },
+  style_bg_text_classname: {
+    info: 'text-dark',
+    success: 'text-white',
+    warning: 'text-dark',
+    error: 'text-white',
   },
 };
 
@@ -340,10 +346,16 @@ function showToastNotification(title, message, config) {
     // Set content
     if (iconEl) {
       iconEl.textContent = notificationConfig.icons[config.type];
-      iconEl.style.color = notificationConfig.colors[config.type];
+      toastEl.classList.add(
+        notificationConfig.style_bg_color_classname[config.type],
+        notificationConfig.style_bg_text_classname[config.type],
+      );
     }
 
-    if (titleEl) titleEl.textContent = title;
+    if (titleEl) {
+      titleEl.classList.add(notificationConfig.style_bg_text_classname[config.type]);
+      titleEl.textContent = title;
+    }
     if (messageEl) {
       if (config.html) {
         messageEl.innerHTML = message;
@@ -381,6 +393,7 @@ function showToastNotification(title, message, config) {
 
     const timeDiffEl = document.getElementById('toastTimeDiff');
     timeDiffEl.textContent = '刚刚';
+    timeDiffEl.classList.add(notificationConfig.style_bg_text_classname[config.type]);
     const intervalId = setInterval(() => {
       timeDiffEl.textContent = calculateTimeDifference(Date.now(), config.triggerTime);
     }, 1000);
@@ -548,6 +561,16 @@ class ThemeConfigForm {
     if (saveInput) {
       saveInput.addEventListener('click', (e) => this.saveConfig());
     }
+
+    document.getElementById('confirm-reset-btn').addEventListener('click', () => {
+      // 清空所有设置或执行其他重置操作
+      this.resetSettings();
+      showNotification('已重置', '所有设置已被清除！', {
+        type: 'info',
+        duration: 3000,
+      });
+      bootstrap.Modal.getInstance(document.getElementById('resetModal')).hide();
+    });
   }
 
   createSectionContainers() {
@@ -558,7 +581,7 @@ class ThemeConfigForm {
 
     this.sections.forEach((section) => {
       const sectionDiv = document.createElement('div');
-      sectionDiv.className = 'mb-4';
+      sectionDiv.className = `${section}ColorsSection  mb-4`;
       sectionDiv.innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h6 class="text-capitalize mb-0">${section} Colors</h6>
@@ -650,8 +673,8 @@ class ThemeConfigForm {
     const div = document.createElement('div');
     div.className = 'd-flex align-items-center';
 
-    // 获取颜色的 hex 值
-    const hexColor = ColorManager.COLOR_TO_HEX[currentValue];
+    // 获取颜色代码的 hex 值
+    const hexColor = ColorCodeManager.AVAILABLE_COLOR_CODES_TO_HEX[currentValue];
 
     // 创建颜色样本 (Swatch)
     const swatch = document.createElement('span');
@@ -664,7 +687,7 @@ class ThemeConfigForm {
     select.className = 'form-select';
 
     // 填充颜色选择框
-    Object.values(ColorManager.AVAILABLE_COLORS).forEach((color) => {
+    Object.values(ColorCodeManager.AVAILABLE_COLOR_CODES).forEach((color) => {
       const option = document.createElement('option');
       option.value = color;
       option.textContent = color.toUpperCase();
@@ -675,7 +698,7 @@ class ThemeConfigForm {
     // 当选择改变时，更新颜色样本 (Swatch) 和选中的颜色
     select.addEventListener('change', (e) => {
       const newColor = e.target.value;
-      const newHexColor = ColorManager.COLOR_TO_HEX[newColor];
+      const newHexColor = ColorCodeManager.AVAILABLE_COLOR_CODES_TO_HEX[newColor];
 
       // 更新对应颜色项的 swatch 背景色
       swatch.style.backgroundColor = newHexColor;
@@ -714,7 +737,7 @@ class ThemeConfigForm {
     }
 
     this.themeConfig.themeColors[section].push({
-      color: ColorManager.COLORS.BLU,
+      color: ColorCodeManager.ALL_SUPPORTED_COLOR_CODES.BLU,
       per: '1%',
     }); // 设置最小1%的百分比
     this.renderColorItems(section);
@@ -750,12 +773,18 @@ class ThemeConfigForm {
   updatePercentage(section, index, value) {
     const percentage = parseInt(value, 10);
     if (percentage === 0) {
-      showNotification('无效百分比! ⚠️', '百分比不能为0，请设置一个大于0的值', {
+      showNotification('无效百分比！⚠️ ', '百分比不能为 0。请设置一个大于 0 的值哦~', {
         type: 'error',
         duration: 3000,
       });
+      document
+        .querySelector(`[data-section="${section}"] .percentage-input`)
+        .classList.add('is-invalid');
       return;
     }
+    document
+      .querySelector(`[data-section="${section}"] .percentage - input`)
+      .classList.remove('is-invalid');
     this.themeConfig.themeColors[section][index].per = `${percentage}%`;
     this.validatePercentages(section);
     this.calculateTotalPercentage(section);
@@ -783,26 +812,40 @@ class ThemeConfigForm {
     const items = this.themeConfig.themeColors[section];
     const total = items.reduce((sum, item) => sum + parseInt(item.per, 10), 0);
     const rest = 100 - total;
+    const over = total - 100;
 
-    if (total > 100) {
-      showNotification('快速检查! 🎨', `${section}中的颜色超过100%。请减少${total - 100}%。`, {
-        type: 'warning',
-        duration: 4000,
-        dismissible: true,
-      });
-      return false;
-    } else if (total < 100) {
+    if (over > 0) {
       showNotification(
         '快速检查! 🎨',
-        `${section}中的颜色加起来应该是100! 现在它们处于 ${total}% (${rest}% 剩余)。`,
+        `${section}的总和超出了 100%（当前：${total}%），请调整比例以使总和不超过 100%。`,
         {
           type: 'warning',
-          duration: 4000,
+          duration: 5000,
           dismissible: true,
         },
       );
+      document.getElementById(`${section}TotalPercentage`).className =
+        'text-warning total-percentage';
       return false;
-    } else if (total === 100) {
+    } else if (over < 0) {
+      showNotification(
+        '颜色分配需达100%！🎨',
+        `${section} : 你当前设置的是 ${total}%，还有 ${rest}% 空余哦，快补上吧！`,
+        {
+          type: 'warning',
+          duration: 4000,
+        },
+      );
+      document.getElementById(`${section}TotalPercentage`).className =
+        'text-warning total-percentage';
+      return false;
+    } else if (over == 0) {
+      showNotification('配置完成！', '颜色比例分配已正确，总和为 100%。', {
+        type: 'success',
+        duration: 3000,
+      });
+      document.getElementById(`${section}TotalPercentage`).className =
+        'text-success total-percentage';
       return true;
     }
     showNotification('错误', '出了一点问题，请再试一次。', {
@@ -810,6 +853,19 @@ class ThemeConfigForm {
       duration: 5000,
     });
     return false;
+  }
+
+  resetSettings() {
+    this.themeConfig = {
+      themeColors: {
+        low: [{ color: 'blu', per: '1%' }],
+        mid: [{ color: 'blu', per: '1%' }],
+        high: [{ color: 'blu', per: '1%' }],
+        accent: [{ color: 'blu', per: '1%' }],
+        base: 'blu',
+      },
+    };
+    this.initializeForm();
   }
 
   exportConfig() {
@@ -827,7 +883,7 @@ class ThemeConfigForm {
     window.saveAs(blob, 'theme-config.json');
 
     // 显示导出成功通知
-    showNotification('已导出！📤', '你的颜色设置已成功导出', {
+    showNotification('导出成功！📦', '你的设置已保存为文件，快留作纪念吧~', {
       type: 'success',
       duration: 3000,
     });
@@ -843,9 +899,11 @@ class ThemeConfigForm {
 
     window.AudioAnalyzer &&
       window.AudioAnalyzer.handleThemeChange_manual(this.themeConfig) &&
-      showNotification('已保存！💫', '你的颜色偏好已更新', {
-        type: 'success',
-      });
+      showNotification(
+        '主题颜色方案准备好了！',
+        '下一步：点击“生成预设代码”按钮，创造你的灯光秀吧！',
+        { type: 'info', duration: 4000 },
+      );
     localStorage.setItem('lastThemeColors', JSON.stringify(this.themeConfig));
   }
 
@@ -882,12 +940,12 @@ class ThemeConfigForm {
   }
 
   validateImportedConfig(config) {
-    const validColors = Object.values(ColorManager.COLORS);
+    const validColors = Object.values(ColorCodeManager.ALL_SUPPORTED_COLOR_CODES);
     const sections = ['low', 'mid', 'high', 'accent'];
 
     // Validate base color
     if (!validColors.includes(config.themeColors.base)) {
-      showNotification('配置无效', '基础颜色无效', {
+      showNotification('哎呀！出错了~', '主色调好像没选对，请检查一吧！', {
         type: 'error',
         duration: 5000,
       });
@@ -897,7 +955,7 @@ class ThemeConfigForm {
     // Validate section colors
     for (const section of sections) {
       if (!config.themeColors[section]) {
-        showNotification('配置无效', `缺少部分：${section}`, {
+        showNotification('哎呀！出错了~', `缺少部分：${section}`, {
           type: 'error',
           duration: 5000,
         });
@@ -906,7 +964,7 @@ class ThemeConfigForm {
 
       for (const item of config.themeColors[section]) {
         if (!validColors.includes(item.color)) {
-          showNotification('配置无效', `${section} 部分颜色无效`, {
+          showNotification('哎呀！出错了~', `${section} 部分颜色无效`, {
             type: 'error',
             duration: 5000,
           });
@@ -914,7 +972,7 @@ class ThemeConfigForm {
         }
 
         if (typeof item.per !== 'string') {
-          showNotification('配置无效', `${section} 部分百分比格式无效`, {
+          showNotification('哎呀！出错了~', `${section} 部分百分比格式无效`, {
             type: 'error',
             duration: 5000,
           });
@@ -944,7 +1002,6 @@ class ThemeConfigForm {
       baseContainer.appendChild(baseSelect);
 
       baseSelect.onchange = (e) => {
-        console.log('e: ', e);
         this.themeConfig.themeColors.base = e.target.value;
       };
     }
@@ -1102,13 +1159,13 @@ class AudioAnalyzer {
       try {
         const content = document.getElementById('output-result').value;
         await navigator.clipboard.writeText(content);
-        showNotification('耶！', '📋 已复制到剪贴板！', {
+        showNotification('成功~🎉', '📋 已复制~可以直接粘贴使用啦！', {
           type: 'success',
           duration: 3000,
         });
       } catch (err) {
         my_debugger.showError('Failed to copy:', err);
-        showNotification('哎呀！', '📋 无法复制到剪贴板！', {
+        showNotification('出错了~🤔', '📋 复制失败了，请重试哦！实在不行请手动复制！', {
           type: 'error',
           duration: 5000,
         });
@@ -1127,7 +1184,7 @@ class AudioAnalyzer {
         }
         if (Timeline.parse(content).errors.length) {
           showNotification(
-            '哎哟! 🤔',
+            '出错了~🤔',
             '预设代码无效，请检查内容!\n' + Timeline.parse(content).errors,
             {
               type: 'error',
@@ -1149,21 +1206,17 @@ class AudioAnalyzer {
         window.saveAs(blob, 'converted-output.txt');
 
         // 添加成功通知
-        showNotification('开始下载！✨', '你的文件正在下载中', {
+        showNotification('下载中~✨', '文件已经开始下载，请稍等一会儿哦！', {
           type: 'success',
           duration: 3000,
         });
       } catch (error) {
         // 添加错误通知
-        showNotification(
-          'Oops! 🤔',
-          'There was a problem downloading your file. Please try again.',
-          {
-            type: 'error',
-            duration: 5000,
-            dismissible: true,
-          },
-        );
+        showNotification('出错了~ 🤔', '下载失败了，请检查文件内容后再试！', {
+          type: 'error',
+          duration: 5000,
+          dismissible: true,
+        });
 
         // 确保my_debugger.showError存在
         if (typeof my_debugger !== 'undefined' && typeof my_debugger.showError === 'function') {
@@ -1177,14 +1230,14 @@ class AudioAnalyzer {
 
   async handleNetworkAudioEntry() {
     showModalNotification(
-      '在线搜索音频',
+      '在线音乐搜索',
       `
  <div class="card shadow-sm mb-4">
     <div class="card-header">
-      <h2 class="h5 mb-0">在线搜索音频</h2>
+      <h2 class="h5 mb-0">找到你喜欢的音乐吧！🎵</h2>
     </div>
     <div class="card-body">
-      <div class="search-section">
+      <div class="search-section d-flex align-items-center">
         <input type="text" class="form-control" placeholder="搜索音频" id="searchInput">
         <select class="form-select" id="searchTypeSelect">
           <option value="1">单曲</option>
@@ -1221,11 +1274,11 @@ class AudioAnalyzer {
       if (keyword) {
         // 先检查缓存中是否已有结果
         if (cachedSearchResults.has(`${keyword}_${searchType}`)) {
-          displaySearchResults(cachedSearchResults.get(`${keyword}_${searchType}`));
+          displaySearchResults(cachedSearchResults.get(`${keyword}_${searchType}`, keyword));
           return;
         }
 
-        const searchUrl = `https://netease-cloud-music-api-freysu.vercel.app/cloudsearch?keywords=${keyword}&type=${searchType}&limit=100&offset=0`;
+        const searchUrl = `https://netease-cloud-music-api-freysu.glitch.me/cloudsearch?keywords=${keyword}&type=${searchType}&limit=100&offset=0`;
         try {
           const response = await fetch(searchUrl);
           if (!response.ok) {
@@ -1235,9 +1288,11 @@ class AudioAnalyzer {
           if (data.result && data.result.songs) {
             // 缓存本次搜索结果
             cachedSearchResults.set(`${keyword}_${searchType}`, data.result.songs);
-            displaySearchResults(data.result.songs);
+            displaySearchResults(data.result.songs, keyword);
           } else {
-            document.getElementById('searchResults').innerHTML = '<p>No results found.</p>';
+            document.getElementById(
+              'searchResults',
+            ).innerHTML = `<p class="mt-3">没有找到你想要的音乐~试试换个关键词吧！</p>`;
           }
         } catch (error) {
           if (
@@ -1246,7 +1301,7 @@ class AudioAnalyzer {
             error.message.includes('HTTP error! status: 0')
           ) {
             document.getElementById('searchResults').innerHTML =
-              '<p>网络错误，可能无法访问外网API。若第一次使用不了，请检查网络设置（可能需要特殊网络设置，如“魔法”），不然请放弃使用该功能。</p>';
+              '<p>网络不通畅哦，稍后再试吧~若第一次使用不了，请检查网络设置（可能需要特殊网络设置，如“魔法”），不然请放弃使用该功能。</p>';
           } else if (error.message.includes('HTTP error! status: 403')) {
             document.getElementById('searchResults').innerHTML =
               '<p>请求被拒绝，可能是API限制或IP被封禁。请尝试使用其他网络或稍后再试。</p>';
@@ -1265,13 +1320,18 @@ class AudioAnalyzer {
     // 捕获 this 的引用
     const that = this;
 
-    function displaySearchResults(songs) {
+    const highlightKeyword = (text, keyword) => {
+      const regex = new RegExp(`(${keyword})`, 'gi');
+      return text.replace(regex, '<span class="text-primary">$1</span>');
+    };
+
+    function displaySearchResults(songs, keyword) {
       let resultsHtml = '<ul class="search-results-list">';
       songs.forEach((song) => {
         resultsHtml += `<li class="search-results-list-item">
           <img src="${song.al.picUrl}" alt="Album Cover" class="album-cover">
           <div class="song-info">
-            <h5>${song.name}</h5>
+            <h5>${highlightKeyword(song.name, keyword)}</h5>
             <p>歌手: ${song.ar.map((artist) => artist.name).join(', ')}</p>
             <p>专辑: ${song.al.name}</p>
             <p>时长: ${formatTimestamp(song.dt, 'mm:ss')}</p>
@@ -1329,7 +1389,7 @@ class AudioAnalyzer {
         this.state.metadata,
       );
       this.updateAnalyzeButtonState();
-      showNotification('成功', '网络音频加载成功', {
+      showNotification('你的音乐准备好了', '下一步：配置主题颜色方案~', {
         type: 'success',
         duration: 3000,
       });
@@ -1337,10 +1397,11 @@ class AudioAnalyzer {
       this.showStatusNotStarted();
     } catch (error) {
       document.getElementById('processing').classList.add('d-none');
-      showNotification('错误', `加载网络音频出错：${error.message}`, {
-        type: 'error',
-        duration: 5000,
-      });
+      showNotification(
+        '哎呀，出错了！',
+        '音频加载失败，可能是网络问题或者文件格式不对。请检查后重试~',
+        { type: 'error', duration: 5000 },
+      );
       my_debugger.showError(`Error loading network audio: ${error.message}`, error);
     }
   }
@@ -1410,7 +1471,7 @@ class AudioAnalyzer {
       if (error.message.includes('Cannot use a BYOB reader with a non-byte stream')) {
         showNotification(
           '浏览器不支持 🚀',
-          '当前浏览器不支持此功能，请尝试使用 Chrome 或 Firefox 浏览器。',
+          '当前浏览器不支持音频分析功能，请尝试使用 Chrome 或 Firefox 浏览器。',
           {
             type: 'error',
             duration: 5000,
@@ -1434,7 +1495,13 @@ class AudioAnalyzer {
   async handleAudioFileSelect(event) {
     const file = event.target.files[0];
 
-    if (!file || !this.checkFileFormat(file)) return;
+    if (!file)
+      return showNotification('上传失败', '没有选择文件呢，先选择音乐文件再试吧~', {
+        type: 'error',
+        duration: 5000,
+      });
+
+    if (!this.checkFileFormat(file)) return;
 
     try {
       // 初始化 AudioContext
@@ -1453,7 +1520,7 @@ class AudioAnalyzer {
       // 更新 UI
       this.updateFileInfo('audioFileInfo', file, this.state.metadata);
       this.updateAnalyzeButtonState();
-      showNotification('成功', '音频文件加载成功', {
+      showNotification('你的音乐准备好了', '下一步：配置主题颜色方案~', {
         type: 'success',
         duration: 3000,
       });
@@ -1461,10 +1528,7 @@ class AudioAnalyzer {
       this.showStatusNotStarted();
     } catch (error) {
       document.getElementById('processing').classList.add('d-none');
-      showNotification('错误', `加载音频文件出错：${error.message}`, {
-        type: 'error',
-        duration: 5000,
-      });
+
       my_debugger.showError(`Error loading audio file: ${error.message}`, error);
     }
   }
@@ -1504,7 +1568,7 @@ class AudioAnalyzer {
             throw new Error('Invalid theme configuration format');
           }
           this.state.themeColors = parsedData.themeColors;
-          if (ColorManager.validateThemeColors(this.state.themeColors)) {
+          if (ColorCodeManager.validateThemeColorCodes(this.state.themeColors)) {
             // Update UI
             this.updateFileInfo('themeConfigInfo', file);
             this.updateAnalyzeButtonState();
@@ -1536,7 +1600,7 @@ class AudioAnalyzer {
         throw new Error('Invalid theme configuration format');
       }
       this.state.themeColors = configs_json.themeColors;
-      if (ColorManager.validateThemeColors(this.state.themeColors)) {
+      if (ColorCodeManager.validateThemeColorCodes(this.state.themeColors)) {
         this.updateAnalyzeButtonState();
         showNotification('成功', '主题颜色导入成功', {
           type: 'success',
@@ -1556,6 +1620,7 @@ class AudioAnalyzer {
 
   updateFileInfo(elementId, file, metadata = null) {
     try {
+      document.getElementById("fileInfoSection").classList.remove("d-none");
       const infoElement = document.getElementById(elementId);
       let info = `文件名: ${file.name}<br>大小: ${this.formatFileSize(file.size)}`;
 
@@ -1588,7 +1653,7 @@ class AudioAnalyzer {
         }
       }
 
-      // infoElement.innerHTML = info;
+      infoElement.innerHTML = info;
     } catch (error) {
       // Error notification if something goes wrong
       showNotification('文件信息错误 ⚠️', '无法正确显示文件信息', {
@@ -1680,7 +1745,7 @@ class AudioAnalyzer {
         });
         throw new Error('Theme colors are not initialized');
       }
-      if (!ColorManager.validateThemeColors(this.state.themeColors)) {
+      if (!ColorCodeManager.validateThemeColorCodes(this.state.themeColors)) {
         showNotification('颜色主题问题 🎨', '颜色设置似乎有问题', {
           type: 'error',
           duration: 4000,
@@ -1693,7 +1758,7 @@ class AudioAnalyzer {
 
       await this.generateColorSequence();
       // Success notification after analysis completes
-      showNotification('分析完成！✨', '你的音频已成功处理', {
+      showNotification('🎉 代码已生成！', '快复制或者下载吧，导入到Mayday.blue 小程序试试！', {
         type: 'success',
         duration: 4000,
       });
@@ -1731,11 +1796,11 @@ class AudioAnalyzer {
         });
       }
 
-      showNotification('开始处理 🎼', '正在分析你的音频文件...', {
-        type: 'info',
-        duration: 3000,
-      });
       this.showStatusProcessing();
+      showNotification('🚀 开始生成', '正在努力生成你的代码，稍等片刻哦！', {
+        type: 'info',
+        duration: 2000,
+      });
 
       // Setup
       const interval = (60 / bpm) * 1000 * intervalMultiplier; // milliseconds
@@ -1812,7 +1877,7 @@ class AudioAnalyzer {
 
               const isOffEffect = normalizedTime - lastOffEffect >= 800;
 
-              const colorCode = ColorManager.getColorCode(
+              const colorCode = ColorCodeManager.getColorCode(
                 normalizedFrequency,
                 normalizedAmplitude,
                 sentimentScore,
@@ -1993,9 +2058,14 @@ class AudioAnalyzer {
   }
 }
 
-// Color management class
-class ColorManager {
-  static COLORS = {
+/**
+ * 特定格式的颜色代码管理类
+ */
+class ColorCodeManager {
+  /**
+   * 所有支持的颜色代码
+   */
+  static ALL_SUPPORTED_COLOR_CODES = {
     RED: 'red',
     ORA: 'ora',
     YEL: 'yel',
@@ -2008,9 +2078,15 @@ class ColorManager {
     RAI: 'rai',
   };
 
-  static AVAILABLE_COLORS = ['red', 'ora', 'yel', 'sky', 'blu', 'pur', 'pin', 'whi'];
+  /**
+   * 可用的颜色代码
+   */
+  static AVAILABLE_COLOR_CODES = ['red', 'ora', 'yel', 'sky', 'blu', 'pur', 'pin', 'whi'];
 
-  static COLOR_TO_HEX = {
+  /**
+   * 颜色代码对应的十六进制值
+   */
+  static AVAILABLE_COLOR_CODES_TO_HEX = {
     red: '#FF0000',
     ora: '#FFA500', // 橙色
     yel: '#FFFF00', // 黄色
@@ -2021,8 +2097,14 @@ class ColorManager {
     whi: '#FFFFFF', // 白色
   };
 
+  /**
+   * 强度等级
+   */
   static INTENSITIES = ['1', '2', '3', '4', 'T'];
 
+  /**
+   * 特殊强度等级
+   */
   static SPECIAL_INTENSITIES = {
     pin: new Set(['2', '4']),
     whi: new Set(['4', 'T']),
@@ -2030,16 +2112,24 @@ class ColorManager {
     rai: new Set(['4']),
   };
 
-  static getColorMap() {
-    return Object.keys(this.COLORS).reduce((map, color) => {
-      const colorKey = this.COLORS[color];
+  /**
+   * 获取颜色代码映射
+   */
+  static getColorCodeMap() {
+    return Object.keys(this.ALL_SUPPORTED_COLOR_CODES).reduce((map, color) => {
+      const colorKey = this.ALL_SUPPORTED_COLOR_CODES[color];
       map[colorKey] = this.SPECIAL_INTENSITIES[colorKey] || new Set(this.INTENSITIES);
       return map;
     }, {});
   }
 
-  static validateThemeColors(themeColors) {
-    const colorMap = this.getColorMap();
+  /**
+   * 验证主题颜色代码
+   * @param {Object} themeColorCodes 主题颜色代码
+   * @returns {boolean} 是否有效
+   */
+  static validateThemeColorCodes(themeColors) {
+    const colorMap = this.getColorCodeMap();
     const validRanges = ['low', 'mid', 'high', 'accent'];
     const validColors = Object.keys(colorMap);
 
@@ -2115,10 +2205,15 @@ class ColorManager {
     return true;
   }
 
+  /**
+   * 验证颜色代码
+   * @param {string} colorCode 颜色代码
+   * @returns {boolean} 是否有效
+   */
   static validateColorCode(colorCode) {
     const color = colorCode.slice(0, 3);
     const intensity = colorCode.slice(3);
-    const colorMap = this.getColorMap();
+    const colorMap = this.getColorCodeMap();
 
     if (!colorMap.hasOwnProperty(color)) {
       return false;
@@ -2127,8 +2222,14 @@ class ColorManager {
     return colorMap[color].has(intensity);
   }
 
+  /**
+   * 获取有效的颜色代码
+   * @param {string} color 颜色
+   * @param {string} preferredIntensity 偏好的强度
+   * @returns {string|null} 有效的颜色代码
+   */
   static getValidColorCode(color, preferredIntensity) {
-    const colorMap = this.getColorMap();
+    const colorMap = this.getColorCodeMap();
     if (!colorMap.hasOwnProperty(color)) {
       return null;
     }
@@ -2498,8 +2599,6 @@ class Timeline {
   }
 }
 
-
-
 // Update the AnimationController class
 class AnimationController {
   constructor(element, timerDisplay) {
@@ -2666,7 +2765,6 @@ class AnimationController {
     this.animate();
   }
 }
-
 
 class AudioVisualizer {
   constructor(audioElement) {
@@ -3235,6 +3333,29 @@ function debounce(fn, delay) {
   };
 }
 
+function clearIframe(id) {
+  let el = document.getElementById(id);
+  let iframe = el.contentWindow;
+  if (el) {
+    try {
+      // 空白页面
+      el.src = 'about:blank';
+    } catch (e) {
+      // 有资料显示如果是https协议，在设置about:blank会报错，需要更改为javascript:void(0)；
+      //（亲测是https协议，在设置about:blank后并没有报错，后续考证一下
+      el.src = 'javascript:void(0)';
+    }
+    try {
+      iframe.document.write('');
+      iframe.document.clear();
+      // 以上操作已删除了大量资源
+    } catch (e) {}
+
+    // 删除iframe(按需选择是否需要删除iframe节点)
+    document.body.removeChild(el);
+  }
+}
+
 window.addEventListener('load', () => {
   const fileInputs = document.querySelectorAll('input[type="file"]');
   const hasAutoFilled = Array.from(fileInputs).some((input) => input.value !== '');
@@ -3269,12 +3390,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     script.crossOrigin = 'anonymous';
     script.onload = () => {
       console.log('Script loaded successfully!');
-      document.getElementById('loadingOverlay').style.display = 'none'; // 隐藏加载动画
+      // document.getElementById('loadingOverlay').style.display = 'none'; // 隐藏加载动画
+      document.getElementById('loadingOverlay').classList.add('d-none'); // 隐藏加载动画
     };
     document.body.appendChild(script);
   };
 
   loadScripts_segmentit('https://cdn.jsdelivr.net/npm/segmentit@2.0.3/dist/umd/segmentit.min.js');
+
+  // 初始化 Bootstrap Tooltip
+  document.addEventListener('DOMContentLoaded', () => {
+    const tooltipTriggerList = [].slice.call(
+      document.querySelectorAll('[data-bs-toggle="tooltip"]'),
+    );
+    tooltipTriggerList.forEach((tooltipTriggerEl) => {
+      new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+  });
 
   document.querySelectorAll('input[name="musicSource"]').forEach((radio) => {
     radio.addEventListener('change', function () {
@@ -3768,13 +3900,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   const ANNOUNCEMENT_CONTENT_backup = `
 <div class="card shadow-sm mb-4">
         <div class="card-header">
-          <h2 class="modal-title" id="announcementModalLabel">欢迎wmls来玩!</h2>
+          <h2 class="modal-title" id="announcementModalLabel">欢迎wmls来玩 Mayday.Blue 预设工具~</h2>
         </div>
         <div class="modal-body">
 <h6>制作者<a
   href="https://www.xiaohongshu.com/user/profile/5c1610720000000005018c49"
   target="_blank">（小红书@那一转眼只剩我🥕)</a>留言：</h6>
-<p>本工具旨在帮助五月天演唱会的观众和组织者轻松生成荧光棒的控制代码，实现更加炫酷的灯光效果。通过简单的配置，你可以生成自定义的荧光棒控制代码，并在实时预览中查看基础效果。生成算法还在持续优化!本工具还在迭代!<br>感谢<a
+<p>你只需要选择你喜欢的音乐文件并配置好主题颜色方案，剩下的交给我~<br>生成的质量还再不停优化!<br>感谢<a
       href="https://www.xiaohongshu.com/user/profile/5d7e751900000000010010bd"
       target="_blank">小红书@Diu🥕</a>大佬开发的<strong><code style="font-family: 'Lato', sans-serif;">Mayday.Blue</code></strong>小程序!
 </p>
@@ -3803,74 +3935,213 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 检查是否为新用户
   if (!localStorage.getItem('isNewUser')) {
     try {
-      showModalNotification(
-        '公告📢 - 2024/11/23 15:20',
-        `<iframe id="myIframe" src="https://sx5w7odpp7p.feishu.cn/docx/IcuIdkFKJofwhsxfW4GcVdGSnQd" width="100%" height="600px"></iframe>`,
-        {
-          type: 'info',
-          size: 'large',
-          buttons: [
-            {
-              text: '不再提示',
-              class: 'btn btn-primary',
-              onClick: () => {
-                // 存储用户选择不再提示
-                localStorage.setItem('isNewUser', 'false');
-              },
+      showModalNotification('公告📢 - 2024/11/23 15:20', ANNOUNCEMENT_CONTENT_backup, {
+        type: 'info',
+        size: 'large',
+        buttons: [
+          {
+            text: '开始使用（不再展示)',
+            class: 'btn btn-primary',
+            onClick: () => {
+              // 存储用户选择开始使用
+              localStorage.setItem('isNewUser', 'false');
+
+              // 关闭模态框
+              const modal = document.querySelector('#notificationModal');
+              if (modal && modal.classList.contains('show')) {
+                const bootstrapModal = new bootstrap.Modal(modal);
+                bootstrapModal.hide();
+              }
+
+              const descriptionSteps = [
+                {
+                  element: '#guideHeading',
+                  popover: {
+                    title: '使用指南：如何生成预设代码 ',
+                    description:
+                      '首先，请导入你喜欢的歌曲吧！这一步可是关键哦，它将为我们的荧光棒色彩之旅奠定基础。',
+                    position: 'right',
+                  },
+                },
+                {
+                  element: '#fileFormCollapse',
+                  popover: {
+                    description:
+                      '<p>想在线找音乐，就点蓝色的 “在线搜索音乐”，再点下面的 “点我去搜索”，就能从网上找音乐啦。</p>',
+                    position: 'right',
+                  },
+                },
+                {
+                  element: '#fileFormCollapse',
+                  popover: {
+                    description: `<p>要是想上传自己电脑里的音乐，就点 “上传本地音乐”（点了会变蓝）。然后点 “浏览...”，从自己电脑里选音乐文件就行，像 MP3、WAV、FLAC 这些格式都可以。</p><span class="text-muted">一万首的mp3 一万次疯狂的爱 灭不了一个渺小的孤单</span><img src="https://i.imgur.com/JqJyJqJ.png" width="300" height="auto"> </img>`,
+                    position: 'right',
+                  },
+                },
+                // 颜色
+                {
+                  element: '.card-header[id="themeConfigHeading"]',
+                  popover: {
+                    description: '现在，让我们来为荧光棒挑选漂亮的颜色主题吧！',
+                    position: 'bottom',
+                  },
+                },
+                {
+                  element: '#baseColorContainer',
+                  popover: {
+                    description:
+                      '在这里，先选择一个基础颜色，它就像歌曲的灵魂一样，会决定整个荧光棒颜色变化的主基调哦。想象一下，哪种颜色最能代表你心中五月天歌曲的感觉呢？',
+                    position: 'bottom',
+                  },
+                },
+                {
+                  element: '#colorSections',
+                  popover: {
+                    description:
+                      '然后，我们要为歌曲的不同部分设置颜色啦。每个部分都可以有自己独特的颜色哦。调整颜色的比例，让它们完美地配合歌曲的节奏，就像一场绚丽的色彩派对！',
+                    position: 'bottom',
+                  },
+                },
+                {
+                  element: '.lowColorsSection',
+                  popover: {
+                    description: '低频部分（如前奏、慢节奏段落）',
+                    position: 'bottom',
+                  },
+                },
+                {
+                  element: '.midColorsSection',
+                  popover: {
+                    description: '中频部分（如主歌、节奏适中段落）',
+                    position: 'bottom',
+                  },
+                },
+                {
+                  element: '.highColorsSection',
+                  popover: {
+                    description: '高频部分（如副歌、高潮段落）',
+                    position: 'bottom',
+                  },
+                },
+                {
+                  element: '.accentColorsSection',
+                  popover: { description: '关键转折处（如情感爆发点）', position: 'bottom' },
+                },
+                {
+                  element: '#themeConfig_saveConfig',
+                  popover: {
+                    description:
+                      '当你完成颜色设置后，点击这个保存配置按钮，就能保存你的颜色主题配置啦。',
+                    position: 'left',
+                  },
+                },
+                {
+                  element: '#themeConfig_exportConfig',
+                  popover: {
+                    description:
+                      '如果你想分享你的颜色主题设置，可以点击这个导出配置按钮，将配置导出为文件。',
+                    position: 'left',
+                  },
+                },
+                {
+                  element: "label[for='themeConfig_importConfig']",
+                  popover: {
+                    description:
+                      '想要使用已有的颜色主题配置？点击这个导入配置按钮，选择相应的文件即可。',
+                    position: 'left',
+                  },
+                },
+                // 生成
+                {
+                  element: '#generate-btn',
+                  popover: {
+                    description:
+                      '歌曲和颜色主题配置都准备好啦，接下来就是见证奇迹的时刻——点击这个按钮就生成Mayday.blue 的预设代码了！',
+                    position: 'right',
+                  },
+                },
+                {
+                  element: '#output-result',
+                  popover: {
+                    description:
+                      '看，这里就是生成的代码显示区域啦。代码生成后，你可以点击“复制”按钮把它复制到剪贴板，然后粘贴到Mayday.Blue应用中，或者点击“下载”保存为.json文件备用哦。',
+                    position: 'top',
+                  },
+                },
+                {
+                  element: '#copy-btn',
+                  popover: {
+                    description:
+                      '点击这个“复制”按钮，就可以轻松把代码复制下来，准备好让荧光棒闪耀起来吧！',
+                    position: 'left',
+                  },
+                },
+                {
+                  element: '#download-btn',
+                  popover: {
+                    description:
+                      '如果你想把代码保存下来，以防万一，就点击这个“下载”按钮，它会把代码保存为一个方便的.json文件哦。',
+                    position: 'bottom',
+                  },
+                },
+                // 可视化
+                {
+                  element: '#guide1Heading',
+                  popover: {
+                    description: '这是如何预览已有的预设代码的使用指南。',
+                    position: 'bottom',
+                  },
+                },
+              ];
+              const driver = window.driver.js.driver;
+              // 启动 description.js 引导
+              setTimeout(() => {
+                const driverObj = driver({
+                  animate: true,
+                  showProgress: false,
+                  nextBtnText: '下一个',
+                  prevBtnText: '上一个',
+                  doneBtnText: '结束',
+                  popoverClass: 'driverjs-theme',
+                  steps: descriptionSteps,
+                  scrollIntoViewOptions: { behavior: 'smooth' },
+                });
+                driverObj.drive();
+              }, 300); // 确保模态框完全关闭后再启动引导
+
+              // // 移除 iframe 元素
+              // const iframe = document.getElementById('myIframe');
+              // if (iframe) {
+              //   // 移除 iframe 的所有事件监听器
+              //   iframe.onload = null;
+              //   iframe.onerror = null;
+              //   // 移除 iframe 元素
+              //   iframe.remove();
+              // }
+              // // 如果需要，可以重置模态框内容
+              // document.querySelector('#notificationModal #modalBody').innerHTML = '';
             },
-          ],
-          html: true,
-          dismissible: true,
-        },
-      );
-      // 确保 iframe 加载完成后再显示通知
-      const iframe = document.getElementById('myIframe');
-      if (iframe) {
-        iframe.onload = () => {
-          // 模态通知已经显示，无需额外操作
-        };
-      }
+          },
+        ],
+        html: true,
+        dismissible: false,
+      });
+      // // 确保 iframe 加载完成后再显示通知
+      // const iframe = document.getElementById('myIframe');
+      // if (iframe) {
+      //   iframe.onload = () => {
+      //     // 模态通知已经显示，无需额外操作
+      //   };
+      //   // 可以在这里添加其他事件监听器，例如错误处理
+      //   iframe.onerror = (event) => {
+      //     console.error('Iframe 加载失败:', event);
+      //   };
+      // }
     } catch (error) {
       console.error('显示公告时发生错误:', error);
-      document.querySelector('#notificationModal #modalBody').innerHTML =
-        ANNOUNCEMENT_CONTENT_backup;
+      document.querySelector(
+        '#notificationModal #modalBody',
+      ).innerHTML = `<iframe id="myIframe" src="https://sx5w7odpp7p.feishu.cn/docx/IcuIdkFKJofwhsxfW4GcVdGSnQd" width="100%" height="600px"></iframe>`;
     }
   }
-  // const driver = window.driver.js.driver;
-
-  // const driverObj = driver();
-
-  // driverObj.highlight({
-  //   element: '#fileFormCollapse',
-  //   popover: {
-  //     title: 'Title',
-  //     description: 'Description',
-  //   },
-  // });
-  // showModalNotification(
-  //   `新手引导`,
-  //   `
-  //                    <div id="guide-step-1" class="guide-step visible">
-  //                         <h6>音频导入步骤：</h6>
-  //                         <p>点击页面上的 <strong>音频导入按钮</strong>（图标为音乐符号），选择您本地计算机中的音频文件（支持格式：AAC、FLAC、MP3、WAV、OGG、M4A）。您也可以通过点击 <strong>网络音频搜索按钮</strong>（图标为放大镜），在搜索框输入关键词，选择搜索类型（单曲、专辑等）进行在线音频搜索。</p>
-  //                         <div class="guide-animation" id="audioImportAnimation"></div>
-  //                     </div>
-  //                     <div id="guide-step-2" class="guide-step visible">
-  //                         <h6>主题颜色选择步骤：</h6>
-  //                         <p>在 <strong>“主题颜色配置”</strong> 区域，点击 <strong>“基础颜色”</strong> 下拉框选择代表歌曲情感的主色调。然后，针对 <strong>“Low”</strong>（低频部分，如前奏、慢节奏段落）、<strong>“Mid”</strong>（中频部分，如主歌、节奏适中的段落）、<strong>“High”</strong>（高频部分，如副歌、高潮段落）、<strong>“Accent”</strong>（关键转折处的颜色，如情感爆发点）每个范围，通过点击颜色选项选择颜色，并在输入框中设置合适的百分比，确保所有范围颜色比例总和为100%。</p>
-  //                         <div class="guide-animation" id="colorSelectAnimation"></div>
-  //                     </div>
-  //                     <div id="guide-step-3" class="guide-step visible">
-  //                         <h6>代码生成与预览步骤  ：</h6>
-  //                         <p>完成音频和颜色设置后，点击 <strong>“生成预设代码”</strong> 按钮，生成的代码将显示在下方的 <strong>“生成结果”</strong> 区域。您可以点击 <strong>“复制”</strong> 按钮将代码复制到剪贴板，然后粘贴到Mayday.Blue应用中使用，或者点击 <strong>“下载”</strong> 保存为.json文件备用。同时，您可以在 <strong>“音频可视化”</strong> 区域选择频谱图或波形图查看音频起伏，辅助调整代码效果。</p>
-  //                         <div class="guide-animation" id="codeGenerateAnimation"></div>
-  //                     </div>
-  //     `,
-  //   {
-  //     type: 'warning',
-  //     buttons: [],
-  //     modal: true,
-  //     html: true,
-  //   },
-  // );
 });

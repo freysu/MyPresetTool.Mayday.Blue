@@ -2,7 +2,7 @@
  * @Author: freysu
  * @Date: 2024-11-21 04:20:51
  * @LastEditors: freysu
- * @LastEditTime: 2024-11-29 07:23:55
+ * @LastEditTime: 2024-11-30 16:07:50
  * @Description: file content
 -->
 <!DOCTYPE html>
@@ -21,171 +21,37 @@
     <link href="css/atom-one-dark.min.css" rel="stylesheet" />
     <link href="css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="css/style.min.css" />
-    <style>
-      .total-percentage {
-        font-weight: bold;
-        font-size: 1.1rem;
-        color: #333;
-        margin-bottom: 10px;
-      }
-
-      .swatch {
-        font-size: 16px;
-        display: inline-block;
-        width: 2em;
-        height: 2em;
-        background: #ccc;
-        border-radius: 0.25em;
-        margin-left: 0.25em;
-        margin-bottom: 0.25em;
-        box-sizing: border-box;
-        border: 0.125em solid #364347;
-        cursor: pointer;
-      }
-
-      /* 添加间距和布局优化 */
-      #timer {
-        font-size: 1.2rem;
-        color: #007bff;
-        /* 可以根据实际设计调整颜色 */
-      }
-
-      #milliseconds {
-        font-size: 1rem;
-        color: #888;
-        /* 淡色表示辅助信息 */
-      }
-
-      /* 搜索部分样式 */
-      .search-section {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
-      }
-
-      .search-section input,
-      .search-section select {
-        flex: 1;
-        padding: 0.5rem;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        margin-right: 0.5rem;
-      }
-
-      .search-section button {
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 4px;
-        background-color: #007bff;
-        color: #fff;
-        cursor: pointer;
-      }
-
-      .search-section button:hover {
-        background-color: #0056b3;
-      }
-
-      /* 搜索结果样式 */
-      .search-results-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-
-      .search-results-list-item {
-        display: flex;
-        align-items: center;
-        padding: 1rem;
-        border-bottom: 1px solid #ddd;
-        transition: background-color 0.3s;
-      }
-
-      .search-results-list-item:last-child {
-        border-bottom: none;
-      }
-
-      .search-results-list-item:hover {
-        background-color: #f8f8f8;
-      }
-
-      .album-cover {
-        width: 50px;
-        height: 50px;
-        margin-right: 1rem;
-        border-radius: 4px;
-      }
-
-      .search-results-list-item h5 {
-        margin: 0;
-        font-size: 1.1rem;
-      }
-
-      .search-results-list-item p {
-        margin: 0;
-        font-size: 0.9rem;
-        color: #666;
-      }
-
-      .select-song-btn {
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 4px;
-        background-color: #007bff;
-        color: #fff;
-        cursor: pointer;
-        margin-left: auto;
-      }
-
-      .select-song-btn:hover {
-        background-color: #0056b3;
-      }
-    </style>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css"/> -->
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css" />
     <script
       src="https://js.fundebug.cn/fundebug.2.8.6.min.js"
       apikey="33af664e86e0eb2b56643810e04d20105e3621fd117e7751f112b09929efe908"
       crossorigin="anonymous"
     ></script>
-    <script src="https://js.fundebug.cn/fundebug.revideo.0.7.1.min.js"></script>
+    <script
+      src="https://js.fundebug.cn/fundebug.revideo.0.7.1.min.js"
+      crossorigin="anonymous"
+    ></script>
   </head>
 
   <body>
     <div class="app-wrapper d-flex flex-column min-vh-100">
-      <!-- Loading Spinner (in HTML body, visible during loading) -->
       <div
         id="loadingOverlay"
-        class="loading-overlay"
-        style="
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: rgba(0, 0, 0, 0.5);
-          z-index: 9998;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        "
+        class="loading-overlay d-flex justify-content-center align-items-center"
       >
-        <div
-          class="d-flex justify-content-center align-items-center"
-          style="
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            z-index: 9999;
-            transform: translate(-50%, -50%);
-          "
-          id="loadingSpinner"
-        >
-          <div class="spinner-border text-primary" role="status">
+        <div id="loadingSpinner" class="text-center">
+          <div
+            class="spinner-border text-primary mb-3"
+            role="status"
+            style="width: 5rem; height: 5rem"
+          >
             <span class="visually-hidden">Loading...</span>
           </div>
+          <h5 class="text-white mb-3">欢迎使用 Mayday.Blue 预设工具！</h5>
+          <p class="text-white">上传音乐，创造属于你的灯光秀吧~ 初次加载有点慢，谅解一下~</p>
         </div>
       </div>
-
       <!-- Header -->
       <header class="app-header py-3">
         <div class="container">
@@ -223,10 +89,10 @@
                   href="https://sx5w7odpp7p.feishu.cn/docx/IcuIdkFKJofwhsxfW4GcVdGSnQd"
                   target="_blank"
                   id="openHelperPage"
-                  title="使用帮助"
+                  title="提交反馈"
                 >
                   <i class="material-icons">help</i>
-                  <b>帮助中心</b>
+                  <b>提交反馈</b>
                 </a>
               </li>
               <li class="nav-item">
@@ -286,7 +152,7 @@
                         aria-expanded="false"
                         aria-controls="guideCollapse"
                       >
-                        使用指南：如何生成预设代码
+                        🎸 使用指南：如何生成预设代码
                       </a>
                     </h5>
                   </div>
@@ -294,11 +160,11 @@
                     <div class="card-body">
                       <ol class="mb-0">
                         <li>
-                          <h5 class="h6 mb-2">1. 上传音频文件（必填）</h5>
+                          <h5 class="h6 mb-2">1. 上传音乐文件（必做）</h5>
                           <ul class="mb-0 pl-3">
                             <li>
                               <i class="material-icons">audio_file</i>
-                              <span class="fw-bold text-danger">选择你的音乐</span>
+                              <span class="fw-bold text-danger">上传你的音乐</span>
                               <br />
                               只需点击“选择文件”上传你喜欢的音乐（支持 MP3、WAV、FLAC、AAC
                               等格式）。
@@ -529,7 +395,7 @@
                                 value="search"
                                 checked
                               />
-                              <label class="form-check-label" for="searchRadio">联网搜索</label>
+                              <label class="form-check-label" for="searchRadio">在线搜索音乐</label>
                             </div>
                             <div class="form-check">
                               <input
@@ -539,7 +405,7 @@
                                 id="uploadRadio"
                                 value="upload"
                               />
-                              <label class="form-check-label" for="uploadRadio">手动上传</label>
+                              <label class="form-check-label" for="uploadRadio">上传本地音乐</label>
                             </div>
                           </div>
 
@@ -551,12 +417,12 @@
 
                           <div id="uploadSection" style="display: none">
                             <form>
-                              <div class="mb-3">
+                              <div class="mb-3 file-upload-container">
                                 <label
                                   for="audioFileInput_generate_tool"
                                   class="form-label d-flex align-items-center"
                                 >
-                                  手动上传
+                                  请选择你的音乐文件
                                 </label>
                                 <input
                                   type="file"
@@ -564,6 +430,8 @@
                                   id="audioFileInput_generate_tool"
                                   accept="audio/*"
                                   autocomplete="off"
+                                  data-bs-toggle="tooltip"
+                                  title="点击选择音乐文件（MP3/WAV/FLAC 格式）"
                                 />
                                 <small class="text-muted">支持 MP3, WAV, FLAC 等格式</small>
                               </div>
@@ -592,13 +460,13 @@
                       </div>
                     </div>
                     <!-- 文件信息解析区 -->
-                    <div class="card shadow-sm mb-4 d-none">
+                    <div id="fileInfoSection" class="card shadow-sm mb-4 d-none">
                       <div class="card-header">
                         <h2 class="h5 mb-0">文件信息</h2>
                       </div>
                       <div class="card-body">
-                        <div id="audioFileInfo" class="mb-2 p-2 rounded">音频文件信息</div>
-                        <div id="lrcFileInfo" class="mb-2 p-2 rounded">歌词文件信息</div>
+                        <div id="audioFileInfo" class="mb-2 p-2 rounded">🎵 音乐文件详情</div>
+                        <div id="lrcFileInfo" class="mb-2 p-2 rounded">📖 歌词文件详情</div>
                       </div>
                     </div>
                     <!-- 进度情况区 -->
@@ -624,19 +492,19 @@
                           <div class="text-primary" role="status">
                             <span class="visually-hidden">准备中...</span>
                           </div>
-                          <h6>准备开始</h6>
+                          <h6>准备中，点击“生成”开始吧！</h6>
                         </div>
                         <div id="statusProcessing" class="text-center d-none">
                           <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">处理中...</span>
                           </div>
-                          <h6>处理中...</h6>
+                          <h6>正在生成，请稍等~</h6>
                         </div>
                         <div id="statusCompleted" class="text-center d-none">
                           <div class="text-success" role="status">
                             <span class="visually-hidden">已完成</span>
                           </div>
-                          <h6>完成啦！</h6>
+                          <h6>生成完成！快看看效果吧！</h6>
                         </div>
                       </div>
                     </div>
@@ -647,7 +515,7 @@
                           id="generate-btn"
                           data-bs-toggle="tooltip"
                           data-bs-placement="top"
-                          title="生成预设代码"
+                          title="请先上传音乐文件哦~"
                           disabled
                         >
                           <i class="material-icons me-2">bolt</i>
@@ -673,13 +541,27 @@
                           （二）颜色主题配置
                         </h2>
                         <div class="text-end">
-                          <button class="btn btn-outline-secondary" id="themeConfig_saveConfig">
+                          <button
+                            class="btn btn-outline-secondary"
+                            id="themeConfig_saveConfig"
+                            data-bs-toggle="tooltip"
+                            title="保存当前颜色配置"
+                          >
                             <i class="material-icons" aria-hidden="true">save</i>
-                            保存
+                            保存配置
+                          </button>
+                          <button
+                            id="themeConfig_resetConfig "
+                            class="btn btn-outline-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#resetModal"
+                          >
+                            <i class="material-icons">delete</i>
+                            重置配置
                           </button>
                           <button class="btn btn-outline-secondary" id="themeConfig_exportConfig">
                             <i class="material-icons">file_download</i>
-                            导出
+                            导出配置
                           </button>
                           <button class="btn btn-outline-secondary">
                             <label
@@ -688,7 +570,7 @@
                               style="cursor: pointer"
                             >
                               <i class="material-icons">file_upload</i>
-                              导入
+                              导入配置
                             </label>
                           </button>
                           <input
@@ -1256,11 +1138,33 @@
         </div>
       </div>
     </div>
-    <!-- <script
-      src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"
-      crossorigin="anonymous"
-      defer="true"
-    ></script> -->
+    <!-- 重置确认弹窗 -->
+    <div
+      class="modal fade"
+      id="resetModal"
+      tabindex="-1"
+      aria-labelledby="resetModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="resetModalLabel">确认重置设置</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">你确定要重置所有设置吗？此操作不可恢复。</div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+            <button type="button" class="btn btn-danger" id="confirm-reset-btn">确认重置</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <script
       src="https://unpkg.com/wavesurfer.js@7.8.9/dist/wavesurfer.min.js"
       crossorigin="anonymous"
@@ -1275,11 +1179,6 @@
     <script src="original_src/bootstrap.bundle.min.js" defer></script>
     <script src="original_src/mousetrap.min.js" defer></script>
     <script src="original_src/highlight.min.js" defer></script>
-    <!-- <script
-      src="https://cdn.jsdelivr.net/npm/segmentit@2.0.3/dist/umd/segmentit.min.js"
-      crossorigin="anonymous"
-      defer
-    ></script> -->
     <script src="webpack_dist/bundle.js" defer></script>
   </body>
 </html>

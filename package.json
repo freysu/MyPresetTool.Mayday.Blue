@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "./webpack_dist/bundle.js",
   "scripts": {
+    "start": "lite-server",
     "build": "webpack",
     "serve": "webpack serve",
     "predeploy": "npm run build",
@@ -26,7 +27,8 @@
     "lodash.assign": "v4.1.0",
     "lru.min": "^1.1.1",
     "segmentit": "2.0.3",
-    "web-audio-beat-detector": "^8.2.19"
+    "web-audio-beat-detector": "^8.2.19",
+    "lite-server": "^2.6.1"
   },
   "keywords": [],
   "author": "",
