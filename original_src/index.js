@@ -82,6 +82,15 @@
   });
 })();
 
+// 简单的去抖函数实现
+function debounce(fn, delay) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => fn(...args), delay);
+  };
+}
+
 // 捕获异步错误（Promise 拒绝）
 window.addEventListener('unhandledrejection', function (event) {
   const errorDetails = {
@@ -1268,54 +1277,86 @@ class AudioAnalyzer {
       },
     );
 
-    document.getElementById('searchButton').addEventListener('click', async () => {
-      const keyword = document.getElementById('searchInput').value;
-      const searchType = document.getElementById('searchTypeSelect').value;
-      if (keyword) {
-        // 先检查缓存中是否已有结果
-        if (cachedSearchResults.has(`${keyword}_${searchType}`)) {
-          displaySearchResults(cachedSearchResults.get(`${keyword}_${searchType}`, keyword));
-          return;
-        }
+    document.getElementById('searchButton').addEventListener(
+      'click',
+      debounce(async (e) => {
+        const keyword = document.getElementById('searchInput').value;
+        const searchType = document.getElementById('searchTypeSelect').value;
+        showNotification('发起搜索！', `正在尝试搜索${keyword}`, { type: 'info', duration: 5000 });
+        e.target.disabled = true;
+        if (keyword) {
+          // 先检查缓存中是否已有结果
+          if (cachedSearchResults.has(`${keyword}_${searchType}`)) {
+            displaySearchResults(cachedSearchResults.get(`${keyword}_${searchType}`, keyword));
+            return;
+          }
 
-        const searchUrl = `https://netease-cloud-music-api-freysu.glitch.me/cloudsearch?keywords=${keyword}&type=${searchType}&limit=100&offset=0`;
-        try {
-          const response = await fetch(searchUrl);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          const data = await response.json();
-          if (data.result && data.result.songs) {
-            // 缓存本次搜索结果
-            cachedSearchResults.set(`${keyword}_${searchType}`, data.result.songs);
-            displaySearchResults(data.result.songs, keyword);
-          } else {
-            document.getElementById(
-              'searchResults',
-            ).innerHTML = `<p class="mt-3">没有找到你想要的音乐~试试换个关键词吧！</p>`;
-          }
-        } catch (error) {
-          if (
-            error.message.includes('Failed to fetch') ||
-            error.message.includes('网络错误') ||
-            error.message.includes('HTTP error! status: 0')
-          ) {
-            document.getElementById('searchResults').innerHTML =
-              '<p>网络不通畅哦，稍后再试吧~若第一次使用不了，请检查网络设置（可能需要特殊网络设置，如“魔法”），不然请放弃使用该功能。</p>';
-          } else if (error.message.includes('HTTP error! status: 403')) {
-            document.getElementById('searchResults').innerHTML =
-              '<p>请求被拒绝，可能是API限制或IP被封禁。请尝试使用其他网络或稍后再试。</p>';
-          } else if (error.message.includes('HTTP error! status: 404')) {
-            document.getElementById('searchResults').innerHTML =
-              '<p>API未找到，可能是API地址有误。请检查API地址并重试。</p>';
-          } else {
-            console.error('Error fetching search results:', error);
-            document.getElementById('searchResults').innerHTML =
-              '<p>An error occurred while fetching results.</p>';
+          const searchUrl = `https://netease-cloud-music-api-freysu.glitch.me/cloudsearch?keywords=${keyword}&type=${searchType}&limit=100&offset=0`;
+          try {
+            const response = await fetch(searchUrl);
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            if (data.result && data.result.songs) {
+              // 缓存本次搜索结果
+              cachedSearchResults.set(`${keyword}_${searchType}`, data.result.songs);
+              displaySearchResults(data.result.songs, keyword);
+            } else {
+              document.getElementById(
+                'searchResults',
+              ).innerHTML = `<p class="mt-3">没有找到你想要的音乐~试试换个关键词吧！</p>`;
+              showNotification(
+                '搜索结果',
+                '<p class="mt-3">没有找到你想要的音乐~试试换个关键词吧！</p>',
+                { type: 'warning', html: true, duration: 5000 },
+              );
+            }
+          } catch (error) {
+            if (
+              error.message.includes('Failed to fetch') ||
+              error.message.includes('网络错误') ||
+              error.message.includes('HTTP error! status: 0')
+            ) {
+              document.getElementById('searchResults').innerHTML =
+                '<p>网络不通畅哦，稍后再试吧~若第一次使用不了，请检查网络设置（可能需要特殊网络设置，如“魔法”），不然请放弃使用该功能。</p>';
+              showNotification(
+                '网络错误',
+                '<p>网络不通畅哦，稍后再试吧~若第一次使用不了，请检查网络设置（可能需要特殊网络设置，如“魔法”），不然请放弃使用该功能。</p>',
+                { type: 'error', html: true, duration: 5000 },
+              );
+            } else if (error.message.includes('HTTP error! status: 403')) {
+              document.getElementById('searchResults').innerHTML =
+                '<p>请求被拒绝，可能是API限制或IP被封禁。请尝试使用其他网络或稍后再试。</p>';
+              showNotification(
+                '请求被拒绝',
+                '<p>请求被拒绝，可能是API限制或IP被封禁。请尝试使用其他网络或稍后再试。</p>',
+                { type: 'error', html: true, duration: 5000 },
+              );
+            } else if (error.message.includes('HTTP error! status: 404')) {
+              document.getElementById('searchResults').innerHTML =
+                '<p>API未找到，可能是API地址有误。请检查API地址并重试。</p>';
+              showNotification(
+                'API未找到',
+                '<p>API未找到，可能是API地址有误。请检查API地址并重试。</p>',
+                { type: 'error', html: true, duration: 5000 },
+              );
+            } else {
+              console.error('Error fetching search results:', error);
+              document.getElementById('searchResults').innerHTML =
+                '<p>An error occurred while fetching results.</p>';
+              showNotification('错误', '<p>An error occurred while fetching results.</p>', {
+                type: 'error',
+                html: true,
+                duration: 5000,
+              });
+            }
+          } finally {
+            e.target.disabled = false;
           }
         }
-      }
-    });
+      }, 500),
+    );
 
     // 捕获 this 的引用
     const that = this;
@@ -1620,7 +1661,7 @@ class AudioAnalyzer {
 
   updateFileInfo(elementId, file, metadata = null) {
     try {
-      document.getElementById("fileInfoSection").classList.remove("d-none");
+      document.getElementById('fileInfoSection').classList.remove('d-none');
       const infoElement = document.getElementById(elementId);
       let info = `文件名: ${file.name}<br>大小: ${this.formatFileSize(file.size)}`;
 
@@ -3322,38 +3363,6 @@ function formatTimestamp(milliseconds, format = 'dd HH:mm:ss') {
     .replace('mm', formattedMinutes)
     .replace('ss', formattedSeconds)
     .replace('ms', formattedMilliseconds);
-}
-
-// 简单的去抖函数实现
-function debounce(fn, delay) {
-  let timeout;
-  return function (...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => fn(...args), delay);
-  };
-}
-
-function clearIframe(id) {
-  let el = document.getElementById(id);
-  let iframe = el.contentWindow;
-  if (el) {
-    try {
-      // 空白页面
-      el.src = 'about:blank';
-    } catch (e) {
-      // 有资料显示如果是https协议，在设置about:blank会报错，需要更改为javascript:void(0)；
-      //（亲测是https协议，在设置about:blank后并没有报错，后续考证一下
-      el.src = 'javascript:void(0)';
-    }
-    try {
-      iframe.document.write('');
-      iframe.document.clear();
-      // 以上操作已删除了大量资源
-    } catch (e) {}
-
-    // 删除iframe(按需选择是否需要删除iframe节点)
-    document.body.removeChild(el);
-  }
 }
 
 window.addEventListener('load', () => {
