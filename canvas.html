@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>五月天演唱会荧光棒</title>
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(to bottom, #000, #222);
+        font-family: Arial, sans-serif;
+      }
+      canvas {
+        border: 2px solid #fff;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+      }
+      .controls {
+        margin-top: 20px;
+        text-align: center;
+      }
+      .controls input,
+      .controls button {
+        margin: 5px;
+        padding: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .controls button {
+        background-color: gray;
+        color: white;
+      }
+      .controls button.active {
+        background-color: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="controls">
+      <label>
+        开始颜色:
+        <input type="color" id="startColor" value="#0000FF" />
+      </label>
+      <label>
+        结束颜色:
+        <input type="color" id="endColor" value="#87CEEB" />
+      </label>
+      <button id="toggleGlow">开启发光</button>
+    </div>
+    <canvas id="glowstickCanvas" width="1000" height="102"></canvas>
+    <!-- <script>
+      const canvas = document.getElementById('glowstickCanvas');
+      const ctx = canvas.getContext('2d');
+      const startColorInput = document.getElementById('startColor');
+      const endColorInput = document.getElementById('endColor');
+      const toggleGlowButton = document.getElementById('toggleGlow');
+
+      const glowstickWidth = 102;
+      const glowstickHeight = 1000;
+      const lightHeight = glowstickHeight * 0.6;
+      const ringHeight = 50;
+      const buttonRadius = 30;
+      const grooveHeight = glowstickHeight * 0.4 - 100 - 60;
+      const grooveWidth = glowstickWidth * 0.8;
+      const silverRingHeight = 10; // 银环的高度
+      // // 在全局作用域中定义发光区域
+      // let glowRect = { x: 0, y: 0, width: 0, height: 0 };
+
+      let isGlowing = false;
+
+      function drawGlowArea() {
+        ctx.save();
+        let glowGradient;
+        if (isGlowing) {
+          ctx.filter = 'blur(2px)';
+
+          glowGradient = startColorInput.value;
+        } else {
+          glowColor = '#dedbdf';
+        }
+        if (isGlowing) {
+          ctx.fillStyle = glowGradient;
+        } else {
+          ctx.fillStyle = glowColor;
+        }
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillRect((canvas.width - glowstickWidth) / 2, 0, glowstickWidth, lightHeight);
+        ctx.restore();
+        ctx.filter = 'none';
+
+        // // 更新发光区域
+        // glowRect.x = (canvas.width - glowstickWidth) / 2;
+        // glowRect.y = 0;
+        // glowRect.width = glowstickWidth;
+        // glowRect.height = lightHeight;
+      }
+
+      function drawMainBody() {
+        const bodyGradient = ctx.createLinearGradient(0, lightHeight, 0, glowstickHeight);
+        bodyGradient.addColorStop(0, '#ecece9');
+        bodyGradient.addColorStop(1, '#e6e6e6');
+        ctx.fillStyle = '#e2e3e3';
+        ctx.fillRect(
+          (canvas.width - glowstickWidth) / 2,
+          lightHeight,
+          glowstickWidth,
+          glowstickHeight - lightHeight,
+        );
+      }
+
+      function drawRing() {
+        const ringY = lightHeight;
+        const ringGradient = ctx.createLinearGradient(0, ringY, 0, ringY + ringHeight);
+        ringGradient.addColorStop(0, '#e7e7e6');
+        ringGradient.addColorStop(1, '#afa895');
+        ctx.fillStyle = ringGradient;
+        ctx.fillRect((canvas.width - glowstickWidth) / 2, ringY, glowstickWidth, ringHeight);
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 20px Arial';
+        const text = 'MAYDAY';
+        const textWidth = ctx.measureText(text).width;
+        ctx.fillText(text, (canvas.width - textWidth) / 2, ringY + ringHeight / 2 + 6);
+      }
+
+      function drawButton() {
+        const buttonY = lightHeight + ringHeight + 45;
+        const buttonGradient = ctx.createRadialGradient(
+          canvas.width / 2,
+          buttonY,
+          5,
+          canvas.width / 2,
+          buttonY,
+          buttonRadius,
+        );
+        buttonGradient.addColorStop(0, '#e6e6e6');
+        buttonGradient.addColorStop(1, '#b3b3b3');
+        ctx.fillStyle = buttonGradient;
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, buttonY, buttonRadius, 0, Math.PI * 2);
+        // 绘制按钮边框，根据状态切换颜色
+        ctx.lineWidth = 10;
+        ctx.strokeStyle = isGlowing ? '#00a4ff' : '#808080';
+        ctx.stroke();
+        ctx.fill();
+
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 30px Arial';
+        const buttonText = 'M';
+        const buttonTextWidth = ctx.measureText(buttonText).width;
+        ctx.fillText(buttonText, (canvas.width - buttonTextWidth) / 2, buttonY + 10);
+      }
+
+      function drawGroove() {
+        const grooveY = glowstickHeight - grooveHeight - silverRingHeight * 2;
+        const grooveGradient = ctx.createLinearGradient(0, grooveY, 0, grooveY + grooveHeight);
+        grooveGradient.addColorStop(0, '#a6a6a6');
+        grooveGradient.addColorStop(1, '#808080');
+        ctx.fillStyle = '#d2d3d5';
+
+        const grooveX = (canvas.width - grooveWidth) / 2;
+        const halfGrooveWidth = grooveWidth / 2;
+        const cornerRadius = 25; // 半圆的半径
+
+        // 开始路径
+        ctx.beginPath();
+        // 左上角半圆
+        ctx.arc(
+          grooveX + cornerRadius,
+          grooveY + cornerRadius,
+          cornerRadius,
+          Math.PI,
+          Math.PI * 1.5,
+        );
+        // 上边直线
+        ctx.lineTo(grooveX + grooveWidth - cornerRadius, grooveY);
+        // 右上角半圆
+        ctx.arc(
+          grooveX + grooveWidth - cornerRadius,
+          grooveY + cornerRadius,
+          cornerRadius,
+          Math.PI * 1.5,
+          Math.PI * 2,
+        );
+        // 右边直线
+        ctx.lineTo(grooveX + grooveWidth, grooveY + grooveHeight - cornerRadius);
+        // 右下角半圆
+        ctx.arc(
+          grooveX + grooveWidth - cornerRadius,
+          grooveY + grooveHeight - cornerRadius,
+          cornerRadius,
+          0,
+          Math.PI * 0.5,
+        );
+        // 下边直线
+        ctx.lineTo(grooveX + cornerRadius, grooveY + grooveHeight);
+        // 左下角半圆
+        ctx.arc(
+          grooveX + cornerRadius,
+          grooveY + grooveHeight - cornerRadius,
+          cornerRadius,
+          Math.PI * 0.5,
+          Math.PI,
+        );
+        // 左边直线
+        ctx.lineTo(grooveX, grooveY + cornerRadius);
+
+        // 填充路径
+        ctx.fill();
+      }
+
+      function drawSilverRing() {
+        const silverRingY = glowstickHeight - silverRingHeight;
+        ctx.fillStyle = '#6e6f7f';
+        ctx.fillRect(
+          (canvas.width - glowstickWidth) / 2,
+          silverRingY,
+          glowstickWidth,
+          silverRingHeight,
+        );
+      }
+
+      function drawGlowstick() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGlowArea();
+        drawMainBody();
+        drawRing();
+        drawButton();
+        drawGroove();
+        drawSilverRing();
+        requestAnimationFrame(drawGlowstick);
+      }
+
+      toggleGlowButton.addEventListener('click', () => {
+        isGlowing = !isGlowing;
+        toggleGlowButton.classList.toggle('active', isGlowing);
+        toggleGlowButton.textContent = isGlowing ? '关闭发光' : '开启发光';
+      });
+
+      drawGlowstick();
+
+      // 调整画布大小的函数
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        drawGlowstick();
+      }
+
+      // 监听窗口大小变化事件
+      window.addEventListener('resize', resizeCanvas);
+    </script> -->
+    <!-- <script>
+      const canvas = document.getElementById('glowstickCanvas');
+      const ctx = canvas.getContext('2d');
+      const startColorInput = document.getElementById('startColor');
+      const endColorInput = document.getElementById('endColor');
+      const toggleGlowButton = document.getElementById('toggleGlow');
+
+      const glowstickWidth = 102;
+      const glowstickHeight = 1000;
+      const lightHeight = glowstickHeight * 0.6;
+      const ringHeight = 50;
+      const buttonRadius = 30;
+      const grooveHeight = glowstickHeight * 0.4 - 100 - 60;
+      const grooveWidth = glowstickWidth * 0.8;
+      const silverRingHeight = 10; // 银环的高度
+
+      let isGlowing = false;
+
+      function drawGlowArea() {
+        ctx.save();
+        let glowGradient;
+        if (isGlowing) {
+          ctx.filter = 'blur(2px)';
+          glowGradient = startColorInput.value;
+        } else {
+          glowGradient = '#dedbdf';
+        }
+        ctx.fillStyle = glowGradient;
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillRect((canvas.width - glowstickWidth) / 2, 0, glowstickWidth, lightHeight);
+        ctx.restore();
+        ctx.filter = 'none';
+      }
+
+      function drawMainBody() {
+        const bodyGradient = ctx.createLinearGradient(0, lightHeight, 0, glowstickHeight);
+        bodyGradient.addColorStop(0, '#ecece9');
+        bodyGradient.addColorStop(1, '#e6e6e6');
+        ctx.fillStyle = bodyGradient;
+        ctx.fillRect(
+          (canvas.width - glowstickWidth) / 2,
+          lightHeight,
+          glowstickWidth,
+          glowstickHeight - lightHeight,
+        );
+      }
+
+      function drawRing() {
+        const ringY = lightHeight;
+        const ringGradient = ctx.createLinearGradient(0, ringY, 0, ringY + ringHeight);
+        ringGradient.addColorStop(0, '#e7e7e6');
+        ringGradient.addColorStop(1, '#afa895');
+        ctx.fillStyle = ringGradient;
+        ctx.fillRect((canvas.width - glowstickWidth) / 2, ringY, glowstickWidth, ringHeight);
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 20px Arial';
+        const text = 'MAYDAY';
+        const textWidth = ctx.measureText(text).width;
+        ctx.fillText(text, (canvas.width - textWidth) / 2, ringY + ringHeight / 2 + 6);
+      }
+
+      function drawButton() {
+        const buttonY = lightHeight + ringHeight + 45;
+        const buttonGradient = ctx.createRadialGradient(
+          canvas.width / 2,
+          buttonY,
+          5,
+          canvas.width / 2,
+          buttonY,
+          buttonRadius,
+        );
+        buttonGradient.addColorStop(0, '#e6e6e6');
+        buttonGradient.addColorStop(1, '#b3b3b3');
+        ctx.fillStyle = buttonGradient;
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, buttonY, buttonRadius, 0, Math.PI * 2);
+        ctx.lineWidth = 10;
+        ctx.strokeStyle = isGlowing ? '#00a4ff' : '#808080';
+        ctx.stroke();
+        ctx.fill();
+
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 30px Arial';
+        const buttonText = 'M';
+        const buttonTextWidth = ctx.measureText(buttonText).width;
+        ctx.fillText(buttonText, (canvas.width - buttonTextWidth) / 2, buttonY + 10);
+      }
+
+      function drawGroove() {
+        const grooveY = glowstickHeight - grooveHeight - silverRingHeight * 2;
+        const grooveGradient = ctx.createLinearGradient(0, grooveY, 0, grooveY + grooveHeight);
+        grooveGradient.addColorStop(0, '#a6a6a6');
+        grooveGradient.addColorStop(1, '#808080');
+        ctx.fillStyle = '#d2d3d5';
+
+        const grooveX = (canvas.width - grooveWidth) / 2;
+        const halfGrooveWidth = grooveWidth / 2;
+        const cornerRadius = 25; // 半圆的半径
+
+        ctx.beginPath();
+        ctx.arc(
+          grooveX + cornerRadius,
+          grooveY + cornerRadius,
+          cornerRadius,
+          Math.PI,
+          Math.PI * 1.5,
+        );
+        ctx.lineTo(grooveX + grooveWidth - cornerRadius, grooveY);
+        ctx.arc(
+          grooveX + grooveWidth - cornerRadius,
+          grooveY + cornerRadius,
+          cornerRadius,
+          Math.PI * 1.5,
+          Math.PI * 2,
+        );
+        ctx.lineTo(grooveX + grooveWidth, grooveY + grooveHeight - cornerRadius);
+        ctx.arc(
+          grooveX + grooveWidth - cornerRadius,
+          grooveY + grooveHeight - cornerRadius,
+          cornerRadius,
+          0,
+          Math.PI * 0.5,
+        );
+        ctx.lineTo(grooveX + cornerRadius, grooveY + grooveHeight);
+        ctx.arc(
+          grooveX + cornerRadius,
+          grooveY + grooveHeight - cornerRadius,
+          cornerRadius,
+          Math.PI * 0.5,
+          Math.PI,
+        );
+        ctx.lineTo(grooveX, grooveY + cornerRadius);
+
+        ctx.fill();
+      }
+
+      function drawSilverRing() {
+        const silverRingY = glowstickHeight - silverRingHeight;
+        ctx.fillStyle = '#6e6f7f';
+        ctx.fillRect(
+          (canvas.width - glowstickWidth) / 2,
+          silverRingY,
+          glowstickWidth,
+          silverRingHeight,
+        );
+      }
+
+      function drawGlowstick() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGlowArea();
+        drawMainBody();
+        drawRing();
+        drawButton();
+        drawGroove();
+        drawSilverRing();
+        requestAnimationFrame(drawGlowstick);
+      }
+
+      function resetSize() {
+        const { innerWidth, innerHeight } = window;
+        const aspectRatio = glowstickWidth / glowstickHeight;
+
+        if (innerWidth / innerHeight > aspectRatio) {
+          canvas.width = innerHeight * aspectRatio;
+          canvas.height = innerHeight;
+        } else {
+          canvas.width = innerWidth;
+          canvas.height = innerWidth / aspectRatio;
+        }
+
+        canvas.style.transformOrigin = 'center';
+        canvas.style.transform = 'scale(1)';
+      }
+
+      window.addEventListener('resize', resetSize);
+      resetSize();
+
+      toggleGlowButton.addEventListener('click', () => {
+        isGlowing = !isGlowing;
+        toggleGlowButton.classList.toggle('active', isGlowing);
+        toggleGlowButton.textContent = isGlowing ? '关闭发光' : '开启发光';
+      });
+
+      drawGlowstick();
+    </script> -->
+
+    <script>
+      const canvas = document.getElementById('glowstickCanvas');
+      const ctx = canvas.getContext('2d');
+      const startColorInput = document.getElementById('startColor');
+      const endColorInput = document.getElementById('endColor');
+      const toggleGlowButton = document.getElementById('toggleGlow');
+      const glowstickWidth = 1000;
+      const glowstickHeight = 102;
+      const lightWidth = glowstickWidth * 0.6;
+      const ringWidth = 50;
+      const buttonRadius = 30;
+      const grooveWidth = glowstickWidth * 0.4 - 100 - 60;
+      const grooveHeight = glowstickHeight * 0.8;
+      const silverRingWidth = 10; // 银环的宽度
+
+      let isGlowing = false;
+
+      function drawGlowArea() {
+        ctx.save();
+        let glowGradient;
+        if (isGlowing) {
+          ctx.filter = 'blur(2px)';
+          glowGradient = startColorInput.value;
+        } else {
+          glowGradient = '#dedbdf';
+        }
+        ctx.fillStyle = glowGradient;
+        ctx.globalCompositeOperation = 'lighter';
+        ctx.fillRect(0, (canvas.height - glowstickHeight) / 2, lightWidth, glowstickHeight);
+        ctx.restore();
+        ctx.filter = 'none';
+      }
+
+      function drawMainBody() {
+        const bodyGradient = ctx.createLinearGradient(0, 0, glowstickWidth, 0);
+        bodyGradient.addColorStop(0, '#ecece9');
+        bodyGradient.addColorStop(1, '#e6e6e6');
+        ctx.fillStyle = bodyGradient;
+        ctx.fillRect(
+          lightWidth,
+          (canvas.height - glowstickHeight) / 2,
+          glowstickWidth - lightWidth,
+          glowstickHeight,
+        );
+      }
+
+      function drawRing() {
+        const ringX = lightWidth;
+        const ringGradient = ctx.createLinearGradient(ringX, 0, ringX + ringWidth, 0);
+        ringGradient.addColorStop(0, '#e7e7e6');
+        ringGradient.addColorStop(1, '#afa895');
+        ctx.fillStyle = ringGradient;
+        ctx.fillRect(ringX, (canvas.height - glowstickHeight) / 2, ringWidth, glowstickHeight);
+        // ctx.fillStyle = 'black';
+        // ctx.font = 'bold 20px Arial';
+        // const text = 'MAYDAY';
+        // const textWidth = ctx.measureText(text).width;
+        // ctx.fillText(
+        //   text,
+        //   ringX + (ringWidth - textWidth) / 2,
+        //   (canvas.height + glowstickHeight / 2) / 2 + 6,
+        // );
+      }
+
+      function drawButton() {
+        const buttonX = lightWidth + ringWidth + 45;
+        const buttonGradient = ctx.createRadialGradient(
+          buttonX,
+          canvas.height / 2,
+          5,
+          buttonX,
+          canvas.height / 2,
+          buttonRadius,
+        );
+        buttonGradient.addColorStop(0, '#e6e6e6');
+        buttonGradient.addColorStop(1, '#b3b3b3');
+        ctx.fillStyle = buttonGradient;
+        ctx.beginPath();
+        ctx.arc(buttonX, canvas.height / 2, buttonRadius, 0, Math.PI * 2);
+        ctx.lineWidth = 10;
+        ctx.strokeStyle = isGlowing ? '#00a4ff' : '#808080';
+        ctx.stroke();
+        ctx.fill();
+
+        ctx.fillStyle = 'black';
+        ctx.font = 'bold 30px Arial';
+        const buttonText = 'M';
+        const buttonTextWidth = ctx.measureText(buttonText).width;
+        // ctx.fillText(buttonText, buttonX - buttonTextWidth / 2, canvas.height / 2 + 10);
+        drawText(ctx, 'M', buttonX - buttonTextWidth / 2, canvas.height / 2 - 10, 0);
+      }
+
+      function drawGroove() {
+        const grooveX = glowstickWidth - grooveWidth - silverRingWidth * 2;
+        const grooveGradient = ctx.createLinearGradient(grooveX, 0, grooveX + grooveWidth, 0);
+        grooveGradient.addColorStop(0, '#a6a6a6');
+        grooveGradient.addColorStop(1, '#808080');
+        ctx.fillStyle = '#d2d3d5';
+
+        const grooveY = (canvas.height - grooveHeight) / 2;
+        const halfGrooveHeight = grooveHeight / 2;
+        const cornerRadius = 25; // 半圆的半径
+
+        ctx.beginPath();
+        ctx.arc(
+          grooveX + cornerRadius,
+          grooveY + cornerRadius,
+          cornerRadius,
+          Math.PI,
+          Math.PI * 1.5,
+        );
+        ctx.lineTo(grooveX, grooveY + halfGrooveHeight);
+        ctx.arc(
+          grooveX + cornerRadius,
+          grooveY + halfGrooveHeight - cornerRadius,
+          cornerRadius,
+          Math.PI * 1.5,
+          Math.PI * 2,
+        );
+        ctx.lineTo(grooveX + grooveWidth - cornerRadius, grooveY + grooveHeight);
+        ctx.arc(
+          grooveX + grooveWidth - cornerRadius,
+          grooveY + grooveHeight - cornerRadius,
+          cornerRadius,
+          0,
+          Math.PI * 0.5,
+        );
+        ctx.lineTo(grooveX + grooveWidth, grooveY + cornerRadius);
+        ctx.arc(
+          grooveX + grooveWidth - cornerRadius,
+          grooveY + cornerRadius,
+          cornerRadius,
+          Math.PI * 0.5,
+          Math.PI,
+        );
+        ctx.lineTo(grooveX + cornerRadius, grooveY);
+
+        ctx.fill();
+      }
+
+      function drawSilverRing() {
+        const silverRingX = glowstickWidth - silverRingWidth;
+        ctx.fillStyle = '#6e6f7f';
+        ctx.fillRect(
+          silverRingX,
+          (canvas.height - glowstickHeight) / 2,
+          silverRingWidth,
+          glowstickHeight,
+        );
+      }
+
+      function drawGlowstick() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawGlowArea();
+        drawMainBody();
+        drawRing();
+        drawButton();
+        drawGroove();
+        drawSilverRing();
+        requestAnimationFrame(drawGlowstick);
+      }
+
+      function drawText(ctx, text, startX, startY, letterSpacing) {
+        let x = startX;
+        let y = startY;
+        for (let i = 0; i < text.length; i++) {
+          const str = text.slice(i, i + 1).toString();
+          if (str.match(/[A-Za-z0-9]/) && y < 576) {
+            // 非汉字 旋转
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate((Math.PI / 180) * 90);
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(str, 0, 0);
+            ctx.restore();
+            y += ctx.measureText(str).width + letterSpacing; // 计算文字宽度
+          } else if (str.match(/[\u4E00-\u9FA5]/) && y < 576) {
+            ctx.save();
+            ctx.textBaseline = 'top';
+            ctx.fillText(str, x, y);
+            ctx.restore();
+            y += ctx.measureText(str).width + letterSpacing; // 计算文字宽度
+          }
+        }
+      }
+
+      function resetSize() {
+        const { innerWidth, innerHeight } = window;
+        const aspectRatio = glowstickWidth / glowstickHeight;
+
+        if (innerWidth / innerHeight > aspectRatio) {
+          canvas.width = innerHeight * aspectRatio;
+          canvas.height = innerHeight;
+        } else {
+          canvas.width = innerWidth;
+          canvas.height = innerWidth / aspectRatio;
+        }
+
+        canvas.style.transformOrigin = 'center';
+        canvas.style.transform = 'scale(1)';
+      }
+
+      window.addEventListener('resize', resetSize);
+      resetSize();
+
+      toggleGlowButton.addEventListener('click', () => {
+        isGlowing = !isGlowing;
+        toggleGlowButton.classList.toggle('active', isGlowing);
+        toggleGlowButton.textContent = isGlowing ? '关闭发光' : '开启发光';
+      });
+
+      drawGlowstick();
+    </script>
+  </body>
+</html>

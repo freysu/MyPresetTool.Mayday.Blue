@@ -2,7 +2,7 @@
  * @Author: freysu
  * @Date: 2024-11-21 04:20:51
  * @LastEditors: freysu
- * @LastEditTime: 2024-12-02 07:07:35
+ * @LastEditTime: 2024-12-03 06:00:20
  * @Description: file content
 -->
 <!DOCTYPE html>
@@ -1060,7 +1060,7 @@
                       </div>
                       <div class="card-body p-0">
                         <div class="d-flex justify-content-between align-items-center">
-                          <!-- 歌曲进度 -->
+                          <!--歌曲进度-->
                           <div>
                             <span class="fw-bold">歌曲进度</span>
                             <br />
@@ -1068,14 +1068,16 @@
                               [00:00:00]
                             </span>
                           </div>
-                          <!-- 转换后的毫秒 -->
+                          <!--转换后的毫秒-->
                           <div>
                             <span class="fw-bold">转换后的毫秒</span>
                             <br />
                             <span class="text-muted" id="milliseconds">0ms</span>
                           </div>
                         </div>
+                        <!-- 添加Canvas元素 -->
                         <div class="color-preview" id="colorElement">
+                          <canvas id="glowstickCanvas" width="600" height="300"></canvas>
                           <div class="color-info" id="colorInfo"></div>
                         </div>
                       </div>
@@ -1093,7 +1095,7 @@
                             音频可视化(点击可隐藏)
                           </h2>
                           <select id="visualizationType" class="form-select w-auto">
-                            <option value="frequency" selected >频谱图</option>
+                            <option value="frequency" selected>频谱图</option>
                             <option value="waveform">波形图</option>
                           </select>
                         </div>
@@ -1234,8 +1236,8 @@
     <script src="original_src/mousetrap.min.js" defer></script>
     <script src="original_src/highlight.min.js" defer></script>
     <script type="module">
-      import { mypresets } from '../config/colorThemeConfig.js';
-      window.MY_PRESETS = mypresets
+      import { mypresets } from './config/colorThemeConfig.js';
+      window.MY_PRESETS = mypresets;
     </script>
     <script src="webpack_dist/bundle.js" defer></script>
   </body>
