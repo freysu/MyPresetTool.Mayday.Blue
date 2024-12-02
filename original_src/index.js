@@ -381,110 +381,6 @@ class ThemeColorConfigurator {
 }
  */
 
-// // 不允许修改格式，键值对！
-// const defaultConfig = {
-//   themeColors: {
-//     low: [
-//       { color: 'whi', per: '30%' },
-//       { color: 'red', per: '70%' },
-//     ],
-//     mid: [
-//       { color: 'yel', per: '20%' },
-//       { color: 'ora', per: '30%' },
-//       { color: 'sky', per: '20%' },
-//       { color: 'red', per: '30%' },
-//     ],
-//     high: [
-//       { color: 'ora', per: '40%' },
-//       { color: 'red', per: '60%' },
-//     ],
-//     accent: [
-//       { color: 'sky', per: '50%' },
-//       { color: 'yel', per: '50%' },
-//     ],
-//     base: 'red',
-//   },
-//   name: 'Default Theme',
-//   version: 'v1',
-// };
-
-// const presets = [
-//   {
-//     themeColors: {
-//       low: [
-//         { color: 'sky', per: '60%' },
-//         { color: 'whi', per: '40%' },
-//       ],
-//       mid: [
-//         { color: 'sky', per: '60%' },
-//         { color: 'whi', per: '30%' },
-//         { color: 'yel', per: '10%' },
-//       ],
-//       high: [
-//         { color: 'sky', per: '50%' },
-//         { color: 'whi', per: '30%' },
-//         { color: 'red', per: '20%' },
-//       ],
-//       accent: [
-//         { color: 'red', per: '50%' },
-//         { color: 'yel', per: '50%' },
-//       ],
-//       base: 'sky',
-//     },
-//     name: 'aqws',
-//     version: 'v2',
-//   },
-//   {
-//     themeColors: {
-//       low: [
-//         { color: 'whi', per: '50%' },
-//         { color: 'yel', per: '50%' },
-//       ],
-//       mid: [
-//         { color: 'ora', per: '40%' },
-//         { color: 'yel', per: '40%' },
-//         { color: 'sky', per: '20%' },
-//       ],
-//       high: [
-//         { color: 'red', per: '30%' },
-//         { color: 'ora', per: '30%' },
-//         { color: 'pin', per: '40%' },
-//       ],
-//       accent: [
-//         { color: 'yel', per: '30%' },
-//         { color: 'whi', per: '70%' },
-//       ],
-//       base: 'ora',
-//     },
-//     name: 'cst',
-//     version: 'v3',
-//   },
-//   {
-//     themeColors: {
-//       low: [
-//         { color: 'yel', per: '60%' },
-//         { color: 'whi', per: '40%' },
-//       ],
-//       mid: [
-//         { color: 'yel', per: '50%' },
-//         { color: 'whi', per: '50%' },
-//       ],
-//       high: [
-//         { color: 'ora', per: '50%' },
-//         { color: 'whi', per: '50%' },
-//       ],
-//       accent: [
-//         { color: 'yel', per: '40%' },
-//         { color: 'ora', per: '40%' },
-//         { color: 'whi', per: '20%' },
-//       ],
-//       base: 'yel',
-//     },
-//     name: 'ganla',
-//     version: 'v1',
-//   },
-// ];
-
 ////////////////// test-end
 
 // 简单的去抖函数实现
@@ -623,11 +519,12 @@ if (!document.querySelector('.toast-container')) {
   );
 }
 
-let currentNotifications = []; // 当前显示的通知队列
-const maxNotifications = 3; // 最大允许同时显示的通知数量
+// 当前显示的通知队列，最大容量为 maxNotifications=3
+let currentNotifications = [];
+const maxNotifications = 3;
+
 /**
- * Configuration object for notification icons and colors
- * @type {Object}
+ * 通知的配置，包括图标和样式相关的类名
  */
 const notificationConfig = {
   icons: {
@@ -651,40 +548,56 @@ const notificationConfig = {
 };
 
 /**
- * Shows a notification using either toast or modal
- * @param {string} title - The notification title
- * @param {string} message - The notification message
- * @param {NotificationOptions} [options={}] - Configuration options
- * @returns {bootstrap.Toast|bootstrap.Modal|null} The notification instance (toast or modal)
- * @throws {Error} When required DOM elements are not found
- * @example
- * // Show a simple toast notification
- * showNotification('Hello', 'This is a message');
+ * 显示一个通知（Toast 或 Modal），根据配置自动选择合适的显示方式。
  *
- * // Show a success modal with custom buttons
- * showNotification('Success', 'Operation completed', {
- *   type: 'success',
+ * @param {string} title - 通知的标题，将显示在通知的顶部。
+ * @param {string} message - 通知的内容，用于提供详细信息。
+ * @param {Object} [options={}] - 可选参数，用于自定义通知的外观和行为。
+ * @param {string} [options.type='info'] - 通知类型，决定通知的样式和图标。支持 'info', 'success', 'warning', 'error'。
+ * @param {number|boolean} [options.duration=3000] - 通知的显示时长（毫秒）。设置为 `false` 表示不会自动隐藏。
+ * @param {boolean} [options.html=false] - 是否允许 `message` 使用 HTML。为 `false` 时自动转义 HTML 字符。
+ * @param {boolean} [options.dismissible=true] - 是否允许用户关闭通知（显示关闭按钮或允许点击背景关闭）。
+ * @param {boolean} [options.modal=false] - 是否显示为模态框。如果为 `true`，使用 Modal 样式而非 Toast。
+ * @param {string} [options.size='medium'] - 模态框的大小，适用于 `modal=true` 的场景。可选值为 'small', 'medium', 'large'。
+ * @param {boolean} [options.animate=true] - 是否启用动画效果。
+ * @param {Array<Object>} [options.buttons=[]] - 自定义按钮数组，适用于需要用户交互的通知。每个按钮可设置以下属性：
+ *   - `text` (string): 按钮文本。
+ *   - `class` (string): 按钮的样式类，例如 'btn-primary'。
+ *   - `onClick` (Function): 按钮的点击事件回调函数。
+ *   - `closeOnClick` (boolean): 点击按钮后是否自动关闭通知，默认为 `true`。
+ * @param {number} [options.triggerTime=Date.now()] - 通知的触发时间，用于显示时间差信息。
+ *
+ * @returns {Object|null} 返回 Toast 或 Modal 的实例；如果发生错误，返回 `null`。
+ *
+ * @example
+ * // 显示一个简单的 Toast 通知
+ * showNotification('提示', '操作成功完成', { type: 'success', duration: 5000 });
+ *
+ * @example
+ * // 显示一个模态通知
+ * showNotification('警告', '您确定要删除吗？', {
  *   modal: true,
- *   buttons: [{
- *     text: 'Continue',
- *     onClick: () => console.log('Continued')
- *   }]
+ *   dismissible: false,
+ *   buttons: [
+ *     { text: '确认', class: 'btn-danger', onClick: () => console.log('确认删除') },
+ *     { text: '取消', class: 'btn-secondary' }
+ *   ],
  * });
  */
 function showNotification(title, message, options = {}) {
   const defaults = {
-    type: 'info',
-    duration: 3000,
-    position: 'end-0',
-    animate: true,
-    dismissible: true,
-    buttons: [],
-    modal: false,
-    size: 'medium',
-    html: false,
-    triggerTime: Date.now(), // 记录触发时间
+    type: 'info', // 类型, inf,success,error,warning
+    duration: 3000, // 持续时间（毫秒），设置为 false 则不会自动关闭
+    position: 'end-0', // Toast 位置
+    animate: true, // 是否启用动画
+    dismissible: true, // 是否可关闭
+    buttons: [], // 自定义按钮
+    modal: false, // 是否显示为 Modal
+    size: 'medium', // Modal 大小
+    html: false, // 是否允许 HTML 内容
+    triggerTime: Date.now(), // 创建时间
   };
-
+  // 合并用户配置和默认配置
   const config = { ...defaults, ...options };
 
   // 如果当前通知数量超过最大值，移除最早的弹窗
@@ -696,9 +609,10 @@ function showNotification(title, message, options = {}) {
   }
   // 处理模态框通知
   if (config.modal) {
-    const modalInstance = showModalNotification(title, message, config);
+    const modalInstance = showModal(title, message, config);
     if (modalInstance) {
       currentNotifications.push(modalInstance);
+      // 监听 Modal 关闭事件，移除队列中的实例
       modalInstance._element.addEventListener('hidden.bs.modal', () => {
         const index = currentNotifications.indexOf(modalInstance);
         if (index !== -1) {
@@ -708,12 +622,15 @@ function showNotification(title, message, options = {}) {
     }
     return modalInstance;
   }
+
+  // 转义标题和内容以防止 XSS
   title = escapeHtml(title);
-  message = escapeHtml(message);
+
   // 处理吐司通知
-  const toastInstance = showToastNotification(title, message, config);
+  const toastInstance = showToast(title, message, config);
   if (toastInstance) {
     currentNotifications.push(toastInstance);
+    // 监听 Modal 关闭事件，移除队列中的实例
     toastInstance._element.addEventListener('hidden.bs.toast', () => {
       const index = currentNotifications.indexOf(toastInstance);
       if (index !== -1) {
@@ -725,42 +642,66 @@ function showNotification(title, message, options = {}) {
 }
 
 /**
- * Shows a toast notification
- * @private
- * @param {string} title - The toast title
- * @param {string} message - The toast message
- * @param {NotificationOptions} config - Configuration options
- * @returns {bootstrap.Toast|null} The toast instance or null if failed
+ * 显示一个动态通知（Toast）。
+ *
+ * @param {string} title - 通知标题，支持 HTML 格式化。
+ * @param {string} message - 通知内容，支持 HTML 格式化。
+ * @param {Object} config - 配置选项，用于自定义通知的外观和行为。
+ * @param {boolean} [config.animate=true] - 是否启用显示/隐藏动画。
+ * @param {boolean|number} [config.duration=3000] - 自动隐藏通知的时间（毫秒）。设置为 `false` 时，通知不会自动隐藏。
+ * @param {boolean} [config.html=false] - 是否允许 `message` 使用 HTML。为 `false` 时自动转义 HTML 字符。
+ * @param {Array} [config.buttons=[]] - 按钮数组，每个按钮可以指定文本、样式和回调函数。
+ * @param {boolean} [config.dismissible=true] - 是否显示关闭按钮，允许用户手动关闭通知。
+ * @param {string} [config.type='info'] - 通知类型，决定样式和图标。支持 'info', 'success', 'warning', 'error'。
+ * @param {number} [config.triggerTime=Date.now()] - 通知的触发时间，用于计算相对时间。
+ *
+ * @returns {Object|null} 返回 Toast 的 Bootstrap 实例；如果发生错误，返回 `null`。
+ *
+ * @example
+ * showNotificationNotification('成功', '操作已完成', {
+ *   type: 'success',
+ *   duration: 5000,
+ *   buttons: [
+ *     { text: '撤销', class: 'btn-warning', onClick: () => console.log('撤销操作') }
+ *   ],
+ *   html: false,
+ *   dismissible: true,
+ * });
  */
-function showToastNotification(title, message, config) {
+function showToast(title, message, config) {
   try {
     title = escapeHtml(title);
-    message = escapeHtml(message);
+    // 获取或克隆现有的 Toast 元素
     let toastEl = document.getElementById('programToast');
     if (!toastEl) throw new Error('Toast element not found');
-
-    // Create a new toast element if the existing one is showing
     if (toastEl.classList.contains('show')) {
       const newToastEl = toastEl.cloneNode(true);
       newToastEl.removeAttribute('id');
       document.querySelector('.toast-container').appendChild(newToastEl);
       toastEl = newToastEl;
     }
-    // Create Bootstrap toast instance
+    // 创建 Bootstrap Toast 实例
     const toastInstance = new bootstrap.Toast(toastEl, {
       animation: config.animate,
       autohide: config.duration !== false,
       delay: config.duration,
     });
 
-    // Get elements
-    const iconEl = document.getElementById('toastIcon');
-    const titleEl = document.getElementById('toastTitle');
-    const messageEl = document.getElementById('toastMessage');
-    const buttonContainer = document.getElementById('toastButtons');
+    // 配置 Toast 内容
+    const iconEl = toastEl.querySelector('#toastIcon');
+    const titleEl = toastEl.querySelector('#toastTitle');
+    const messageEl = toastEl.querySelector('#toastMessage');
+    const buttonContainer = toastEl.querySelector('#toastButtons');
     const closeBtn = toastEl.querySelector('.btn-close');
+    const timeDiffEl = toastEl.querySelector('#toastTimeDiff');
 
-    // Set content
+    // 恢复原有的Toast的样式
+    toastEl.className = 'toast';
+    titleEl.className = 'me-auto';
+    messageEl.className = '';
+    timeDiffEl.className = 'text-muted';
+
+    // 更新 Toast 样式和内容
     if (iconEl) {
       iconEl.textContent = notificationConfig.icons[config.type];
       toastEl.classList.add(
@@ -781,7 +722,7 @@ function showToastNotification(title, message, config) {
       }
     }
 
-    // Handle buttons
+    // 配置按钮
     if (buttonContainer) {
       buttonContainer.innerHTML = '';
       if (config.buttons && config.buttons.length > 0) {
@@ -803,26 +744,25 @@ function showToastNotification(title, message, config) {
       }
     }
 
-    // Handle close button
+    // 配置关闭按钮
     if (closeBtn) {
       closeBtn.style.display = config.dismissible ? 'block' : 'none';
     }
 
-    const timeDiffEl = document.getElementById('toastTimeDiff');
-    timeDiffEl.textContent = '刚刚';
-    timeDiffEl.classList.add(notificationConfig.style_bg_text_classname[config.type]);
+    // 更新时间显示
+    if (timeDiffEl) {
+      timeDiffEl.textContent = '刚刚';
+      timeDiffEl.classList.add(notificationConfig.style_bg_text_classname[config.type]);
+    }
+
+    // 定时更新时间差
     const intervalId = setInterval(() => {
       timeDiffEl.textContent = calculateTimeDifference(Date.now(), config.triggerTime);
     }, 1000);
 
-    toastInstance._element.addEventListener('hidden.bs.toast', () => {
-      clearInterval(intervalId);
-      toastEl.classList.remove(
-        notificationConfig.style_bg_color_classname[config.type],
-        notificationConfig.style_bg_text_classname[config.type],
-      );
-      titleEl.classList.remove(notificationConfig.style_bg_text_classname[config.type]);
-    });
+    // 监听 Toast 隐藏事件，清理定时器
+    toastInstance._element.addEventListener('hidden.bs.toast', clearInterval(intervalId));
+
     toastInstance.show();
     return toastInstance;
   } catch (error) {
@@ -832,14 +772,30 @@ function showToastNotification(title, message, config) {
 }
 
 /**
- * Shows a modal notification
- * @private
- * @param {string} title - The modal title
- * @param {string} message - The modal message
- * @param {NotificationOptions} config - Configuration options
- * @returns {bootstrap.Modal|null} The modal instance or null if failed
+ * 显示一个模态通知。
+ *
+ * @param {string} title - 通知标题，支持 HTML 格式化。
+ * @param {string} message - 通知内容，支持 HTML 格式化。
+ * @param {Object} config - 配置选项，用于自定义模态通知的行为和样式。
+ * @param {boolean} [config.dismissible=true] - 是否允许用户关闭模态框。设置为 `false` 则用户无法关闭模态框。
+ * @param {Array} [config.buttons=[]] - 按钮数组，每个按钮可以指定文本、样式和回调函数。
+ * @param {string} [config.size='medium'] - 模态框大小，可选值为 'small', 'medium', 'large'。
+ * @param {boolean} [config.html=false] - 是否允许 `message` 使用 HTML。为 `false` 时自动转义 HTML 字符。
+ *
+ * @returns {Object|null} 返回模态框的 Bootstrap Modal 实例；如果出现错误，返回 `null`。
+ *
+ * @example
+ * showModalNotification('提示', '这是一个模态通知', {
+ *   dismissible: true,
+ *   buttons: [
+ *     { text: '确认', class: 'btn-primary', onClick: () => console.log('确认') },
+ *     { text: '取消', class: 'btn-secondary', closeOnClick: true },
+ *   ],
+ *   size: 'large',
+ *   html: true
+ * });
  */
-function showModalNotification(title, message, config) {
+function showModal(title, message, config) {
   try {
     // Ensure config.dismissible is always boolean
     config.dismissible = Boolean(config.dismissible ?? true); // defaults to true if undefined
@@ -913,10 +869,10 @@ function showModalNotification(title, message, config) {
 }
 
 /**
- * Calculates the time difference between two dates
- * @param {Date} now - The current date
- * @param {Date} triggerTime - The trigger time of the notification
- * @returns {string} The formatted time difference
+ * 计算时间差并返回友好的描述
+ * @param {number} now - 当前时间戳
+ * @param {number} triggerTime - 通知触发时间戳
+ * @returns {string} 时间差描述
  */
 function calculateTimeDifference(now, triggerTime) {
   const diff = now - triggerTime;
@@ -1005,6 +961,7 @@ class ThemeConfigForm {
       const presetIndex = parseInt(e.target.value);
       if (!isNaN(presetIndex) && this.presets[presetIndex]) {
         this.themeConfig = JSON.parse(JSON.stringify(this.presets[presetIndex]));
+        this.eventListenersInitialized = false;
         this.initializeForm();
         showNotification('预设已应用', '', { type: 'success', duration: 3000 });
       }
@@ -1026,6 +983,7 @@ class ThemeConfigForm {
       sectionDiv.innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <h6 class="text-capitalize mb-0">${section} Colors</h6>
+                <small class="form-text text-muted">${this.getSectionDescription(section)}</small>
                 <button type="button" class="btn btn-sm btn-outline-primary add-color-btn" data-section="${section}">
                     <i class="material-icons">add</i>添加颜色
                 </button>
@@ -1040,6 +998,21 @@ class ThemeConfigForm {
     colorSections.appendChild(fragment);
     // Add event listeners to the newly created buttons
     this._addEventListeners();
+  }
+
+  getSectionDescription(section) {
+    switch (section) {
+      case 'low':
+        return '低频部分（如前奏、慢节奏段落）';
+      case 'mid':
+        return '中频部分（如主歌、节奏适中的段落）';
+      case 'high':
+        return '高频部分（如副歌、高潮段落）';
+      case 'accent':
+        return '关键转折处的颜色（如情感爆发点）';
+      default:
+        return '';
+    }
   }
 
   renderColorItems(section) {
@@ -1171,7 +1144,10 @@ class ThemeConfigForm {
       showNotification(
         '无法添加更多颜色！ 🎨',
         '该部分的颜色百分比已满（100%），无法添加更多颜色',
-        { type: 'warning', duration: 3000 },
+        {
+          type: 'warning',
+          duration: 3000,
+        },
       );
       return;
     }
@@ -1346,14 +1322,21 @@ class ThemeConfigForm {
       this.validatePercentages(section),
     );
 
-    if (!isValid) return;
+    if (!isValid)
+      return showNotification('保存失败 ❌', '请确保所有颜色分配和百分比都正确。', {
+        type: 'error',
+        duration: 5000,
+      });
 
     window.AudioAnalyzer &&
       window.AudioAnalyzer.handleThemeChange_manual(this.themeConfig) &&
       showNotification(
         '主题颜色方案准备好了！',
         '下一步：点击“生成预设代码”按钮，创造你的灯光秀吧！',
-        { type: 'info', duration: 4000 },
+        {
+          type: 'info',
+          duration: 4000,
+        },
       );
     localStorage.setItem('lastThemeColors', JSON.stringify(this.themeConfig));
   }
@@ -1567,6 +1550,21 @@ function convertTime(string) {
 /*
  * generate-tool
  */
+
+const unlockSection = (sectionId) => {
+  const section = document.getElementById(sectionId);
+  section.classList.remove('disabled');
+  section.scrollIntoView({ behavior: 'smooth' });
+};
+const lockSection = (sectionId) => {
+  const section = document.getElementById(sectionId);
+  section.classList.add('disabled');
+};
+const completeStep = (currentStepId, nextStepId) => {
+  document.getElementById(currentStepId).classList.add('completed');
+  unlockSection(nextStepId);
+};
+
 import localforage from 'localforage';
 import { guess } from 'web-audio-beat-detector';
 class AudioAnalyzer {
@@ -1689,7 +1687,7 @@ class AudioAnalyzer {
   }
 
   async handleNetworkAudioEntry() {
-    showModalNotification(
+    showModal(
       '在线音乐搜索',
       `
  <div class="card shadow-sm mb-4">
@@ -1767,7 +1765,11 @@ class AudioAnalyzer {
               showNotification(
                 '搜索结果',
                 '<p class="mt-3">没有找到你想要的音乐~试试换个关键词吧！</p>',
-                { type: 'warning', html: true, duration: 5000 },
+                {
+                  type: 'warning',
+                  html: true,
+                  duration: 5000,
+                },
               );
             }
           } catch (error) {
@@ -1797,7 +1799,11 @@ class AudioAnalyzer {
               showNotification(
                 'API未找到',
                 '<p>API未找到，可能是API地址有误。请检查API地址并重试。</p>',
-                { type: 'error', html: true, duration: 5000 },
+                {
+                  type: 'error',
+                  html: true,
+                  duration: 5000,
+                },
               );
             } else {
               console.error('Error fetching search results:', error);
@@ -1883,15 +1889,15 @@ class AudioAnalyzer {
         await this.cleanup();
       }
       this.state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  
+
       // 从网络获取音频文件
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
       this.state.audioBuffer = await this.state.audioContext.decodeAudioData(arrayBuffer);
-  
+
       // 使用 web-audio-beat-detector 获取元数据
       this.state.metadata = await this.getMetadata(this.state.audioBuffer);
-  
+
       // 更新 UI
       this.updateFileInfo(
         'audioFileInfo',
@@ -1910,7 +1916,10 @@ class AudioAnalyzer {
       showNotification(
         '哎呀，出错了！',
         '音频加载失败，可能是网络问题或者文件格式不对。请检查后重试~',
-        { type: 'error', duration: 5000 },
+        {
+          type: 'error',
+          duration: 5000,
+        },
       );
       my_debugger.showError(`Error loading network audio: ${error.message}`, error);
     }
@@ -1979,7 +1988,7 @@ class AudioAnalyzer {
       return { bpm, sampleRate, duration, offset };
     } catch (error) {
       if (error.message.includes('Cannot use a BYOB reader with a non-byte stream')) {
-        showNotification(
+        showModal(
           '浏览器不支持 🚀',
           '当前浏览器不支持音频分析功能，请尝试使用 Chrome 或 Firefox 浏览器。',
           {
@@ -2226,7 +2235,7 @@ class AudioAnalyzer {
     try {
       // Input verification
       if (!this.state.audioBuffer) {
-        showNotification('缺少音频 🎵', '请先上传一个音频文件', {
+        showModal('缺少音频 🎵', '请先上传一个音频文件', {
           type: 'warning',
           duration: 4000,
           dismissible: true,
@@ -2236,7 +2245,7 @@ class AudioAnalyzer {
         throw new Error('Audio buffer is not initialized');
       }
       if (!this.state.metadata) {
-        showNotification('音频无效 🎵', '请先换一个音频文件,再试试吧', {
+        showModal('音频无效 🎵', '请先换一个音频文件,再试试吧', {
           type: 'warning',
           duration: 4000,
           dismissible: true,
@@ -2246,7 +2255,7 @@ class AudioAnalyzer {
         throw new Error('Metadata is not initialized');
       }
       if (!this.state.themeColors) {
-        showNotification('颜色主题问题 🎨', '没读取到颜色设置!请检查是否保存', {
+        showModal('颜色主题问题 🎨', '没读取到颜色设置!请检查是否保存', {
           type: 'error',
           duration: 4000,
           dismissible: true,
@@ -2256,7 +2265,7 @@ class AudioAnalyzer {
         throw new Error('Theme colors are not initialized');
       }
       if (!ColorCodeManager.validateThemeColorCodes(this.state.themeColors)) {
-        showNotification('颜色主题问题 🎨', '颜色设置似乎有问题', {
+        showModal('颜色主题问题 🎨', '颜色设置似乎有问题', {
           type: 'error',
           duration: 4000,
           dismissible: true,
@@ -2922,7 +2931,7 @@ class ColorCodeManager {
 // File Import Handling
 const dropZone = document.getElementById('dropZone');
 const fileInput = document.getElementById('fileInput');
-const sequenceInput = document.getElementById('input');
+const sequenceInput = document.getElementById('sequenceInput');
 
 // Prevent default drag behaviors
 ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((eventName) => {
@@ -2973,6 +2982,7 @@ function handleFiles(files) {
     const reader = new FileReader();
     reader.onload = function (e) {
       sequenceInput.value = e.target.result;
+      showNotification(`成功`, `预设代码已准备好!`, { type: 'success', duration: 3000 });
     };
     reader.readAsText(file);
   }
@@ -3238,7 +3248,7 @@ class AnimationController {
     // 获取当前时间点的动画帧
     const frame = this.timeline?.getFrameAtTime(elapsed);
     if (!frame) {
-      if (elapsed <= this.timeline.getDuration() + 1000) {
+      if (elapsed <= this.timeline?.getDuration() + 1000) {
         this.animationFrame = requestAnimationFrame((time) => this.animate(time));
       } else {
         this.stop();
@@ -3248,7 +3258,7 @@ class AnimationController {
 
     const hexColor = ColorConfig.getColorCode(frame.color);
     if (!hexColor) {
-      if (elapsed <= this.timeline.getDuration() + 1000) {
+      if (elapsed <= this.timeline?.getDuration() + 1000) {
         this.animationFrame = requestAnimationFrame((time) => this.animate(time));
       } else {
         this.stop();
@@ -3259,7 +3269,7 @@ class AnimationController {
     this.element.style.backgroundColor = hexColor;
     this.updateColorInfo(frame.color, hexColor, frame.time);
 
-    if (elapsed <= this.timeline.getDuration() + 1000) {
+    if (elapsed <= this.timeline?.getDuration() + 1000) {
       this.animationFrame = requestAnimationFrame((time) => this.animate(time));
     } else {
       this.stop();
@@ -3315,7 +3325,6 @@ class AudioVisualizer {
     this.source = this.audioContext.createMediaElementSource(this.audio);
     this.source.connect(this.analyser);
     this.analyser.connect(this.audioContext.destination);
-
     this.isInitialized = true;
   }
 
@@ -3328,6 +3337,8 @@ class AudioVisualizer {
     });
 
     this.visualizationType.addEventListener('change', () => this.draw());
+
+    this.visualizationType.value = 'frequency';
 
     // Handle orientation change for mobile devices
     window.addEventListener('orientationchange', () => {
@@ -3368,7 +3379,6 @@ class AudioVisualizer {
 
   draw() {
     if (!this.isInitialized) return;
-
     requestAnimationFrame(() => this.draw());
 
     this.analyser.getByteTimeDomainData(this.dataArray);
@@ -3496,6 +3506,12 @@ class waveSurferController {
   stop() {
     if (this.visualizerReady) {
       this.wavesurfer.pause();
+    }
+  }
+
+  destroy() {
+    if (this.visualizerReady) {
+      this.wavesurfer.destroy();
     }
   }
 }
@@ -3629,7 +3645,7 @@ class AudioController {
     this.isAudioLoaded = true;
 
     this.updateControlButtons(true);
-
+    document.querySelector('#run').disabled = false;
     // // Initialize visualizer after loading audio
     if (!this.waveSurferController) {
       this.waveSurferController = new waveSurferController(this.audio);
@@ -3639,6 +3655,8 @@ class AudioController {
     if (!this.visualizer) {
       this.visualizer = new AudioVisualizer(this.audio);
     }
+
+    showNotification(`成功`, `音频加载成功!`, { type: 'success', duration: 3000 });
   }
 
   handleAudioLoaded() {
@@ -3655,9 +3673,10 @@ class AudioController {
     // this.currentPer.textContent = currentProgressValue + '%';
     // this.audioProgress.value = currentProgressValue;
 
-    const currentTime = this.audio.currentTime;
-    const duration = this.audio.duration;
-    const percent = ((currentTime / duration) * 100).toFixed(2);
+    const currentTime = this.audio.currentTime || 0;
+    const duration = this.audio.duration || 0;
+    const percent =
+      currentTime !== 0 && duration !== 0 ? ((currentTime / duration) * 100).toFixed(2) : 0;
 
     this.currentTimeDisplay.textContent = this.formatTime(currentTime);
     this.totalTimeDisplay.textContent = this.formatTime(duration);
@@ -3793,7 +3812,8 @@ class AudioController {
     if (!this.isAudioLoaded) return;
     this.audio.pause();
     this.audio.currentTime = 0;
-    this.waveSurferController?.stop();
+    this.waveSurferController?.destroy();
+    this.waveSurferController = null;
     this.isAudioLoaded = false;
     this.audio.src = '';
     this.audioFileName.textContent = '';
@@ -3872,8 +3892,6 @@ window.addEventListener('load', () => {
   }
 });
 
-import { mypresets } from '../config/colorThemeConfig.js';
-
 document.addEventListener('DOMContentLoaded', async () => {
   //https://cdn.jsdelivr.net/npm/segmentit@2.0.3/dist/umd/segmentit.min.js
   const loadScripts_segmentit = (src) => {
@@ -3920,7 +3938,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Cache DOM elements
   const elements = {
     colorElement: document.getElementById('colorElement'),
-    input: document.getElementById('input'),
+    input: document.getElementById('sequenceInput'),
     timerDisplay: document.getElementById('timer'),
     buttons: {
       run: document.getElementById('run'),
@@ -3933,7 +3951,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   // Initialize the form
-  const themeConfigForm = new ThemeConfigForm(mypresets);
+  const themeConfigForm = new ThemeConfigForm(window.MY_PRESETS);
   try {
     const lastThemeColors = localStorage.getItem('lastThemeColors');
     if (lastThemeColors && lastThemeColors !== undefined && lastThemeColors != null) {
@@ -4109,7 +4127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (elements.input.value.trim()) {
-      showModalNotification('清除已生成的时间轴内容', '你确定要清除所有内容吗？此操作无法撤销。', {
+      showModal('清除已生成的时间轴内容', '你确定要清除所有内容吗？此操作无法撤销。', {
         type: 'warning',
         buttons: [
           {
@@ -4184,7 +4202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.addEventListener('error', (event) => {
     if (event.message.indexOf('Script Error')) return console.log(event);
     if (errorCount >= maxErrors) {
-      showNotification(
+      showModal(
         '频繁错误',
         `
                 <div class="alert alert-warning">
@@ -4239,7 +4257,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       timestamp: new Date().toISOString(),
     };
 
-    showNotification(
+    showModal(
       '发生错误',
       `
               <div class="alert alert-danger">
@@ -4332,7 +4350,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       e.preventDefault();
       if (!document.querySelector('.nav-link.active[data-bs-target="#color-visualizer"]')) return;
       if (!document.querySelector('.modal-backdrop.fade.show'))
-        showModalNotification(
+        showModal(
           '快捷键帮助 ⌨️',
           `<div>可用的快捷键:<br>
       • 空格键 (Space) - 播放/暂停切换<br>
@@ -4370,6 +4388,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Initial button states
   updateButtonStates();
+  elements.buttons.run.disabled = true;
 
   function toggleHelp(elm) {
     const isExpanded = elm.getAttribute('aria-expanded') === 'true';
@@ -4421,7 +4440,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 检查是否为新用户
   if (!localStorage.getItem('isNewUser')) {
     try {
-      showModalNotification('公告📢 - 2024/11/23 15:20', ANNOUNCEMENT_CONTENT_backup, {
+      showModal('公告📢 - 2024/11/23 15:20', ANNOUNCEMENT_CONTENT_backup, {
         type: 'info',
         size: 'large',
         buttons: [

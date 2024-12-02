@@ -14,6 +14,7 @@
     "@babel/core": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "babel-loader": "^8.0.0",
+    "dat.gui": "^0.7.9",
     "gh-pages": "^3.2.3",
     "html-webpack-plugin": "^4.5.0",
     "webpack": "^5.4.0",
@@ -28,6 +29,7 @@
     "localforage": "^1.10.0",
     "lodash.assign": "v4.1.0",
     "segmentit": "2.0.3",
+    "three": "^0.171.0",
     "web-audio-beat-detector": "^8.2.19"
   },
   "keywords": [],
