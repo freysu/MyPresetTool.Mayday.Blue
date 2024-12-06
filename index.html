@@ -2,7 +2,7 @@
  * @Author: freysu
  * @Date: 2024-11-21 04:20:51
  * @LastEditors: freysu
- * @LastEditTime: 2024-12-03 06:00:20
+ * @LastEditTime: 2024-12-06 09:03:07
  * @Description: file content
 -->
 <!DOCTYPE html>
@@ -23,41 +23,7 @@
     <link rel="stylesheet" href="css/style.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css" />
-    <!-- <style>
-      .color-item {
-        display: flex;
-        align-items: center;
-        margin-bottom: 0.5rem;
-      }
-      .color-item input {
-        width: 80px;
-        margin-left: 0.5rem;
-      }
-      .color-item select {
-        margin-left: 0.5rem;
-      }
-      .color-item button {
-        margin-left: auto;
-      }
-
-      .color-swatch {
-        font-size: 16px;
-        display: inline-block;
-        width: 2em;
-        height: 2em;
-        background: #ccc;
-        border-radius: 0.25em;
-        margin-left: 0.25em;
-        margin-bottom: 0.25em;
-        box-sizing: border-box;
-        border: 0.125em solid #364347;
-        cursor: pointer;
-      }
-      .is-invalid .color-swatch {
-        border-color: red;
-      }
-    </style> -->
-    <!-- <script
+    <script
       src="https://js.fundebug.cn/fundebug.2.8.6.min.js"
       apikey="33af664e86e0eb2b56643810e04d20105e3621fd117e7751f112b09929efe908"
       crossorigin="anonymous"
@@ -65,7 +31,7 @@
     <script
       src="https://js.fundebug.cn/fundebug.revideo.0.7.1.min.js"
       crossorigin="anonymous"
-    ></script> -->
+    ></script>
   </head>
 
   <body>
@@ -1149,13 +1115,13 @@
     </div>
     <!-- Toast Container -->
     <div
-      class="toast-container position-fixed bottom-0 end-0 p-3"
+      class="toast-container position-fixed top-0 end-0 p-3"
       style="z-index: 1111100; transform: translate3d(0, 36px, 0)"
     >
       <div id="programToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
           <span id="toastIcon" class="me-2"></span>
-          <strong id="toastTitle" class="me-auto"></strong>
+          <strong id="toastTitle" class="me-auto text-light"></strong>
           <small id="toastTimeDiff" class="text-muted"></small>
           <button
             type="button"
@@ -1232,6 +1198,7 @@
       defer
     ></script>
     <!-- Bootstrap JS -->
+    <script src="./original_src/lazy-load-img.min.js"></script>
     <script src="original_src/bootstrap.bundle.min.js" defer></script>
     <script src="original_src/mousetrap.min.js" defer></script>
     <script src="original_src/highlight.min.js" defer></script>

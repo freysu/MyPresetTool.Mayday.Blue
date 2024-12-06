@@ -1,0 +1,22 @@
+{
+  "themeColors": {
+    "base": "ora",
+    "accent": [
+      { "color": "yel", "per": "55%" },
+      { "color": "ora", "per": "35%" },
+      { "color": "whi", "per": "20%" }
+    ],
+    "high": [
+      { "color": "yel", "per": "70%" },
+      { "color": "ora", "per": "30%" }
+    ],
+    "mid": [
+      { "color": "yel", "per": "60%" },
+      { "color": "whi", "per": "40%" }
+    ],
+    "low": [
+      { "color": "ora", "per": "60%" },
+      { "color": "whi", "per": "40%" }
+    ]
+  }
+}

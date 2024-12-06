@@ -102,15 +102,15 @@ function escapeHtml(unsafe) {
       <!-- 预设选项将在这里动态生成 -->
     </select>
   </div>
-  <button id="importConfig" class="btn btn-primary">导入配置</button>
-  <button id="resetConfig" class="btn btn-warning">重置配置</button>
-  <button id="exportConfig" class="btn btn-success">导出配置</button>
+  <button id="themeConfig_importConfig" class="btn btn-primary">导入配置</button>
+  <button id="themeConfig_resetConfig" class="btn btn-warning">重置配置</button>
+  <button id="themeConfig_exportConfig" class="btn btn-success">导出配置</button>
 </div>
 <div id="configurator">
   <!-- 动态生成的配置区域 -->
 </div>
 */
-/* 
+/*
 class ThemeColorConfigurator {
   constructor(containerId, defaultConfig, presets) {
     this.container = document.getElementById(containerId);
@@ -128,7 +128,7 @@ class ThemeColorConfigurator {
   }
 
   bindResetEvent() {
-    document.getElementById('resetConfig').addEventListener('click', () => {
+    document.getElementById('themeConfig_resetConfig').addEventListener('click', () => {
       if (confirm('确定要重置配置吗？这将恢复到默认设置。')) {
         this.config = JSON.parse(JSON.stringify(this.defaultConfig));
         this.renderSections();
@@ -249,12 +249,6 @@ class ThemeColorConfigurator {
         ColorCodeManager.AVAILABLE_COLOR_CODES_TO_HEX[selectedColor];
       this.validateAndUpdate(section);
     });
-    select.addEventListener('mouseover', (e) => {
-      const selectedColor = e.target.value;
-      const hex = ColorCodeManager.AVAILABLE_COLOR_CODES_TO_HEX[selectedColor];
-      showTooltip(e.target, `${selectedColor.toUpperCase()} (${hex})`);
-    });
-    select.addEventListener('mouseout', hideTooltip);
     const input = itemDiv.querySelector('input');
     input.addEventListener(
       'input',
@@ -326,7 +320,7 @@ class ThemeColorConfigurator {
   }
 
   bindExportImportEvents() {
-    document.getElementById('exportConfig').addEventListener('click', () => {
+    document.getElementById('themeConfig_exportConfig').addEventListener('click', () => {
       const blob = new Blob([JSON.stringify(this.config, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -337,7 +331,7 @@ class ThemeColorConfigurator {
       showNotification('配置已导出', '', { type: 'success', duration: 3000 });
     });
 
-    document.getElementById('importConfig').addEventListener('click', () => {
+    document.getElementById('themeConfig_importConfig').addEventListener('click', () => {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'application/json';
@@ -379,7 +373,7 @@ class ThemeColorConfigurator {
     });
   }
 }
- */
+*/
 
 ////////////////// test-end
 
@@ -484,7 +478,7 @@ if (!document.querySelector('.toast-container')) {
     'beforeend',
     `
     <!-- Toast Container -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1111100; transform: translate3d(0px, 36px, 0px);">
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1111100; transform: translate3d(0px, 36px, 0px);">
       <div id="programToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="toast-header">
           <span id="toastIcon" class="me-2 fw-bold"></span>
@@ -504,7 +498,7 @@ if (!document.querySelector('.toast-container')) {
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="modalTitle"></h5>
+            <h5 class="modal-title text-light" id="modalTitle"></h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body" id="modalBody" style="
@@ -588,7 +582,7 @@ function showNotification(title, message, options = {}) {
   const defaults = {
     type: 'info', // 类型, inf,success,error,warning
     duration: 3000, // 持续时间（毫秒），设置为 false 则不会自动关闭
-    position: 'end-0', // Toast 位置
+    position: 'top-0', // Toast 位置
     animate: true, // 是否启用动画
     dismissible: true, // 是否可关闭
     buttons: [], // 自定义按钮
@@ -668,7 +662,7 @@ function showNotification(title, message, options = {}) {
  *   dismissible: true,
  * });
  */
-function showToast(title, message, config) {
+function showToast(title, message, config, isNeedRemove = true) {
   try {
     title = escapeHtml(title);
     // 获取或克隆现有的 Toast 元素
@@ -761,7 +755,10 @@ function showToast(title, message, config) {
     }, 1000);
 
     // 监听 Toast 隐藏事件，清理定时器
-    toastInstance._element.addEventListener('hidden.bs.toast', clearInterval(intervalId));
+    toastInstance._element.addEventListener('hidden.bs.toast', function () {
+      clearInterval(intervalId);
+      isNeedRemove && toastEl.id !== 'programToast' && toastEl.remove();
+    });
 
     toastInstance.show();
     return toastInstance;
@@ -908,29 +905,32 @@ class ThemeConfigForm {
     // Export button
     const exportBtn = document.querySelector('#themeConfig_exportConfig');
     if (exportBtn) {
-      exportBtn.addEventListener('click', () => this.exportConfig());
+      exportBtn.addEventListener('click', () => debounce(this.exportConfig(), 1000));
     }
 
     // Import input
     const importInput = document.querySelector('#themeConfig_importConfig');
     if (importInput) {
-      importInput.addEventListener('change', (e) => this.importConfig(e.target));
+      importInput.addEventListener('change', (e) => debounce(this.importConfig(e.target), 1000));
     }
 
     const saveInput = document.querySelector('#themeConfig_saveConfig');
     if (saveInput) {
-      saveInput.addEventListener('click', (e) => this.saveConfig());
+      saveInput.addEventListener('click', (e) => debounce(this.saveConfig(), 1000));
     }
 
-    document.getElementById('confirm-reset-btn').addEventListener('click', () => {
-      // 清空所有设置或执行其他重置操作
-      this.resetSettings();
-      showNotification('已重置', '所有设置已被清除！', {
-        type: 'info',
-        duration: 3000,
-      });
-      bootstrap.Modal.getInstance(document.getElementById('resetModal')).hide();
-    });
+    document.getElementById('confirm-reset-btn').addEventListener(
+      'click',
+      debounce(() => {
+        // 清空所有设置或执行其他重置操作
+        this.resetSettings();
+        showNotification('已重置', '所有设置已被清除！', {
+          type: 'info',
+          duration: 3000,
+        });
+        bootstrap.Modal.getInstance(document.getElementById('resetModal')).hide();
+      }, 1000),
+    );
     const presetSelect = document.getElementById('presetSelect');
 
     if (!presetSelect.hasAttribute('data-initialized')) {
@@ -996,8 +996,6 @@ class ThemeConfigForm {
     });
 
     colorSections.appendChild(fragment);
-    // Add event listeners to the newly created buttons
-    this._addEventListeners();
   }
 
   getSectionDescription(section) {
@@ -1069,26 +1067,21 @@ class ThemeConfigForm {
           this.updateColor(section, index, e.target.value);
         }
       };
+
+      const rmbtn = itemDiv.querySelector('button.remove-color-btn');
+      rmbtn.addEventListener('click', (e) => {
+        const { section, index } = e.target.dataset;
+        this.removeColorItem(section, parseInt(index, 10));
+      });
+
+      const perInput = itemDiv.querySelector('input.percentage-input');
+      perInput.addEventListener('change', (e) => {
+        const { section, index } = e.target.dataset;
+        this.updatePercentage(section, parseInt(index, 10), e.target.value);
+      });
     });
 
     container.appendChild(fragment);
-
-    // 使用事件委托绑定删除按钮点击事件，避免重复绑定
-    container.addEventListener('click', (e) => {
-      if (e.target.closest('.remove-color-btn')) {
-        const button = e.target.closest('.remove-color-btn');
-        const { section, index } = button.dataset;
-        this.removeColorItem(section, parseInt(index, 10));
-      }
-    });
-
-    // 绑定百分比输入框的 change 事件
-    container.addEventListener('change', (e) => {
-      if (e.target.classList.contains('percentage-input')) {
-        const { section, index } = e.target.dataset;
-        this.updatePercentage(section, parseInt(index, 10), e.target.value);
-      }
-    });
   }
 
   createColorSelect(section, index, currentValue) {
@@ -1142,8 +1135,8 @@ class ThemeConfigForm {
     const totalPercentage = this.calculateTotalPercentage(section);
     if (totalPercentage === 100) {
       showNotification(
-        '无法添加更多颜色！ 🎨',
-        '该部分的颜色百分比已满（100%），无法添加更多颜色',
+        '哎呀，无法添加更多颜色啦！ 🎨',
+        '该部分的颜色百分比已满（100%），没办法再添加更多颜色咯~',
         {
           type: 'warning',
           duration: 3000,
@@ -1154,7 +1147,7 @@ class ThemeConfigForm {
 
     // 如果已达到最大百分比限制，禁止添加新颜色
     if (this.themeConfig.themeColors[section].length >= 10) {
-      showNotification('最多只能添加10个颜色！ ⚠️', '每个部分的颜色数量已达上限', {
+      showNotification('哇哦，最多只能添加10个颜色哦！ ⚠️', '每个部分的颜色数量已经达到上限啦~', {
         type: 'warning',
         duration: 3000,
       });
@@ -1167,6 +1160,8 @@ class ThemeConfigForm {
     }); // 设置最小1%的百分比
     this.renderColorItems(section);
     this.validatePercentages(section);
+    this.calculateTotalPercentage(section);
+
     showNotification('颜色已添加! ✨', '新的颜色选项已添加到您的调色板', {
       type: 'success',
       duration: 2000,
@@ -1199,25 +1194,19 @@ class ThemeConfigForm {
   updatePercentage(section, index, value) {
     const percentage = parseInt(value, 10);
     if (percentage === 0) {
-      showNotification('无效百分比！⚠️ ', '百分比不能为 0。请设置一个大于 0 的值哦~', {
-        type: 'error',
-        duration: 3000,
-      });
-      document
-        .querySelector(`.percentage-input[data-section="${section}"]`)
-        .classList.add('is-invalid');
+      showNotification(
+        '无效百分比！⚠️',
+        '百分比不能为0哦，这样会影响颜色配置效果，请设置一个大于0且小于等于100的百分比值呢~',
+        {
+          type: 'error',
+          duration: 3000,
+        },
+      );
       return;
     }
-    document
-      .querySelector(`.percentage-input[data-section="${section}"]`)
-      .classList.remove('is-invalid');
     this.themeConfig.themeColors[section][index].per = `${percentage}%`;
     this.validatePercentages(section);
     this.calculateTotalPercentage(section);
-    showNotification('百分比已更新！📊', '您的颜色分布已更新', {
-      type: 'success',
-      duration: 2000,
-    });
   }
 
   calculateTotalPercentage(section) {
@@ -1234,43 +1223,43 @@ class ThemeConfigForm {
     }
   }
 
-  validatePercentages(section) {
+  validatePercentages(section, isFirst = false) {
     let over = 0;
     const items = this.themeConfig.themeColors[section];
     const total = items.reduce((sum, item) => sum + parseInt(item.per, 10), 0);
     const rest = 100 - total;
     over = total - 100;
-
     if (over > 0) {
-      showNotification(
-        '快速检查! 🎨',
-        `${section}的总和超出了 100%（当前：${total}%），请调整比例以使总和不超过 100%。`,
-        {
-          type: 'warning',
-          duration: 5000,
-          dismissible: true,
-        },
-      );
+      document.getElementById(`${section}Colors`).classList = 'color-items is-invalid';
       document.getElementById(`${section}TotalPercentage`).className =
-        'text-warning total-percentage';
+        'text-warning total-percentage ';
+      !isFirst &&
+        showNotification(
+          '快速检查! 🎨',
+          `${section}的总和超出了 100%（当前：${total}%），请调整比例以使总和不超过 100%。`,
+          {
+            type: 'warning',
+            duration: 5000,
+            dismissible: true,
+          },
+        );
       return false;
     } else if (over < 0) {
-      showNotification(
-        '颜色分配需达100%！🎨',
-        `${section} : 你当前设置的是 ${total}%，还有 ${rest}% 空余哦，快补上吧！`,
-        {
-          type: 'warning',
-          duration: 4000,
-        },
-      );
+      document.getElementById(`${section}Colors`).classList = 'color-items is-invalid';
       document.getElementById(`${section}TotalPercentage`).className =
-        'text-warning total-percentage';
+        'text-warning total-percentage is-invalid';
+      !isFirst &&
+        showNotification(
+          '颜色分配需达100%！🎨',
+          `${section} : 你当前设置的是 ${total}%，还有 ${rest}% 空余哦，快补上吧！`,
+          {
+            type: 'warning',
+            duration: 4000,
+          },
+        );
       return false;
     } else if (over == 0) {
-      showNotification('配置完成！', `${section}颜色比例分配已正确，总和为 100%。`, {
-        type: 'success',
-        duration: 3000,
-      });
+      document.getElementById(`${section}Colors`).classList = 'color-items is-valid';
       document.getElementById(`${section}TotalPercentage`).className =
         'text-success total-percentage';
       return true;
@@ -1292,6 +1281,7 @@ class ThemeConfigForm {
         base: 'blu',
       },
     };
+    this.eventListenersInitialized = false;
     this.initializeForm();
   }
 
@@ -1459,7 +1449,11 @@ class ThemeConfigForm {
     this.createSectionContainers();
     this.sections.forEach((section) => {
       this.renderColorItems(section);
+      this.validatePercentages(section, true);
+      this.calculateTotalPercentage(section);
     });
+    // Add event listeners to the newly created buttons
+    this._addEventListeners();
   }
 }
 
@@ -1602,7 +1596,7 @@ class AudioAnalyzer {
   setupEventListeners() {
     document
       .getElementById('searchEntry__generate_tool')
-      .addEventListener('click', () => this.handleNetworkAudioEntry());
+      .addEventListener('click', () => debounce(this.handleNetworkAudioEntry(), 1000));
     document
       .getElementById('audioFileInput_generate_tool')
       .addEventListener('change', (e) => this.handleAudioFileSelect(e));
@@ -1611,110 +1605,112 @@ class AudioAnalyzer {
       .addEventListener('change', (e) => this.handleLrcFileSelect(e));
 
     // Analysis button
-    document.getElementById('generate-btn').addEventListener('click', () => this.startAnalysis());
+    document
+      .getElementById('generate-btn')
+      .addEventListener('click', () => debounce(this.startAnalysis(), 1500));
 
-    document.getElementById('copy-btn').addEventListener('click', async () => {
-      try {
-        const content = document.getElementById('output-result').value;
-        await navigator.clipboard.writeText(content);
-        showNotification('成功~🎉', '📋 已复制~可以直接粘贴使用啦！', {
-          type: 'success',
-          duration: 3000,
-        });
-      } catch (err) {
-        my_debugger.showError('Failed to copy:', err);
-        showNotification('出错了~🤔', '📋 复制失败了，请重试哦！实在不行请手动复制！', {
-          type: 'error',
-          duration: 5000,
-        });
-      }
-    });
-
-    document.getElementById('download-btn').addEventListener('click', () => {
-      try {
-        const content = document.getElementById('output-result').value;
-        if (!content.trim() || !content.replace(/\s/g, '')) {
-          showNotification('检查一下！💭', '还没有内容可以下载。先添加一些内容吧！', {
-            type: 'warning',
-            duration: 4000,
+    document.getElementById('copy-btn').addEventListener(
+      'click',
+      debounce(async () => {
+        try {
+          const content = document.getElementById('output-result').value;
+          await navigator.clipboard.writeText(content);
+          showNotification('成功~🎉', '📋 已复制~可以直接粘贴使用啦！', {
+            type: 'success',
+            duration: 3000,
           });
-          return;
+        } catch (err) {
+          my_debugger.showError('Failed to copy:', err);
+          showNotification('出错了~🤔', '📋 复制失败了，请重试哦！实在不行请手动复制！', {
+            type: 'error',
+            duration: 5000,
+          });
         }
-        if (Timeline.parse(content).errors.length) {
-          showNotification(
-            '出错了~🤔',
-            '预设代码无效，请检查内容!\n' + Timeline.parse(content).errors,
-            {
-              type: 'error',
-              duration: 5000,
-            },
-          );
-          return;
+      }, 1000),
+    );
+
+    document.getElementById('download-btn').addEventListener(
+      'click',
+      debounce(() => {
+        try {
+          const content = document.getElementById('output-result').value;
+          if (!content.trim() || !content.replace(/\s/g, '')) {
+            showNotification('检查一下！💭', '还没有内容可以下载。先添加一些内容吧！', {
+              type: 'warning',
+              duration: 4000,
+            });
+            return;
+          }
+          if (Timeline.parse(content).errors.length) {
+            showNotification(
+              '出错了~🤔',
+              '预设代码无效，请检查内容!\n' + Timeline.parse(content).errors,
+              {
+                type: 'error',
+                duration: 5000,
+              },
+            );
+            return;
+          }
+
+          // 转义用户输入，防止XSS攻击
+          const escapedContent = content.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+          // 使用 FileSaver.js 的 saveAs 方法来保存文件
+          const blob = new Blob([escapedContent], {
+            type: 'text/plain;charset=utf-8',
+          });
+
+          // 文件保存
+          window.saveAs(blob, 'converted-output.txt');
+
+          // 添加成功通知
+          showNotification('下载中~✨', '文件已经开始下载，请稍等一会儿哦！', {
+            type: 'success',
+            duration: 3000,
+          });
+        } catch (error) {
+          // 添加错误通知
+          showNotification('出错了~ 🤔', '下载失败了，请检查文件内容后再试！', {
+            type: 'error',
+            duration: 5000,
+            dismissible: true,
+          });
+
+          // 确保my_debugger.showError存在
+          if (typeof my_debugger !== 'undefined' && typeof my_debugger.showError === 'function') {
+            my_debugger.showError('Download error:', error);
+          } else {
+            console.error('Download error:', error);
+          }
         }
-
-        // 转义用户输入，防止XSS攻击
-        const escapedContent = content.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-        // 使用 FileSaver.js 的 saveAs 方法来保存文件
-        const blob = new Blob([escapedContent], {
-          type: 'text/plain;charset=utf-8',
-        });
-
-        // 文件保存
-        window.saveAs(blob, 'converted-output.txt');
-
-        // 添加成功通知
-        showNotification('下载中~✨', '文件已经开始下载，请稍等一会儿哦！', {
-          type: 'success',
-          duration: 3000,
-        });
-      } catch (error) {
-        // 添加错误通知
-        showNotification('出错了~ 🤔', '下载失败了，请检查文件内容后再试！', {
-          type: 'error',
-          duration: 5000,
-          dismissible: true,
-        });
-
-        // 确保my_debugger.showError存在
-        if (typeof my_debugger !== 'undefined' && typeof my_debugger.showError === 'function') {
-          my_debugger.showError('Download error:', error);
-        } else {
-          console.error('Download error:', error);
-        }
-      }
-    });
+      }, 1500),
+    );
   }
 
   async handleNetworkAudioEntry() {
     showModal(
       '在线音乐搜索',
       `
- <div class="card shadow-sm mb-4">
-    <div class="card-header">
-      <h2 class="h5 mb-0">找到你喜欢的音乐吧！🎵</h2>
-    </div>
-    <div class="card-body">
-      <div class="search-section d-flex align-items-center">
-        <input type="text" class="form-control" placeholder="搜索音频" id="searchInput">
-        <select class="form-select" id="searchTypeSelect">
-          <option value="1">单曲</option>
-          <option value="10">专辑</option>
-          <option value="100">歌手</option>
-          <option value="1000">歌单</option>
-          <option value="1002">用户</option>
-          <option value="1004">MV</option>
-          <option value="1006">歌词</option>
-          <option value="1009">电台</option>
-          <option value="1014">视频</option>
-          <option value="1018">综合</option>
-          <option value="2000">声音</option>
-        </select>
-        <button class="btn btn-primary" type="button" id="searchButton">搜索</button>
+<div class="card shadow-sm mb-4">
+      <div class="card-header">
+        <h2 class="h5 mb-0">找到你喜欢的音乐吧！🎵</h2>
       </div>
-      <div id="searchResults"></div>
+      <div class="card-body">
+        <div class="search-section d-flex align-items-center">
+          <input type="text" class="form-control" placeholder="搜索音频" id="searchInput">
+          <select class="form-select" id="searchTypeSelect">
+            <option value="1">单曲</option>
+            <option value="10" disabled>专辑</option>
+            <option value="100" disabled>歌手</option>
+            <option value="1000" disabled>歌单</option>
+            <!-- ... other options ... -->
+          </select>
+          <button class="btn btn-primary" type="button" id="searchButton">搜索</button>
+        </div>
+        <div id="searchResults"></div>
+      </div>
     </div>
-  </div>
       `,
       {
         type: 'info',
@@ -1726,129 +1722,230 @@ class AudioAnalyzer {
       },
     );
 
-    document.getElementById('searchButton').addEventListener(
+    const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
+    const searchTypeSelect = document.getElementById('searchTypeSelect');
+
+    // Add enter key support
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        searchButton.click();
+      }
+    });
+
+    searchButton.addEventListener(
       'click',
       debounce(async (e) => {
-        const keyword = document.getElementById('searchInput').value;
-        const searchType = document.getElementById('searchTypeSelect').value;
+        const keyword = searchInput.value.trim();
+        const searchType = searchTypeSelect.value;
+
+        if (!keyword) {
+          showNotification('错误', '搜索词不能为空!', {
+            type: 'error',
+            duration: 3000,
+          });
+          return;
+        }
+
         showNotification('发起搜索！', `正在尝试搜索${keyword}`, {
           type: 'info',
           duration: 5000,
         });
+
         e.target.disabled = true;
-        if (keyword) {
-          const cacheKey = `${keyword}_${searchType}`;
+        const cacheKey = `${keyword}_${searchType}`;
 
-          try {
-            // 先检查缓存中是否已有结果
-            const cachedResults = await localforage.getItem(cacheKey);
-            if (cachedResults) {
-              displaySearchResults(cachedResults, keyword);
-              e.target.disabled = false;
-              return;
-            }
-
-            const searchUrl = `https://netease-cloud-music-api-freysu.glitch.me/cloudsearch?keywords=${keyword}&type=${searchType}&limit=100&offset=0`;
-            const response = await fetch(searchUrl);
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            if (data.result && data.result.songs) {
-              // 缓存本次搜索结果
-              await localforage.setItem(cacheKey, data.result.songs);
-              displaySearchResults(data.result.songs, keyword);
-            } else {
-              document.getElementById(
-                'searchResults',
-              ).innerHTML = `<p class="mt-3">没有找到你想要的音乐~试试换个关键词吧！</p>`;
-              showNotification(
-                '搜索结果',
-                '<p class="mt-3">没有找到你想要的音乐~试试换个关键词吧！</p>',
-                {
-                  type: 'warning',
-                  html: true,
-                  duration: 5000,
-                },
-              );
-            }
-          } catch (error) {
-            if (
-              error.message.includes('Failed to fetch') ||
-              error.message.includes('网络错误') ||
-              error.message.includes('HTTP error! status: 0')
-            ) {
-              document.getElementById('searchResults').innerHTML =
-                '<p>网络不通畅哦，稍后再试吧~若第一次使用不了，请检查网络设置（可能需要特殊网络设置，如“魔法”），不然请放弃使用该功能。</p>';
-              showNotification(
-                '网络错误',
-                '<p>网络不通畅哦，稍后再试吧~若第一次使用不了，请检查网络设置（可能需要特殊网络设置，如“魔法”），不然请放弃使用该功能。</p>',
-                { type: 'error', html: true, duration: 5000 },
-              );
-            } else if (error.message.includes('HTTP error! status: 403')) {
-              document.getElementById('searchResults').innerHTML =
-                '<p>请求被拒绝，可能是API限制或IP被封禁。请尝试使用其他网络或稍后再试。</p>';
-              showNotification(
-                '请求被拒绝',
-                '<p>请求被拒绝，可能是API限制或IP被封禁。请尝试使用其他网络或稍后再试。</p>',
-                { type: 'error', html: true, duration: 5000 },
-              );
-            } else if (error.message.includes('HTTP error! status: 404')) {
-              document.getElementById('searchResults').innerHTML =
-                '<p>API未找到，可能是API地址有误。请检查API地址并重试。</p>';
-              showNotification(
-                'API未找到',
-                '<p>API未找到，可能是API地址有误。请检查API地址并重试。</p>',
-                {
-                  type: 'error',
-                  html: true,
-                  duration: 5000,
-                },
-              );
-            } else {
-              console.error('Error fetching search results:', error);
-              document.getElementById('searchResults').innerHTML =
-                '<p>An error occurred while fetching results.</p>';
-              showNotification('错误', '<p>An error occurred while fetching results.</p>', {
-                type: 'error',
-                html: true,
-                duration: 5000,
-              });
-            }
-          } finally {
-            e.target.disabled = false;
+        try {
+          // Check cache first
+          const cachedResults = await localforage.getItem(cacheKey);
+          if (cachedResults) {
+            displaySearchResults(cachedResults, keyword);
+            return;
           }
+
+          const searchUrl = `https://netease-cloud-music-api-freysu.glitch.me/cloudsearch?keywords=${encodeURIComponent(
+            keyword,
+          )}&type=${searchType}&limit=100&offset=0`;
+          const response = await fetch(searchUrl);
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          if (data.result?.songs?.length) {
+            await localforage.setItem(cacheKey, data.result.songs);
+            displaySearchResults(data.result.songs, keyword);
+          } else {
+            const noResultsMessage = '<p class="mt-3">没有找到你想要的音乐~试试换个关键词吧！</p>';
+            document.getElementById('searchResults').innerHTML = noResultsMessage;
+            showNotification('搜索结果', noResultsMessage, {
+              type: 'warning',
+              html: true,
+              duration: 5000,
+            });
+          }
+        } catch (error) {
+          handleSearchError(error);
+        } finally {
+          e.target.disabled = false;
         }
       }, 500),
     );
 
-    // 捕获 this 的引用
+    // Capture this reference
     const that = this;
 
-    const highlightKeyword = (text, keyword) => {
-      const regex = new RegExp(`(${keyword})`, 'gi');
-      return text.replace(regex, '<span class="text-primary">$1</span>');
+    function handleSearchError(error) {
+      let errorMessage = '';
+      let errorTitle = '错误';
+
+      if (
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('网络错误') ||
+        error.message.includes('HTTP error! status: 0')
+      ) {
+        errorMessage =
+          '<p>网络不通畅哦，稍后再试吧~若第一次使用不了，请检查网络设置（可能需要特殊网络设置，如"魔法"），不然请放弃使用该功能。</p>';
+        errorTitle = '网络错误';
+      } else if (error.message.includes('HTTP error! status: 403')) {
+        errorMessage = '<p>请求被拒绝，可能是API限制或IP被封禁。请尝试使用其他网络或稍后再试。</p>';
+        errorTitle = '请求被拒绝';
+      } else if (error.message.includes('HTTP error! status: 404')) {
+        errorMessage = '<p>API未找到，可能是API地址有误。请检查API地址并重试。</p>';
+        errorTitle = 'API未找到';
+      } else {
+        errorMessage = '<p>An error occurred while fetching results.</p>';
+        console.error('Error fetching search results:', error);
+      }
+
+      document.getElementById('searchResults').innerHTML = errorMessage;
+      showNotification(errorTitle, errorMessage, {
+        type: 'error',
+        html: true,
+        duration: 5000,
+      });
+    }
+
+    const highlightKeyword = (text, keywords, options = {}) => {
+      if (!text || !keywords) return text;
+
+      const {
+        className = 'text-primary',
+        caseSensitive = false,
+        wholeWord = false,
+        maxHighlights = 200,
+      } = options;
+
+      // Convert single keyword to array
+      const keywordArray = Array.isArray(keywords) ? keywords : [keywords];
+
+      // Escape special regex characters
+      const escapedKeywords = keywordArray.map((keyword) =>
+        keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+      );
+
+      // Create regex pattern based on options
+      const wordBoundary = wholeWord ? '\\b' : '';
+      const flags = caseSensitive ? 'g' : 'gi';
+      const pattern = escapedKeywords
+        .map((keyword) => `${wordBoundary}(${keyword})${wordBoundary}`)
+        .join('|');
+
+      let highlightCount = 0;
+      const regex = new RegExp(pattern, flags);
+
+      return text.replace(regex, (match, ...groups) => {
+        if (highlightCount >= maxHighlights) return match;
+        highlightCount++;
+        return `<span class="${className}">${match}</span>`;
+      });
     };
 
     function displaySearchResults(songs, keyword) {
-      let resultsHtml = '<ul class="search-results-list">';
-      songs.forEach((song) => {
-        resultsHtml += `<li class="search-results-list-item">
-          <img src="${song.al.picUrl}" alt="Album Cover" class="album-cover">
-          <div class="song-info">
-            <h5>${highlightKeyword(song.name, keyword)}</h5>
-            <p>歌手: ${song.ar.map((artist) => artist.name).join(', ')}</p>
-            <p>专辑: ${song.al.name}</p>
-            <p>时长: ${formatTimestamp(song.dt, 'mm:ss')}</p>
-          </div>
-          <button class="btn btn-primary select-song-btn" data-songid="${song.id}">选择</button>
-        </li>`;
-      });
-      resultsHtml += '</ul>';
+      const resultsHtml = `
+        <div class="container-fluid p-0" id="song-list">
+          ${songs
+            .map(
+              (song) => `
+            <div class="card mb-3 border-0 shadow-sm hover-overlay">
+              <div class="card-body">
+                <div class="row align-items-center g-3">
+                  <div class="col-auto">
+                    <img data-src="${song.al.picUrl}"
+                         alt="Album Cover"
+                         class="rounded shadow-sm album-cover"
+                         style="width: 80px; height: 80px; object-fit: cover;">
+                  </div>
+                  <div class="col">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div>
+                        <h5 class="card-title mb-2">${highlightKeyword(song.name, [keyword], {
+                          className: 'highlight-blue',
+                          wholeWord: false,
+                          caseSensitive: false,
+                        })}</h5>
+                        <div class="text-body-secondary mb-1">
+                          <i class="material-icons align-middle me-1" style="font-size: 16px;">person</i>
+                          ${song.ar
+                            .map((artist) =>
+                              highlightKeyword(artist.name, [keyword], {
+                                className: 'highlight-blue',
+                                wholeWord: false,
+                                caseSensitive: false,
+                              }),
+                            )
+                            .join(', ')}
+                        </div>
+                        <div class="text-body-secondary mb-1">
+                          <i class="material-icons align-middle me-1" style="font-size: 16px;">album</i>
+                          ${highlightKeyword(song.al.name, [keyword], {
+                            className: 'highlight-blue',
+                            wholeWord: false,
+                            caseSensitive: false,
+                          })}
+                        </div>
+                        <div class="text-body-secondary">
+                          <i class="material-icons align-middle me-1" style="font-size: 16px;">schedule</i>
+                          ${formatTimestamp(song.dt, 'mm:ss')}
+                        </div>
+                      </div>
+                      <div class="ms-3">
+                        <button class="btn btn-primary btn-sm select-song-btn rounded-pill px-3"
+                                data-songid="${song.id}">
+                          <i class="material-icons align-middle me-1">add</i>选择
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            `,
+            )
+            .join('')}
+        </div>
+      `;
+
       document.getElementById('searchResults').innerHTML = resultsHtml;
+
+      var lazyLoadImg = new LazyLoadImg({
+        el: document.querySelector('#song-list'),
+        mode: 'default',
+        time: 300, // 设置一个检测时间间隔
+        complete: true,
+        position: {
+          top: 0, // 元素距离顶部
+          right: 0, // 元素距离右边
+          bottom: 0, // 元素距离下面
+          left: 0, // 元素距离左边
+        },
+      });
+
+      // Add event listeners to select buttons
       document.querySelectorAll('.select-song-btn').forEach((button) => {
         button.addEventListener('click', (e) => {
-          that.getNetworkAudioInfo(e.target.dataset.songid);
+          that.getNetworkAudioInfo(e.target.closest('.select-song-btn').dataset.songid);
         });
       });
     }
@@ -3962,7 +4059,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   themeConfigForm.initializeForm();
 
-  // const configurator = new ThemeColorConfigurator('configurator', defaultConfig, presets);
+  // const configurator = new ThemeColorConfigurator(
+  //   'configurator',
+  //   window.MY_PRESETS[0],
+  //   window.MY_PRESETS,
+  // );
   // console.log('configurator: ', configurator);
 
   window.AudioAnalyzer = new AudioAnalyzer();
