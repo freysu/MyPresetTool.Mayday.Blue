@@ -1,0 +1,2616 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mayday.Blue 预设代码编辑器</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      :root {
+        --editor-bg: #1e1e1e;
+        --toolbar-bg: #2d2d2d;
+        --accent-color: #007acc;
+        --text-color: #e0e0e0;
+        --border-color: #404040;
+      }
+
+      body {
+        background-color: var(--editor-bg);
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        min-width: 320px;
+      }
+
+      /* Stack elements vertically on mobile */
+      .editor-header {
+        background: var(--toolbar-bg);
+        border-bottom: 1px solid var(--border-color);
+        padding: 4px 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        height: 40px;
+      }
+
+      .loader {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: none;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 20px;
+        border-radius: 5px;
+        z-index: 1000;
+      }
+
+      .header-left,
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .header-center {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 0; /* Allows flex shrinking */
+      }
+
+      .file-controls,
+      .edit-controls,
+      .validation-controls,
+      .view-controls {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+      }
+
+      .btn-header {
+        color: var(--text-color);
+        background: transparent;
+        border: 1px solid transparent;
+        padding: 4px 8px;
+        font-size: 13px;
+        line-height: 1;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .btn-header:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--border-color);
+      }
+
+      .btn-header:active {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      /* File info section */
+      .file-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .file-name,
+      #statusInfo {
+        font-size: 14px;
+        font-weight: 500;
+        white-space: wrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .file-status {
+        font-size: 8px;
+        color: #4caf50;
+      }
+
+      .file-status.unsaved {
+        color: #ffc107;
+      }
+
+      .dropdown-menu {
+        background: var(--toolbar-bg);
+        border: 1px solid var(--border-color);
+        padding: 4px;
+        min-width: 200px;
+      }
+
+      .dropdown-item {
+        color: var(--text-color);
+        padding: 6px 12px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .dropdown-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-color);
+      }
+
+      .dropdown-divider {
+        border-color: var(--border-color);
+        margin: 4px 0;
+      }
+
+      .shortcut {
+        margin-left: auto;
+        opacity: 0.7;
+        font-size: 11px;
+      }
+
+      /* Button group container */
+      .button-group {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+
+      /* Style for all buttons */
+      .btn {
+        padding: 4px;
+        font-size: 11px;
+        min-height: 24px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+      }
+
+      /* Hide button text on very small screens, show only icons */
+      @media (max-width: 360px) {
+        .btn span {
+          display: none;
+        }
+
+        .btn i {
+          margin: 0;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .view-controls {
+          display: none;
+        }
+      }
+      /* Tablet breakpoint */
+      @media (min-width: 768px) {
+        .editor-header {
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          padding: 4px;
+        }
+
+        .btn-header span {
+          display: none;
+        }
+
+        .file-controls .dropdown-toggle span {
+          display: none;
+        }
+
+        .button-group {
+          display: flex;
+          gap: 8px;
+        }
+
+        .btn {
+          width: auto;
+        }
+      }
+
+      /* Desktop breakpoint */
+      @media (min-width: 1024px) {
+        .editor-header {
+          padding: 12px 24px;
+        }
+
+        .file-name,
+        #statusInfo {
+          font-size: 16px;
+        }
+
+        .btn {
+          padding: 8px 16px;
+          font-size: 14px;
+        }
+      }
+
+      /* Waveform container */
+      .waveform-container {
+        background: var(--toolbar-bg);
+        height: 120px;
+        position: relative;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      #audioInput {
+        font-size: xx-small;
+        height: 24px;
+        line-height: 12px;
+      }
+      /* Playback controls */
+      .playback-controls {
+        /* position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0; */
+        background: rgba(0, 0, 0, 0.7);
+        padding: 4px;
+        gap: 4px;
+        display: flex;
+        justify-content: center;
+      }
+
+      .playback-btn {
+        background: transparent;
+        border: 1px solid var(--accent-color);
+        color: var(--text-color);
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Editor container */
+      .editor-container {
+        flex: 1;
+        position: relative;
+        -webkit-overflow-scrolling: touch; /* Enables smooth scrolling on iOS */
+        overflow: auto; /* Ensures content is scrollable */
+      }
+
+      #editor {
+        width: 100%;
+        height: 100%;
+        position: absolute; /* Ensures editor fills container */
+        top: 0;
+        left: 0;
+      }
+
+      /* Quick access toolbar */
+      .quick-access {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--toolbar-bg);
+        padding: 4px;
+        gap: 4px;
+        display: flex;
+        flex-direction: column;
+        border-top: 1px solid var(--border-color);
+        z-index: 10000000000;
+      }
+      /* Color palette */
+      .color-palette {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+        gap: 2px;
+        padding: 4px;
+        order: 1;
+      }
+
+      .color-btn {
+        width: 24px;
+        height: 24px;
+        border-radius: 2px;
+        border: 1px solid var(--border-color);
+      }
+
+      /* Quick input keys */
+      .quick-keys {
+        display: flex;
+        gap: 4px;
+        padding: 4px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        order: 2; /* Places quick keys below color palette */
+      }
+
+      .quick-key {
+        padding: 8px 12px;
+        background: var(--toolbar-bg);
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+        border-radius: 4px;
+        white-space: nowrap;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .quick-access {
+          position: static;
+        }
+
+        .color-palette {
+          grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Waveform visualization -->
+    <div class="waveform-container">
+      <div class="playback-controls">
+        <input
+          type="file"
+          class="form-control mb-2"
+          id="audioInput"
+          accept="audio/*"
+          aria-label="Audio file input"
+        />
+        <button class="playback-btn" id="backward"><i class="fas fa-backward"></i></button>
+        <button class="playback-btn" id="playPause"><i class="fas fa-play"></i></button>
+        <button class="playback-btn" id="stop"><i class="fas fa-stop"></i></button>
+        <button class="playback-btn" id="forward"><i class="fas fa-forward"></i></button>
+      </div>
+      <div id="waveform">
+        <div
+          id="placeholder"
+          style="
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: var(--text-color);
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+          "
+        >
+          <i class="fas fa-music fa-3x mb-2"></i>
+          <p>请上传音频文件以查看波形图</p>
+        </div>
+      </div>
+    </div>
+    <!-- Header with basic controls -->
+    <!-- <div class="editor-header">
+      <div class="file-info">
+        <span class="editor-info" id="statusInfo"></span>
+      </div>
+
+      <div class="button-group status-bar">
+        <button class="btn btn-secondary" id="undoBtn" title="Undo (Ctrl+Z)">
+          <i class="fas fa-undo"></i>
+          <span>Undo</span>
+        </button>
+        <button class="btn btn-secondary" id="redoBtn" title="Redo (Ctrl+Shift+Z)">
+          <i class="fas fa-redo"></i>
+          <span>Redo</span>
+        </button>
+        <button class="btn btn-secondary" id="formatBtn" title="Format Code">
+          <i class="fas fa-align-left"></i>
+          <span>Format</span>
+        </button>
+        <button class="btn btn-secondary" id="saveBtn" title="Save (Ctrl+S)">
+          <i class="fas fa-save"></i>
+          <span>Save</span>
+        </button>
+        <button class="btn btn-secondary" id="exportBtn">
+          <i class="fas fa-file-export"></i>
+          <span>Export</span>
+        </button>
+        <button class="btn btn-secondary" id="validateBtn">
+          <i class="fas fa-check-circle"></i>
+          <span>Validate</span>
+        </button>
+      </div>
+    </div> -->
+    <div class="editor-header">
+      <div class="header-left">
+        <div class="file-controls">
+          <div class="dropdown">
+            <button class="btn btn-sm btn-header dropdown-toggle" data-bs-toggle="dropdown">
+              <i class="fas fa-file"></i>
+              <span>File</span>
+            </button>
+            <ul class="dropdown-menu">
+              <li>
+                <input type="file" id="importFile" accept=".txt" style="display: none" />
+                <a class="dropdown-item" href="#" id="importBtn">
+                  <i class="fas fa-folder-open"></i>
+                  Import
+                </a>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a class="dropdown-item" href="#" id="saveBtn">
+                  <i class="fas fa-save"></i>
+                  Save
+                  <span class="shortcut">Ctrl+S</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" id="backupBtn">
+                  <i class="fas fa-archive"></i>
+                  Create Backup
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" id="restoreBtn">
+                  <i class="fas fa-trash-restore"></i>
+                  Restore Last Backup
+                </a>
+              </li>
+              <li><hr class="dropdown-divider" /></li>
+              <li>
+                <a class="dropdown-item" href="#" id="showHelpBtn">
+                  <i class="fas fa-keyboard"></i>
+                  Shortcuts
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="dropdown">
+            <button class="btn btn-sm btn-header dropdown-toggle" data-bs-toggle="dropdown">
+              <i class="fas fa-file-export"></i>
+              <span>Export</span>
+            </button>
+            <ul class="dropdown-menu export-dropdown-menu">
+              <li>
+                <a class="dropdown-item" href="#" data-format="json">
+                  <i class="fas fa-file-code"></i>
+                  Export as JSON
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" data-format="txt">
+                  <i class="fas fa-file-alt"></i>
+                  Export as TXT
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#" data-format="csv">
+                  <i class="fas fa-file-csv"></i>
+                  Export as CSV
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="edit-controls">
+          <button class="btn btn-sm btn-header" id="undoBtn" title="Undo (Ctrl+Z)">
+            <i class="fas fa-undo"></i>
+          </button>
+          <button class="btn btn-sm btn-header" id="redoBtn" title="Redo (Ctrl+Shift+Z)">
+            <i class="fas fa-redo"></i>
+          </button>
+          <button class="btn btn-sm btn-header" id="formatBtn" title="Format Code">
+            <i class="fas fa-align-left"></i>
+          </button>
+        </div>
+      </div>
+      <div class="header-center">
+        <div class="file-info">
+          <span class="file-name d-none" id="currentFileName">untitled.txt</span>
+          <span class="file-status d-none" id="saveStatus">●</span>
+          <span class="" id="statusInfo"></span>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="validation-controls">
+          <button class="btn btn-sm btn-header" id="validateBtn" title="Validate Code">
+            <i class="fas fa-check-circle"></i>
+          </button>
+        </div>
+        <div class="view-controls">
+          <button class="btn btn-sm btn-header" id="toggleAudio" title="Toggle Audio Panel">
+            <i class="fas fa-wave-square"></i>
+          </button>
+          <button class="btn btn-sm btn-header" id="togglePalette" title="Toggle Color Palette">
+            <i class="fas fa-palette"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Main editor -->
+    <div class="editor-container">
+      <div id="editor"></div>
+      <div id="loader" class="loader">Loading file...</div>
+    </div>
+
+    <!-- Quick access toolbar -->
+    <div class="quick-access">
+      <div class="color-palette" id="colorPalette">
+        <!-- Color buttons will be dynamically added here -->
+      </div>
+      <!-- <div class="quick-keys">
+        <button class="quick-key">//</button>
+      </div> -->
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="original_src/bootstrap.bundle.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ext-language_tools.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js"></script>
+    <script type="module">
+      import TimelinePlugin from 'https://unpkg.com/wavesurfer.js/dist/plugins/timeline.esm.js';
+      import Hover from 'https://unpkg.com/wavesurfer.js/dist/plugins/hover.esm.js';
+
+      // Add this to your HTML for the toast container
+      const toastContainer = document.createElement('div');
+      toastContainer.className = 'toast-container position-fixed top-30 end-0 p-3';
+      toastContainer.style.zIndex = '1050';
+      document.body.appendChild(toastContainer);
+
+      // Enhanced feedback system
+      const Feedback = {
+        types: {
+          SUCCESS: 'success',
+          ERROR: 'error',
+          WARNING: 'warning',
+          INFO: 'info',
+        },
+
+        // Show toast notification
+        toast: function (message, type = 'info', duration = 3000) {
+          const toastEl = document.createElement('div');
+          const toastId = 'toast-' + Date.now();
+
+          const bgClass =
+            type === 'error'
+              ? 'bg-danger'
+              : type === 'success'
+              ? 'bg-success'
+              : type === 'warning'
+              ? 'bg-warning'
+              : 'bg-info';
+
+          const iconClass =
+            type === 'error'
+              ? 'bi-x-circle'
+              : type === 'success'
+              ? 'bi-check-circle'
+              : type === 'warning'
+              ? 'bi-exclamation-triangle'
+              : 'bi-info-circle';
+
+          toastEl.className = `toast ${bgClass} text-white`;
+          toastEl.id = toastId;
+          toastEl.setAttribute('role', 'alert');
+          toastEl.setAttribute('aria-live', 'assertive');
+          toastEl.setAttribute('aria-atomic', 'true');
+
+          toastEl.innerHTML = `
+            <div class="toast-header ${bgClass} text-white">
+                <i class="bi ${iconClass} me-2"></i>
+                <strong class="me-auto">${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                ${message}
+            </div>
+        `;
+
+          toastContainer.appendChild(toastEl);
+          const toast = new bootstrap.Toast(toastEl, { delay: duration });
+          toast.show();
+
+          // Remove toast element after it's hidden
+          toastEl.addEventListener('hidden.bs.toast', () => {
+            toastEl.remove();
+          });
+        },
+
+        // Show inline error message
+        inline: function (elementId, message, type = 'error') {
+          const element = document.getElementById(elementId);
+          if (!element) return;
+
+          const feedbackDiv = document.createElement('div');
+          feedbackDiv.className = `invalid-feedback d-block`;
+          feedbackDiv.textContent = message;
+
+          // Remove any existing feedback
+          element.querySelectorAll('.invalid-feedback').forEach((el) => el.remove());
+          element.appendChild(feedbackDiv);
+
+          // Add visual indication
+          element.classList.add(type === 'error' ? 'border-danger' : 'border-warning');
+
+          // Remove after 5 seconds
+          setTimeout(() => {
+            feedbackDiv.remove();
+            element.classList.remove('border-danger', 'border-warning');
+          }, 5000);
+        },
+      };
+
+      // prettier-ignore
+      const ColorConfig = { colors: { red: { 4: '#ef4444', 3: '#f87171', 2: '#fca5a5', 1: '#fecaca', T: '#ef4444' }, ora: { 4: '#f97316', 3: '#fb923c', 2: '#fdba74', 1: '#fed7aa', T: '#f97316' }, yel: { 4: '#eab308', 3: '#facc15', 2: '#fde047', 1: '#fef08a', T: '#eab308' }, sky: { 4: '#06b6d4', 3: '#22d3ee', 2: '#67e8f9', 1: '#a5f3fc', T: '#06b6d4' }, blu: { 4: '#3b82f6', 3: '#60a5fa', 2: '#93c5fd', 1: '#bfdbfe', T: '#3b82f6' }, pur: { 4: '#a855f7', 3: '#c084fc', 2: '#d8b4fe', 1: '#e9d5ff', T: '#a855f7' }, off: { 4: '#333333' }, pin: { 4: '#ec4899', 2: '#f472b6' }, whi: { 4: '#ffffff', T: '#eeeeee' } }, colorCache: new Map(), getColorCode (colorName) { if (this.colorCache.has(colorName)) { return this.colorCache.get(colorName) } const [base, level] = [colorName.slice(0, 3), colorName.slice(3)]; const color = this.colors[base]?.[level] || null; this.colorCache.set(colorName, color); return color } };
+
+      // Color definitions
+      const colorDefinitions = {
+        red: {
+          name: 'Red',
+          levels: [1, 2, 3, 4, 'T'],
+          colors: {
+            1: '#fecaca',
+            2: '#fca5a5',
+            3: '#f87171',
+            4: '#ef4444',
+            T: '#ef4444',
+          },
+        },
+        ora: {
+          name: 'Orange',
+          levels: [1, 2, 3, 4, 'T'],
+          colors: {
+            1: '#fed7aa',
+            2: '#fdba74',
+            3: '#fb923c',
+            4: '#f97316',
+            T: '#f97316',
+          },
+        },
+        yel: {
+          name: 'Yellow',
+          levels: [1, 2, 3, 4, 'T'],
+          colors: {
+            1: '#fef08a',
+            2: '#fde047',
+            3: '#facc15',
+            4: '#eab308',
+            T: '#eab308',
+          },
+        },
+        sky: {
+          name: 'Sky Blue',
+          levels: [1, 2, 3, 4, 'T'],
+          colors: {
+            1: '#a5f3fc',
+            2: '#67e8f9',
+            3: '#22d3ee',
+            4: '#06b6d4',
+            T: '#06b6d4',
+          },
+        },
+        blu: {
+          name: 'Blue',
+          levels: [1, 2, 3, 4, 'T'],
+          colors: {
+            1: '#bfdbfe',
+            2: '#93c5fd',
+            3: '#60a5fa',
+            4: '#3b82f6',
+            T: '#3b82f6',
+          },
+        },
+        pur: {
+          name: 'Purple',
+          levels: [1, 2, 3, 4, 'T'],
+          colors: {
+            1: '#e9d5ff',
+            2: '#d8b4fe',
+            3: '#c084fc',
+            4: '#a855f7',
+            T: '#a855f7',
+          },
+        },
+        pin: {
+          name: 'Pink',
+          levels: [2, 4],
+          colors: {
+            2: '#f472b6',
+            4: '#ec4899',
+            T: '#ec4899',
+          },
+        },
+        whi: {
+          name: 'White',
+          levels: [4, 'T'],
+          colors: {
+            4: '#ffffff',
+            T: '#eeeeee',
+          },
+        },
+        off: {
+          name: 'Off',
+          levels: [4],
+          colors: {
+            4: '#333333',
+          },
+        },
+        rai: {
+          name: 'Rainbow',
+          levels: [4],
+          colors: {
+            4: 'linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet)',
+          },
+        },
+      };
+
+      // Initialize editor
+      const editor = ace.edit('editor');
+      const langTools = ace.require('ace/ext/language_tools');
+      const loader = document.getElementById('loader');
+
+      // Editor setup
+      editor.session.setMode('ace/mode/text');
+      editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true,
+        enableSnippets: false,
+        showLineNumbers: true,
+        showPrintMargin: false,
+        highlightActiveLine: true,
+        fontFamily: "Monaco, 'Courier New', monospace",
+        fontSize: '14px',
+        // lineHeight: 1.5,
+        cursorStyle: 'ace',
+        displayIndentGuides: true,
+        showGutter: true,
+        fixedWidthGutter: true,
+        behavioursEnabled: true,
+        scrollPastEnd: 0.5,
+        wrap: true,
+        maxLines: Infinity,
+        minLines: 100,
+        useWorker: false,
+      });
+
+      // Add this function to handle large file loading
+      function handleLargeFile(content) {
+        const CHUNK_SIZE = 50000; // Process 50KB at a time
+        let currentPosition = 0;
+
+        // Temporarily disable features during load
+        const originalOptions = {
+          enableBasicAutocompletion: editor.getOption('enableBasicAutocompletion'),
+          enableLiveAutocompletion: editor.getOption('enableLiveAutocompletion'),
+        };
+
+        editor.setOptions({
+          enableBasicAutocompletion: false,
+          enableLiveAutocompletion: false,
+        });
+
+        function loadChunk() {
+          if (currentPosition >= content.length) {
+            // Re-enable features after loading
+            editor.setOptions(originalOptions);
+            return;
+          }
+
+          const chunk = content.slice(currentPosition, currentPosition + CHUNK_SIZE);
+          editor.session.insert(
+            { row: editor.session.getLength(), column: 0 },
+            currentPosition === 0 ? chunk : '\n' + chunk,
+          );
+          currentPosition += CHUNK_SIZE;
+
+          requestAnimationFrame(loadChunk);
+        }
+
+        editor.session.setValue(''); // Clear existing content
+        loadChunk();
+      }
+
+      // Add file size-based optimization
+      function optimizeForFileSize(size) {
+        if (size > 1000000) {
+          // 1MB
+          editor.setOptions({
+            enableBasicAutocompletion: false,
+            enableLiveAutocompletion: false,
+            useWorker: false,
+            showGutter: false,
+          });
+        } else if (size > 500000) {
+          // 500KB
+          editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: false,
+            useWorker: false,
+          });
+        } else {
+          editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+            useWorker: true,
+            showGutter: true,
+          });
+        }
+      }
+
+      // Add this to your file input handler
+      function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        try {
+          loader.style.display = 'block';
+          optimizeForFileSize(file.size);
+
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            handleLargeFile(e.target.result);
+          };
+          reader.readAsText(file);
+        } catch (error) {
+          console.error('Error loading file:', error);
+          alert('Error loading file: ' + error.message);
+        } finally {
+          loader.style.display = 'none';
+        }
+      }
+
+      // Add performance monitoring
+      let lastRenderTime = performance.now();
+      editor.renderer.on('afterRender', () => {
+        const currentTime = performance.now();
+        const renderTime = currentTime - lastRenderTime;
+
+        if (renderTime > 100) {
+          // If rendering is slow
+          editor.setOptions({
+            enableLiveAutocompletion: false,
+          });
+        }
+        lastRenderTime = currentTime;
+      });
+
+      // Memory optimization
+      function optimizeMemory() {
+        editor.getSession().getUndoManager().reset();
+        editor.getSession().setAnnotations([]);
+
+        const markers = editor.session.getMarkers();
+        for (let markerId in markers) {
+          editor.session.removeMarker(markerId);
+        }
+      }
+
+      // Add debounced search if you're using search functionality
+      const debouncedSearch = (function () {
+        let timeout;
+        return function (searchTerm) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => {
+            editor.find(searchTerm);
+          }, 250);
+        };
+      })();
+
+      // Add cleanup function
+      function cleanup() {
+        editor.destroy();
+        editor = null;
+      }
+
+      // Add unload handler
+      window.addEventListener('unload', cleanup);
+
+      const FileManager = {
+        supportedFormats: ['json', 'txt', 'csv'],
+
+        // Export functionality
+        async exportFile(format = 'json') {
+          const editor = ace.edit('editor');
+          const content = editor.getValue();
+
+          try {
+            // Validate content before export
+            const errors = validateDocument(content);
+            if (errors.length > 0) {
+              const shouldExport = confirm('Document contains validation errors. Export anyway?');
+              if (!shouldExport) {
+                Feedback.toast('Export cancelled', 'warning');
+                return;
+              }
+            }
+
+            let exportData;
+            let filename;
+            let mimeType;
+
+            switch (format.toLowerCase()) {
+              case 'json':
+                exportData = this.createJsonExport(content);
+                filename = 'preset_' + this.getTimestamp() + '.json';
+                mimeType = 'application/json';
+                break;
+
+              case 'txt':
+                exportData = content;
+                filename = 'preset_' + this.getTimestamp() + '.txt';
+                mimeType = 'text/plain';
+                break;
+
+              case 'csv':
+                exportData = this.createCsvExport(content);
+                filename = 'preset_' + this.getTimestamp() + '.csv';
+                mimeType = 'text/csv';
+                break;
+
+              default:
+                throw new Error('Unsupported export format');
+            }
+
+            await this.downloadFile(exportData, filename, mimeType);
+            Feedback.toast(`Successfully exported as ${format.toUpperCase()}`, 'success');
+          } catch (error) {
+            console.error('Export failed:', error);
+            Feedback.toast('Export failed: ' + error.message, 'error');
+          }
+        },
+
+        // Import functionality
+        async importFile(file) {
+          try {
+            const extension = file.name.split('.').pop().toLowerCase();
+            if (!this.supportedFormats.includes(extension)) {
+              throw new Error('Unsupported file format');
+            }
+
+            const content = await this.readFile(file);
+            let processedContent;
+
+            switch (extension) {
+              case 'json':
+                processedContent = this.processJsonImport(content);
+                break;
+
+              case 'txt':
+                processedContent = this.processTextImport(content);
+                break;
+
+              case 'csv':
+                processedContent = this.processCsvImport(content);
+                break;
+            }
+
+            // Validate imported content
+            const errors = validateDocument(processedContent);
+            if (errors.length > 0) {
+              const shouldProceed = confirm(
+                `Imported file contains ${errors.length} validation errors. Import anyway?`,
+              );
+              if (!shouldProceed) {
+                Feedback.toast('Import cancelled', 'warning');
+                return;
+              }
+            }
+
+            // Update editor content
+            const editor = ace.edit('editor');
+            editor.setValue(processedContent, -1);
+
+            // Create backup of previous state
+            await SaveManager.createBackup(editor.getValue());
+
+            Feedback.toast('File imported successfully', 'success');
+          } catch (error) {
+            console.error('Import failed:', error);
+            Feedback.toast('Import failed: ' + error.message, 'error');
+          }
+        },
+
+        // Helper methods
+        createJsonExport(content) {
+          const lines = content.split('\n').filter((line) => line.trim());
+          const presetData = {
+            version: '1.0',
+            timestamp: new Date().toISOString(),
+            entries: lines.map((line) => {
+              const [timing, colorCode, ...commentParts] = line.split(',');
+              return {
+                time: parseInt(timing.trim()),
+                color: colorCode.trim(),
+                comment: commentParts.join(',').split('//')[1]?.trim() || '',
+              };
+            }),
+          };
+          return JSON.stringify(presetData, null, 2);
+        },
+
+        createCsvExport(content) {
+          const lines = content.split('\n').filter((line) => line.trim());
+          const csvLines = lines.map((line) => {
+            const [timing, colorCode, ...commentParts] = line.split(',');
+            const comment = commentParts.join(',').split('//')[1]?.trim() || '';
+            return `${timing.trim()},${colorCode.trim()},"${comment}"`;
+          });
+          return 'Time,Color,Comment\n' + csvLines.join('\n');
+        },
+
+        processJsonImport(content) {
+          try {
+            const data = JSON.parse(content);
+            return data.entries
+              .map((entry) => {
+                const line = `${entry.time}, ${entry.color}`;
+                return entry.comment ? `${line} // ${entry.comment}` : line;
+              })
+              .join('\n');
+          } catch (error) {
+            throw new Error('Invalid JSON format');
+          }
+        },
+
+        processCsvImport(content) {
+          try {
+            const lines = content
+              .split('\n')
+              .filter((line) => line.trim())
+              .slice(1); // Skip header row
+
+            return lines
+              .map((line) => {
+                const [time, color, comment] = line.split(',').map((part) => part.trim());
+                const commentPart = comment ? ` // ${comment.replace(/"/g, '')}` : '';
+                return `${time}, ${color}${commentPart}`;
+              })
+              .join('\n');
+          } catch (error) {
+            throw new Error('Invalid CSV format');
+          }
+        },
+
+        processTextImport(content) {
+          return content
+            .split('\n')
+            .filter((line) => line.trim())
+            .join('\n');
+        },
+
+        async readFile(file) {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = (e) => reject(new Error('File read failed'));
+            reader.readAsText(file);
+          });
+        },
+
+        async downloadFile(content, filename, mimeType) {
+          const blob = new Blob([content], { type: mimeType });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+        },
+
+        getTimestamp() {
+          return new Date().toISOString().replace(/[:.]/g, '-');
+        },
+      };
+
+      // Add UI elements
+      function addImportExportControls() {
+        // Add event listeners
+        document.querySelectorAll('.export-dropdown-menu .dropdown-item').forEach((item) => {
+          item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const format = e.target.dataset.format;
+            FileManager.exportFile(format);
+          });
+        });
+
+        const importBtn = document.getElementById('importBtn');
+        const importFile = document.getElementById('importFile');
+
+        importBtn.addEventListener('click', () => {
+          importFile.click();
+        });
+
+        importFile.addEventListener('change', (e) => {
+          // if (e.target.files.length > 0) {
+          //   FileManager.importFile(e.target.files[0]);
+          //   e.target.value = ''; // Reset file input
+          // }
+          handleFileSelect(e);
+        });
+      }
+
+      // Save functionality with enhanced features
+      const SaveManager = {
+        lastSaveContent: null,
+        backupInterval: 60000, // 1 minute
+        maxBackups: 5,
+
+        // Initialize save functionality
+        init() {
+          this.setupAutoBackup();
+          this.loadLastSession();
+          this.setupBeforeUnloadHandler();
+        },
+
+        // Main save function
+        async save() {
+          const editor = ace.edit('editor');
+          const content = editor.getValue();
+
+          // Validate before saving
+          const errors = validateDocument(content);
+          if (errors.length > 0) {
+            const shouldSave = confirm('Document contains validation errors. Save anyway?');
+            if (!shouldSave) {
+              Feedback.toast('Save cancelled', 'warning');
+              return false;
+            }
+          }
+
+          try {
+            // Save to localStorage
+            await this.saveToLocalStorage(content);
+
+            // Create backup
+            await this.createBackup(content);
+
+            // Update last save content
+            this.lastSaveContent = content;
+
+            Feedback.toast('Document saved successfully!', 'success');
+
+            return true;
+          } catch (error) {
+            console.error('Save failed:', error);
+            Feedback.toast('Failed to save document: ' + error.message, 'error');
+            return false;
+          }
+        },
+
+        // Save to localStorage with timestamp
+        async saveToLocalStorage(content) {
+          try {
+            const saveData = {
+              content: content,
+              timestamp: new Date().toISOString(),
+              version: '1.0',
+            };
+            localStorage.setItem('editorContent', JSON.stringify(saveData));
+          } catch (error) {
+            throw new Error('Failed to save to local storage: ' + error.message);
+          }
+        },
+
+        // Create timestamped backup
+        async createBackup(content) {
+          try {
+            const backups = JSON.parse(localStorage.getItem('editorBackups') || '[]');
+            const newBackup = {
+              content: content,
+              timestamp: new Date().toISOString(),
+            };
+
+            backups.unshift(newBackup);
+
+            // Keep only maximum allowed backups
+            while (backups.length > this.maxBackups) {
+              backups.pop();
+            }
+
+            localStorage.setItem('editorBackups', JSON.stringify(backups));
+          } catch (error) {
+            console.warn('Backup creation failed:', error);
+            // Don't throw - backup failure shouldn't stop main save
+          }
+        },
+
+        // Load last session
+        loadLastSession() {
+          try {
+            const savedData = localStorage.getItem('editorContent');
+            if (savedData) {
+              const { content, timestamp } = JSON.parse(savedData);
+              const editor = ace.edit('editor');
+              editor.setValue(content, -1);
+              this.lastSaveContent = content;
+              Feedback.toast(
+                `Loaded last session from ${new Date(timestamp).toLocaleString()}`,
+                'info',
+              );
+            }
+          } catch (error) {
+            console.error('Failed to load last session:', error);
+            Feedback.toast('Failed to load last session', 'error');
+          }
+        },
+
+        // Setup auto-backup
+        setupAutoBackup() {
+          setInterval(() => {
+            const editor = ace.edit('editor');
+            const currentContent = editor.getValue();
+
+            // Only backup if content has changed since last save
+            if (currentContent !== this.lastSaveContent) {
+              this.createBackup(currentContent)
+                .then(() => console.log('Auto-backup created'))
+                .catch((error) => console.warn('Auto-backup failed:', error));
+            }
+          }, this.backupInterval);
+        },
+
+        // Setup handler for unsaved changes
+        setupBeforeUnloadHandler() {
+          window.addEventListener('beforeunload', (e) => {
+            const editor = ace.edit('editor');
+            const currentContent = editor.getValue();
+
+            if (currentContent !== this.lastSaveContent) {
+              e.preventDefault();
+              e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+            }
+          });
+        },
+
+        // Restore from backup
+        async restoreFromBackup(index = 0) {
+          try {
+            const backups = JSON.parse(localStorage.getItem('editorBackups') || '[]');
+            if (backups[index]) {
+              const editor = ace.edit('editor');
+              editor.setValue(backups[index].content, -1);
+              Feedback.toast(
+                `Restored from backup (${new Date(backups[index].timestamp).toLocaleString()})`,
+                'success',
+              );
+              return true;
+            }
+            return false;
+          } catch (error) {
+            console.error('Restore failed:', error);
+            Feedback.toast('Failed to restore from backup', 'error');
+            return false;
+          }
+        },
+      };
+
+      // Initialize save manager
+      SaveManager.init();
+
+      // Add UI elements for save functionality
+      function addSaveControls() {
+        // Add event listeners
+        document.getElementById('saveBtn').addEventListener('click', () => {
+          SaveManager.save().then((success) => {
+            if (success) {
+              updateFileStatus(true);
+            }
+          });
+        });
+        document.getElementById('backupBtn').addEventListener('click', () => {
+          const editor = ace.edit('editor');
+          SaveManager.createBackup(editor.getValue());
+        });
+        document
+          .getElementById('restoreBtn')
+          .addEventListener('click', () => SaveManager.restoreFromBackup());
+      }
+
+      const UndoManager = ace.require('ace/undomanager').UndoManager;
+      editor.session.setUndoManager(new UndoManager());
+
+      // Function to list all current key bindings
+      function listAllKeyBindings() {
+        const commands = editor.commands.commands;
+        console.log('Current key bindings:');
+        Object.keys(commands).forEach((cmd) => {
+          const binding = commands[cmd].bindKey;
+          if (binding) {
+            console.log(`${cmd}: ${JSON.stringify(binding)}`);
+          }
+        });
+      }
+
+      // Function to remove specific key bindings
+      function removeKeyBinding(commandName) {
+        editor.commands.removeCommand(commandName);
+      }
+
+      // Function to add custom key binding
+      function addKeyBinding(options) {
+        editor.commands.addCommand({
+          name: options.name,
+          bindKey: options.bindKey,
+          exec: options.exec,
+        });
+      }
+
+      function setupCustomKeyBindings() {
+        // Add our custom key bindings
+        const customBindings = [
+          {
+            name: 'export',
+            bindKey: { win: 'Ctrl-E', mac: 'Command-E' },
+            exec: function (editor) {
+              FileManager.exportFile('txt');
+            },
+          },
+          {
+            name: 'save',
+            bindKey: { win: 'Ctrl-S', mac: 'Command-S' },
+            exec: function (editor) {
+              // Your save logic here
+              SaveManager.save();
+            },
+          },
+          {
+            name: 'quickBackup',
+            bindKey: { win: 'Ctrl-B', mac: 'Command-B' },
+            exec: function (editor) {
+              SaveManager.createBackup(editor.getValue())
+                .then(() => Feedback.toast('Quick backup created', 'success'))
+                .catch((error) => Feedback.toast('Backup failed: ' + error.message, 'error'));
+            },
+          },
+          {
+            name: 'format',
+            bindKey: { win: 'Alt-Shift-F', mac: 'Alt-Shift-F' },
+            exec: function (editor) {
+              formatCode_All();
+            },
+          },
+          {
+            name: 'calculateTime',
+            bindKey: { win: 'Alt-Q', mac: 'Alt-Q' },
+            exec: function (editor) {
+              const pos = editor.getCursorPosition();
+              console.log('pos: ', pos);
+              const line = editor.session.getLine(pos.row);
+              console.log('line: ', line);
+              const match = line.match(/^(\d+),/);
+              console.log('match: ', match);
+
+              if (match) {
+                const currentTime = parseInt(match[1]);
+                const newTime = currentTime + 200; // Minimum interval
+                editor.insert(`\n${newTime},`);
+              }
+            },
+          },
+          {
+            name: 'insertComment',
+            bindKey: { win: 'Ctrl-/', mac: 'Command-/' },
+            exec: function (editor) {
+              const pos = editor.getCursorPosition();
+              const line = editor.session.getLine(pos.row);
+              if (!line.includes('//')) {
+                editor.insert(' // ');
+              }
+            },
+          },
+          {
+            name: 'undo',
+            bindKey: { win: 'Ctrl-Z', mac: 'Command-Z' },
+            exec: function (editor) {
+              editor.undo();
+              updateUndoRedoButtons();
+            },
+          },
+          {
+            name: 'redo',
+            bindKey: { win: 'Ctrl-Y', mac: 'Command-Y' },
+            exec: function (editor) {
+              editor.redo();
+              updateUndoRedoButtons();
+            },
+          },
+        ];
+
+        // Add all custom bindings
+        customBindings.forEach((binding) => addKeyBinding(binding));
+      }
+
+      // Function to handle keyboard events before Ace Editor
+      function handleGlobalKeyboard(e) {
+        // Prevent default browser shortcuts
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+          e.preventDefault();
+        }
+      }
+
+      // Initialize key bindings
+      function initializeKeyBindings() {
+        // Setup our custom bindings
+        setupCustomKeyBindings();
+
+        // Add global keyboard handler
+        document.addEventListener('keydown', handleGlobalKeyboard);
+
+        // Add editor-specific keyboard handler
+        editor.container.addEventListener('keydown', function (e) {
+          // Handle editor-specific shortcuts here
+          if (e.key === 'Tab') {
+            // Custom tab behavior if needed
+            e.preventDefault();
+            editor.insert('    '); // 4 spaces instead of tab
+          }
+        });
+      }
+
+      function updateUndoRedoButtons() {
+        const undoBtn = document.getElementById('undoBtn');
+        const redoBtn = document.getElementById('redoBtn');
+
+        undoBtn.disabled = !editor.session.getUndoManager().hasUndo();
+        redoBtn.disabled = !editor.session.getUndoManager().hasRedo();
+      }
+
+      // Validation function
+      function validateLine(line) {
+   const pattern = /^\s*(\d+)\s*,\s*([a-z]{3}[1-4T])\s*(?:\s*\/\/\s*(.*))?$/;
+        return pattern.test(line);
+      }
+
+      // Format function that properly aligns the code
+      function formatCode(code) {
+        return code
+          .split('\n')
+          .map((line) => {
+            const match = line.match(/^\s*(\d+)\s*,\s*([a-z]{3}[1-4T])\s*(?:\s*\/\/\s*(.*))?$/);
+            if (match) {
+              const [_, time, color, comment] = match;
+              // Pad time with spaces to align all colors
+              // const paddedTime = time.padStart(4, ' ');
+              if (comment) {
+                return `${time}, ${color} // ${comment.trim()}`;
+              }
+              return `${time}, ${color}`;
+            }
+            return line; // Return unchanged if it doesn't match the pattern
+          })
+          .join('\n');
+      }
+
+      const formatCode_All = () => {
+        const editor = ace.edit('editor');
+        const currentCode = editor.getValue();
+        const formattedCode = formatCode(currentCode);
+        editor.setValue(formattedCode, -1); // -1 moves cursor to start
+        Feedback.toast('Code formatted successfully!', 'success');
+      };
+
+      // function formatCode() {
+      //   try {
+      //     const lines = editor.getValue().split('\n');
+      //     const formattedLines = [];
+      //     let hasChanges = false;
+      //     let originalLength = lines.length;
+
+      //     lines.forEach((line) => {
+      //       if (!line.trim()) return; // Skip empty lines
+
+      //       try {
+      //         // Parse line components
+      //         const match = line.match(/^(\s*\d+)\s*,\s*([a-z]+[1-4T])(?:\s*\/\/\s*(.*))?$/);
+      //         if (!match) {
+      //           formattedLines.push(line); // Keep original if no match
+      //           return;
+      //         }
+
+      //         const [, time, color, comment] = match;
+      //         const formattedLine = comment
+      //           ? `${time},${color} // ${comment.trim()}`
+      //           : `${time},${color}`;
+
+      //         if (formattedLine !== line.trim()) hasChanges = true;
+      //         formattedLines.push(formattedLine);
+      //       } catch (lineError) {
+      //         console.warn('Error formatting line:', line, lineError);
+      //         formattedLines.push(line); // Keep original on error
+      //       }
+      //     });
+
+      //     // Sort by timestamp
+      //     formattedLines.sort((a, b) => {
+      //       const timeA = parseInt(a.split(',')[0]) || 0;
+      //       const timeB = parseInt(b.split(',')[0]) || 0;
+      //       return timeA - timeB;
+      //     });
+
+      //     if (hasChanges || formattedLines.length !== originalLength) {
+      //       const cursor = editor.getCursorPosition();
+      //       editor.setValue(formattedLines.join('\n'));
+      //       editor.clearSelection();
+      //       editor.moveCursorToPosition(cursor);
+
+      //       Feedback.toast('Code formatted successfully!', 'success');
+      //     } else {
+      //       Feedback.toast('Code is already properly formatted', 'info');
+      //     }
+
+      //     // Validate after formatting
+      //     validateCode();
+      //   } catch (error) {
+      //     console.error('Formatting error:', error);
+      //     Feedback.toast('An error occurred while formatting the code', 'error');
+      //   }
+      // }
+
+      // Add event listeners for the buttons
+      document.getElementById('undoBtn').onclick = () => editor.undo();
+      document.getElementById('redoBtn').onclick = () => editor.redo();
+      document.getElementById('formatBtn').addEventListener('click', formatCode_All);
+      document.getElementById('redoBtn').onclick = () => FileManager.exportFile('txt');
+
+      // Add these to your initialization code
+      editor.on('change', () => {
+        updateUndoRedoButtons();
+      });
+
+      function createShortcutHelpDialog() {
+        const dialog = document.createElement('div');
+        dialog.className = 'shortcut-help-dialog modal fade';
+        dialog.innerHTML = `
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Keyboard Shortcuts</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Windows/Linux</th>
+                                <th>Mac</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Save</td>
+                                <td>Ctrl + S</td>
+                                <td>⌘ + S</td>
+                            </tr>
+                            <tr>
+                                <td>Format Code</td>
+                                <td>Alt + Shift + F</td>
+                                <td>⌥ + ⇧ + F</td>
+                            </tr>
+                            <tr>
+                                <td>Calculate Time</td>
+                                <td>Ctrl + Alt + T</td>
+                                <td>⌘ + ⌥ + T</td>
+                            </tr>
+                            <tr>
+                                <td>Add Comment</td>
+                                <td>Ctrl + /</td>
+                                <td>⌘ + /</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+        document.body.appendChild(dialog);
+
+        document.querySelector('#showHelpBtn').onclick = () => {
+          new bootstrap.Modal(dialog).show();
+        };
+      }
+
+      initializeKeyBindings();
+      createShortcutHelpDialog();
+      addSaveControls();
+      addImportExportControls();
+      updateUndoRedoButtons();
+
+      // Add CSS for the shortcut dialog
+      const style = document.createElement('style');
+      style.textContent = `
+    .shortcut-help-dialog .table {
+        margin-bottom: 0;
+    }
+    .shortcut-help-dialog td:nth-child(2),
+    .shortcut-help-dialog td:nth-child(3) {
+        font-family: monospace;
+    }
+`;
+      document.head.appendChild(style);
+
+      // Ensure proper cursor position after content changes
+      editor.session.on('change', function () {
+        editor.renderer.updateFull(true);
+        // updateFileStatus(false);
+      });
+
+      // Force cursor position update when window is resized
+      window.addEventListener('resize', function () {
+        editor.resize(true);
+      });
+
+      // Create a custom highlighting mode
+      const customMode = function () {
+        const TextMode = ace.require('ace/mode/text').Mode;
+        const oop = ace.require('ace/lib/oop');
+
+        const CustomHighlightRules = function () {
+          this.$rules = {
+            start: [
+              {
+                // Match the number at the start of the line
+                token: 'constant.numeric',
+                regex: '^\\s*\\d+',
+                next: 'separator',
+              },
+              {
+                // Comments at the start of line
+                token: 'comment.line.double-slash',
+                regex: '^\\s*//.*$',
+              },
+            ],
+            separator: [
+              {
+                // Add specific styling for the comma
+                token: 'punctuation.separator',
+                regex: ',\\s*',
+                next: 'color',
+              },
+            ],
+            color: [
+              {
+                token: 'keyword',
+                regex: '([a-z]+[1-4T])',
+                onMatch: function (val, state, stack) {
+                  const baseColor = val.slice(0, 3);
+                  const level = val.slice(3);
+
+                  if (colorDefinitions[baseColor]?.colors[level]) {
+                    this.token = `color.${val}`;
+                  }
+                  return this.token;
+                },
+                next: 'comment_or_end',
+              },
+            ],
+            comment_or_end: [
+              {
+                // Comments after color code
+                token: 'comment.line.double-slash',
+                regex: '\\s*//.*$',
+              },
+              {
+                regex: '$|^',
+                token: 'text',
+                next: 'start',
+              },
+            ],
+          };
+
+          // Add fallback rules for each state
+          ['start', 'separator', 'color', 'comment_or_end'].forEach((state) => {
+            if (!this.$rules[state]) this.$rules[state] = [];
+            this.$rules[state].push({
+              defaultToken: 'text',
+            });
+          });
+        };
+
+        oop.inherits(
+          CustomHighlightRules,
+          ace.require('ace/mode/text_highlight_rules').TextHighlightRules,
+        );
+
+        function Mode() {
+          this.HighlightRules = CustomHighlightRules;
+        }
+        oop.inherits(Mode, TextMode);
+
+        return new Mode();
+      };
+
+      // Apply the custom mode to the editor
+      editor.session.setMode(customMode());
+
+      // Add custom CSS for syntax highlighting
+      function addCustomStyles() {
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            #editor {
+        font-family: Monaco, 'Courier New', monospace !important;
+        line-height: 1.5 !important;
+    }
+    .ace_cursor {
+        border-left: 2px solid #528bff !important;
+        margin-left: 0 !important;
+        width: 0 !important;
+    }
+    .ace_hidden-cursors .ace_cursor {
+        opacity: 1 !important;
+    }
+        /* Comments */
+        .ace_comment {
+            color: var(--bs-gray-500) !important;
+            font-style: italic;
+        }
+
+        /* Numbers */
+        .ace_constant.ace_numeric {
+            color: var(--bs-cyan) !important;
+        }
+
+        /* Separator (comma) */
+        .ace_punctuation.ace_separator {
+            color: var(--bs-gray-500) !important;
+        }
+
+        /* Color tokens - generated dynamically */
+        ${generateColorTokenStyles()}
+    `;
+        document.head.appendChild(styleSheet);
+      }
+
+      // Generate styles for color tokens
+      function generateColorTokenStyles() {
+        let styles = [];
+
+        Object.entries(colorDefinitions).forEach(([baseColor, def]) => {
+          Object.entries(def.colors).forEach(([level, color]) => {
+            const colorCode = `${baseColor}${level}`;
+            styles.push(`
+                .ace_color.ace_${colorCode} {
+                    background-color: ${color};
+                    color: ${isLightColor(color) ? '#000000' : '#ffffff'};
+                    border-radius: 3px;
+                }
+            `);
+          });
+        });
+
+        return styles.join('\n');
+      }
+
+      // Helper function to determine if a color is light or dark
+      function isLightColor(color) {
+        // Handle gradient case
+        if (color.includes('gradient')) return false;
+
+        // Convert hex to RGB
+        const hex = color.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+
+        // Calculate relative luminance
+        const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        return luminance > 0.5;
+      }
+
+      // Initialize the editor styles
+      addCustomStyles();
+
+      editor.on('mousemove', function (e) {
+        const position = e.getDocumentPosition();
+        const token = editor.session.getTokenAt(position.row, position.column);
+
+        if (token && token.type.startsWith('color.')) {
+          const colorCode = token.type.split('.')[1];
+          const baseColor = colorCode.slice(0, 3);
+          const level = colorCode.slice(3);
+          const hexColor = colorDefinitions[baseColor].colors[level];
+
+          editor.container.title = `${colorDefinitions[baseColor].name} Level ${level}\n${hexColor}`;
+        } else {
+          editor.container.title = '';
+        }
+      });
+
+      // Custom completer
+      const completer = {
+        getCompletions: function (editor, session, pos, prefix, callback) {
+          const line = session.getLine(pos.row);
+          const suggestions = [];
+
+          if (line.match(/^\d+,/)) {
+            Object.entries(colorDefinitions).forEach(([color, def]) => {
+              def.levels.forEach((level) => {
+                suggestions.push({
+                  caption: `${color}${level}`,
+                  value: `${color}${level}`,
+                  meta: def.name,
+                  score: 100,
+                });
+              });
+            });
+          }
+
+          callback(null, suggestions);
+        },
+      };
+
+      langTools.addCompleter(completer);
+
+      function initColorPalette() {
+        const palette = document.getElementById('colorPalette');
+
+        Object.entries(colorDefinitions).forEach(([baseColor, def]) => {
+          def.levels.forEach((level) => {
+            const color = def.colors[level];
+            const btn = document.createElement('button');
+            btn.className = 'btn color-button';
+            btn.style.backgroundColor = color;
+            btn.style.color = isLightColor(color) ? '#000' : '#fff';
+            btn.textContent = `${baseColor}${level}`;
+            btn.onclick = () => insertColor(`${baseColor}${level}`);
+            btn.title = `${def.name} Level ${level}\n${color}`;
+            palette.appendChild(btn);
+          });
+        });
+      }
+
+      function insertColor(color) {
+        const pos = editor.getCursorPosition();
+        const line = editor.session.getLine(pos.row);
+        if (line.match(/^\d+,/)) {
+          editor.insert(color);
+        } else {
+          const currentTime = Math.round(wavesurfer ? wavesurfer.getCurrentTime() * 1000 : 0);
+          const timeStr = Math.ceil(currentTime / 100) * 100;
+          editor.insert(`${timeStr},${color}\n`);
+        }
+      }
+
+      // Validate entire document
+      function validateDocument(code) {
+        const lines = code.split('\n');
+        const errors = [];
+
+        lines.forEach((line, index) => {
+          // Skip empty lines or comment-only lines
+          if (line.trim() === '' || line.trim().startsWith('//')) {
+            return;
+          }
+
+          if (!validateLine(line)) {
+            errors.push({
+              line: index + 1,
+              text: line,
+              message: 'Invalid format. Expected: <time>, <color-code> [// comment]',
+            });
+          }
+        });
+
+        return errors;
+      }
+
+      // // Enhanced validation function
+      // function validateCode() {
+      //   const code = editor.getValue();
+      //   const lines = code.split('\n').filter((line) => line.trim());
+      //   const errors = [];
+      //   const warnings = [];
+
+      //   try {
+      //     lines.forEach((line, index) => {
+      //       // Remove any comments after //
+      //       const cleanLine = line.split('//')[0].trim();
+
+      //       // Skip empty lines after comment removal
+      //       if (!cleanLine) return;
+
+      //       // Basic format check - updated regex to be more strict
+      //       if (!cleanLine.match(/^\d+,\s*[a-z]+[1-4T]$/)) {
+      //         errors.push({
+      //           row: index,
+      //           text: 'Invalid format. Expected: time,colorcode (e.g. 1000,red3)',
+      //           type: 'error',
+      //           line: line,
+      //         });
+      //         return;
+      //       }
+
+      //       const [time, colorCode] = cleanLine.split(',').map((part) => part.trim());
+
+      //       // Time validation
+      //       const timeNum = parseInt(time);
+      //       if (isNaN(timeNum) || timeNum % 100 !== 0) {
+      //         errors.push({
+      //           row: index,
+      //           text: 'Time must be a multiple of 100ms',
+      //           type: 'error',
+      //           line: line,
+      //         });
+      //       }
+
+      //       // Color code validation - check for single color code only
+      //       if (colorCode.length > 4) {
+      //         errors.push({
+      //           row: index,
+      //           text: `Invalid color code length: ${colorCode}. Should be color name + single intensity (e.g. red3)`,
+      //           type: 'error',
+      //           line: line,
+      //         });
+      //         return;
+      //       }
+
+      //       const [, color, intensity] = colorCode.match(/([a-z]+)([1-4T])/) || [];
+      //       if (!validateColorCode(color, intensity)) {
+      //         errors.push({
+      //           row: index,
+      //           text: `Invalid color code: ${colorCode}`,
+      //           type: 'error',
+      //           line: line,
+      //         });
+      //       }
+
+      //       // Time interval check
+      //       if (index > 0) {
+      //         const prevTime = parseInt(lines[index - 1].split(',')[0]);
+      //         if (timeNum - prevTime < 200) {
+      //           warnings.push({
+      //             row: index,
+      //             text: 'Time interval should be at least 200ms',
+      //             type: 'warning',
+      //             line: line,
+      //           });
+      //         }
+      //       }
+      //     });
+
+      //     updateEditorMarkers({ errors, warnings });
+      //     updateValidationResults({ errors, warnings });
+
+      //     // Show feedback
+      //     if (errors.length > 0) {
+      //       Feedback.toast(
+      //         `Found ${errors.length} error${
+      //           errors.length > 1 ? 's' : ''
+      //         }. Check the editor for details.`,
+      //         'error',
+      //       );
+      //     } else if (warnings.length > 0) {
+      //       Feedback.toast(
+      //         `Found ${warnings.length} warning${
+      //           warnings.length > 1 ? 's' : ''
+      //         }. Check the editor for details.`,
+      //         'warning',
+      //       );
+      //     } else {
+      //       Feedback.toast('Validation passed successfully!', 'success');
+      //     }
+
+      //     return errors.length === 0;
+      //   } catch (error) {
+      //     console.error('Validation error:', error);
+      //     Feedback.toast('An error occurred during validation', 'error');
+      //     return false;
+      //   }
+      // }
+
+      function validateColorCode(color, intensity) {
+        if (!colorDefinitions[color]) return false;
+        const validLevels = colorDefinitions[color].levels;
+        return validLevels.includes(intensity === 'T' ? intensity : parseInt(intensity));
+      }
+
+      function updateEditorMarkers(validation) {
+        const session = editor.getSession();
+        session.clearAnnotations();
+
+        const annotations = [
+          ...validation.errors.map((e) => ({
+            row: e.row,
+            column: 0,
+            text: e.text,
+            type: 'error',
+          })),
+          ...validation.warnings.map((w) => ({
+            row: w.row,
+            column: 0,
+            text: w.text,
+            type: 'warning',
+          })),
+        ];
+
+        session.setAnnotations(annotations);
+      }
+
+      // Update validation results with enhanced UI
+      function updateValidationResults({ errors, warnings }) {
+        const results = document.getElementById('validationResults');
+        if (!results) return;
+
+        results.innerHTML = `
+        <div class="validation-summary">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="text-${errors.length > 0 ? 'danger' : 'success'}">
+                    <i class="bi bi-${errors.length > 0 ? 'x-circle' : 'check-circle'}"></i>
+                    ${errors.length} Error${errors.length !== 1 ? 's' : ''}
+                </div>
+                <div class="text-${warnings.length > 0 ? 'warning' : 'success'}">
+                    <i class="bi bi-${
+                      warnings.length > 0 ? 'exclamation-triangle' : 'check-circle'
+                    }"></i>
+                    ${warnings.length} Warning${warnings.length !== 1 ? 's' : ''}
+                </div>
+            </div>
+            ${
+              errors.length + warnings.length > 0
+                ? `
+                <div class="validation-details small">
+                    ${[...errors, ...warnings]
+                      .map(
+                        (issue) => `
+                            <div class="validation-item text-${
+                              issue.type === 'error' ? 'danger' : 'warning'
+                            } mb-1">
+                                <div><strong>Line ${issue.row + 1}:</strong> ${issue.text}</div>
+                                <div class="text-muted">${issue.line}</div>
+                            </div>
+                        `,
+                      )
+                      .join('')}
+                </div>
+            `
+                : ''
+            }
+        </div>
+    `;
+      }
+
+      // Add CSS for validation feedback
+      const validationStyles = `
+    .validation-summary {
+        padding: 10px;
+        border-radius: var(--bs-border-radius);
+        background-color: var(--bs-dark-bg-subtle);
+    }
+
+    .validation-details {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid var(--bs-border-color);
+    }
+
+    .validation-item {
+        padding: 5px;
+        border-radius: var(--bs-border-radius-sm);
+        background-color: var(--bs-dark);
+    }
+
+    .toast-container {
+        z-index: 1050;
+    }
+`;
+
+      // Add the styles to the document
+      const styleSheet = document.createElement('style');
+      styleSheet.textContent = validationStyles;
+      document.head.appendChild(styleSheet);
+
+      document.getElementById('validateBtn').addEventListener('click', () => {
+        const editor = ace.edit('editor');
+        const code = editor.getValue();
+        const errors = validateDocument(code);
+
+        if (errors.length === 0) {
+          Feedback.toast('Validation successful!', 'success');
+        } else {
+          const errorMessages = errors.map((err) => `Line ${err.line}: ${err.message}`).join('\n');
+          Feedback.toast('Validation failed:\n' + errorMessages, 'error');
+
+          // Mark errors in editor
+          const session = editor.getSession();
+          session.clearAnnotations();
+          session.setAnnotations(
+            errors.map((err) => ({
+              row: err.line - 1,
+              column: 0,
+              text: err.message,
+              type: 'error',
+            })),
+          );
+        }
+      });
+
+      // Initialize
+      initColorPalette();
+
+      // Status bar updates
+      editor.selection.on('changeCursor', () => {
+        const pos = editor.getCursorPosition();
+        const line = editor.session.getLine(pos.row);
+        const match = line.match(/^(\d+),/);
+
+        document.getElementById('statusInfo').textContent = match
+          ? `Time: ${match[1]}ms (${(parseInt(match[1]) / 1000).toFixed(2)}s) | Line: ${
+              pos.row + 1
+            }`
+          : `Line: ${pos.row + 1}, Column: ${pos.column}`;
+      });
+      editor.setValue(editor.getValue(), -1);
+
+      // Initial content
+      //       editor.setValue(`1000,red3 // Example
+      // 1200,blu3
+      // 1400,yel3`);
+      // editor.clearSelection();
+
+      // Audio handling
+      let wavesurfer = null;
+      let isLoadedAudio = false;
+
+      // // Initialize WaveSurfer
+      // function initWaveSurfer() {
+      //   wavesurfer = WaveSurfer.create({
+      //     container: '#waveform', // Add this div to your HTML
+      //     waveColor: 'hotpink',
+      //     progressColor: 'paleturquoise',
+      //     cursorColor: '#57BAB6',
+      //     cursorWidth: 4,
+      //     minPxPerSec: 100,
+      //     height: 50,
+      //     responsive: true,
+      //     normalize: true,
+      //     minimap: true,
+      //     plugins: [
+      //       Hover.create({
+      //         lineColor: '#ff0000',
+      //         lineWidth: 2,
+      //         labelBackground: '#555',
+      //         labelColor: '#fff',
+      //         labelSize: '11px',
+      //       }),
+      //       TimelinePlugin.create(),
+      //     ],
+      //   });
+
+      //   // Add event listeners
+      //   wavesurfer.on('ready', function () {
+      //     $('#audioInfo').text(`Duration: ${Math.round(wavesurfer.getDuration())}s`);
+      //     console.log('wavesurfer: ', wavesurfer);
+      //   });
+
+      //   wavesurfer.on('audioprocess', function () {
+      //     const progress = (wavesurfer.getCurrentTime() / wavesurfer.getDuration()) * 100;
+      //     $('.progress-bar').css('width', `${progress}%`);
+      //   });
+      // }
+
+      // // // Audio file handling
+      // // $('#audioInput').change(function (e) {
+      // //   const files = e.target.files;
+      // //   if (files.length > 0) {
+      // //     const file = e.target.files[0];
+      // //     const blob = URL.createObjectURL(file);
+      // //     if (!wavesurfer) {
+      // //       initWaveSurfer();
+      // //     }
+      // //     if (wavesurfer) {
+      // //       document.getElementById('placeholder').style.display = 'none';
+      // //       wavesurfer.load(blob);
+      // //     }
+      // //     isLoadedAudio = true;
+      // //   } else {
+      // //     document.getElementById('placeholder').style.display = 'flex';
+      // //     wavesurfer.destroy()
+      // //     wavesurfer = null
+      // //   }
+      // // });
+
+      // // Playback controls
+      // $('button.playback-btn#playPause').click(() => {
+      //   console.log(1);
+      //   if (!isLoadedAudio) return;
+      //   if (wavesurfer) {
+      //     wavesurfer.isPlaying() ? wavesurfer.pause() : wavesurfer.play();
+      //     $('button.playback-btn#playPause').text(wavesurfer.isPlaying() ? '⏸️' : '▶');
+      //   }
+      // });
+
+      // First, modify your wavesurfer initialization
+      function initWaveSurfer() {
+        // Check for iOS or Safari
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+        wavesurfer = WaveSurfer.create({
+          container: '#waveform',
+          waveColor: 'hotpink',
+          progressColor: 'paleturquoise',
+          cursorColor: '#57BAB6',
+          cursorWidth: 4,
+          minPxPerSec: 100,
+          height: 50,
+          responsive: true,
+          normalize: true,
+          minimap: true,
+          // Add iOS/Safari specific configurations
+          backend: isIOS || isSafari ? 'MediaElement' : 'WebAudio',
+          mediaControls: true,
+          autoplay: false,
+          interact: true,
+          plugins: [
+            Hover.create({
+              lineColor: '#ff0000',
+              lineWidth: 2,
+              labelBackground: '#555',
+              labelColor: '#fff',
+              labelSize: '11px',
+            }),
+            TimelinePlugin.create(),
+          ],
+        });
+
+        // Add event listeners
+        wavesurfer.on('ready', function () {
+          $('#audioInfo').text(`Duration: ${Math.round(wavesurfer.getDuration())}s`);
+          console.log('wavesurfer: ', wavesurfer);
+
+          // Add this for iOS
+          if (isIOS) {
+            wavesurfer.setVolume(1);
+          }
+        });
+
+        wavesurfer.on('audioprocess', function () {
+          const progress = (wavesurfer.getCurrentTime() / wavesurfer.getDuration()) * 100;
+          $('.progress-bar').css('width', `${progress}%`);
+        });
+
+        // Add error handling
+        wavesurfer.on('error', function (err) {
+          console.error('WaveSurfer error:', err);
+        });
+
+        // Update the wavesurfer event listeners to handle button states
+        wavesurfer.on('ready', function () {
+          document.querySelectorAll('.playback-btn').forEach((btn) => {
+            btn.disabled = false;
+          });
+        });
+
+        wavesurfer.on('finish', function () {
+          const playIcon = document.querySelector('#playPause i');
+          if (playIcon) {
+            playIcon.className = 'fas fa-play';
+          }
+        });
+      }
+
+      // Add iOS audio context handling
+      if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+        document.addEventListener(
+          'touchstart',
+          function () {
+            const context = window.AudioContext || window.webkitAudioContext;
+            if (context) {
+              const audioContext = new context();
+              if (audioContext.state === 'suspended') {
+                audioContext.resume();
+              }
+            }
+          },
+          false,
+        );
+      }
+
+      // Modify your audio file handling
+      $('#audioInput').change(function (e) {
+        const files = e.target.files;
+        if (files.length > 0) {
+          const file = e.target.files[0];
+          const blob = URL.createObjectURL(file);
+          if (!wavesurfer) {
+            initWaveSurfer();
+          }
+          if (wavesurfer) {
+            document.getElementById('placeholder').style.display = 'none';
+            // Add loading handler for iOS
+            // wavesurfer.on('loading', function (progress) {
+            //   if (progress === 100) {
+            //     setTimeout(() => {
+            //       wavesurfer.setVolume(1);
+            //     }, 100);
+            //   }
+            // });
+            wavesurfer.load(blob);
+          }
+          isLoadedAudio = true;
+        } else {
+          document.getElementById('placeholder').style.display = 'flex';
+          wavesurfer.destroy();
+          wavesurfer = null;
+        }
+      });
+
+      // Enhance playback controls with better error handling and iOS compatibility
+      const playbackControls = {
+        // Play/Pause button enhancement (existing code improved)
+        initPlayPause: () => {
+          document.getElementById('playPause').addEventListener('click', async () => {
+            const playButton = document.getElementById('playPause');
+            const playIcon = playButton.querySelector('i');
+
+            if (!isLoadedAudio || !wavesurfer) {
+              console.warn('No audio loaded');
+              return;
+            }
+
+            try {
+              if (wavesurfer.isPlaying()) {
+                await wavesurfer.pause();
+                playIcon.className = 'fas fa-play';
+              } else {
+                // iOS specific handling
+                if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                  wavesurfer.setVolume(1);
+                }
+                await wavesurfer.play();
+                playIcon.className = 'fas fa-pause';
+              }
+            } catch (error) {
+              console.error('Playback control error:', error);
+              playIcon.className = 'fas fa-play';
+            }
+          });
+        },
+
+        // Forward button enhancement
+        initForward: () => {
+          document
+            .querySelector('button.playback-btn#forward')
+            .addEventListener('click', async () => {
+              if (!isLoadedAudio || !wavesurfer) {
+                console.warn('No audio loaded');
+                return;
+              }
+
+              try {
+                const currentTime = wavesurfer.getCurrentTime();
+                const duration = wavesurfer.getDuration();
+                const newTime = Math.min(currentTime + 10, duration);
+
+                await wavesurfer.setTime(newTime);
+
+                // Update progress bar
+                const progress = (newTime / duration) * 100;
+                $('.progress-bar').css('width', `${progress}%`);
+
+                // Optional: Display time jump feedback
+                showTimeJumpFeedback('forward');
+              } catch (error) {
+                console.error('Forward control error:', error);
+              }
+            });
+        },
+
+        // Backward button enhancement
+        initBackward: () => {
+          document
+            .querySelector('button.playback-btn#backward')
+            .addEventListener('click', async () => {
+              if (!isLoadedAudio || !wavesurfer) {
+                console.warn('No audio loaded');
+                return;
+              }
+
+              try {
+                const currentTime = wavesurfer.getCurrentTime();
+                const newTime = Math.max(currentTime - 10, 0);
+
+                await wavesurfer.setTime(newTime);
+
+                // Update progress bar
+                const progress = (newTime / wavesurfer.getDuration()) * 100;
+                $('.progress-bar').css('width', `${progress}%`);
+
+                // Optional: Display time jump feedback
+                showTimeJumpFeedback('backward');
+              } catch (error) {
+                console.error('Backward control error:', error);
+              }
+            });
+        },
+
+        // Stop button enhancement
+        initStop: () => {
+          document.querySelector('button.playback-btn#stop').addEventListener('click', async () => {
+            if (!isLoadedAudio || !wavesurfer) {
+              console.warn('No audio loaded');
+              return;
+            }
+
+            try {
+              await wavesurfer.stop();
+              await wavesurfer.setTime(0);
+
+              // Reset play button icon
+              const playIcon = document.querySelector('#playPause i');
+              if (playIcon) {
+                playIcon.className = 'fas fa-play';
+              }
+
+              // Reset progress bar
+              $('.progress-bar').css('width', '0%');
+            } catch (error) {
+              console.error('Stop control error:', error);
+            }
+          });
+        },
+      };
+
+      // Optional: Add visual feedback for time jumps
+      function showTimeJumpFeedback(direction) {
+        const feedbackEl = document.createElement('div');
+        feedbackEl.className = 'time-jump-feedback';
+        feedbackEl.textContent = direction === 'forward' ? '+10s' : '-10s';
+
+        // Add CSS for the feedback element
+        feedbackEl.style.cssText = `
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    animation: fadeOut 0.5s forwards;
+    z-index: 1000;
+  `;
+
+        document.querySelector('#waveform').appendChild(feedbackEl);
+
+        // Remove the feedback element after animation
+        setTimeout(() => {
+          feedbackEl.remove();
+        }, 500);
+      }
+
+      // Add CSS for the Time jump feedback animation
+      const Timejumpfeedbackanimation_styleSheet = document.createElement('style');
+      Timejumpfeedbackanimation_styleSheet.textContent = `
+  @keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  .playback-btn {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .playback-btn:active {
+    transform: scale(0.95);
+  }
+
+  .playback-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Add ripple effect */
+  .playback-btn::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+    background-repeat: no-repeat;
+    background-position: 50%;
+    transform: scale(10, 10);
+    opacity: 0;
+    transition: transform .5s, opacity 1s;
+  }
+
+  .playback-btn:active::after {
+    transform: scale(0, 0);
+    opacity: .3;
+    transition: 0s;
+  }
+`;
+      document.head.appendChild(Timejumpfeedbackanimation_styleSheet);
+
+      // Initialize all controls
+      function initializePlaybackControls() {
+        playbackControls.initPlayPause();
+        playbackControls.initForward();
+        playbackControls.initBackward();
+        playbackControls.initStop();
+      }
+
+      // Call this after wavesurfer is initialized
+      initializePlaybackControls();
+
+      // // Modify your play/pause button handler
+      // document.getElementById('playPause').addEventListener('click', async () => {
+      //   const playButton = document.getElementById('playPause');
+      //   const playIcon = playButton.querySelector('i');
+
+      //   try {
+      //     if (!wavesurfer) return;
+
+      //     if (wavesurfer.isPlaying()) {
+      //       await wavesurfer.pause();
+      //       playIcon.className = 'fas fa-play';
+      //     } else {
+      //       // Add this check for iOS
+      //       if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+      //         wavesurfer.setVolume(1);
+      //       }
+      //       await wavesurfer.play();
+      //       playIcon.className = 'fas fa-pause';
+      //     }
+      //   } catch (error) {
+      //     console.log('Playback failed:', error);
+      //   }
+      // });
+
+      // $('button.playback-btn#forward').click(() => {
+      //   if (!isLoadedAudio) return;
+      //   wavesurfer.getCurrentTime() > 0 && wavesurfer.setTime(wavesurfer.getCurrentTime() + 10);
+      // });
+
+      // $('button.playback-btn#backward').click(() => {
+      //   if (!isLoadedAudio) return;
+      //   wavesurfer.setTime(wavesurfer.getCurrentTime() - 10);
+      // });
+
+      // $('button.playback-btn#stop').click(() => {
+      //   if (!isLoadedAudio) return;
+      //   if (wavesurfer) {
+      //     wavesurfer.stop();
+      //     wavesurfer.setTime(0);
+      //   }
+      // });
+
+      // Add this JavaScript for the header functionality
+
+      let isFileSaved = true;
+      const fileStatus = document.getElementById('saveStatus');
+      const fileName = document.getElementById('currentFileName');
+
+      function updateFileStatus(saved) {
+        isFileSaved = saved;
+        fileStatus.className = `file-status ${saved ? '' : 'unsaved'}`;
+        fileStatus.title = saved ? 'Saved' : 'Unsaved changes';
+      }
+
+      // Toggle panels
+      document.getElementById('toggleAudio').addEventListener('click', () => {
+        const waveformContainer = document.querySelector('.waveform-container');
+        waveformContainer.style.display =
+          waveformContainer.style.display === 'none' ? 'block' : 'none';
+      });
+
+      document.getElementById('togglePalette').addEventListener('click', () => {
+        const palette = document.querySelector('.quick-access');
+        palette.style.display = palette.style.display === 'none' ? 'flex' : 'none';
+      });
+
+      // Initialize tooltips
+      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+      tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+    </script>
+  </body>
+</html>

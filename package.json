@@ -22,10 +22,13 @@
     "webpack-dev-server": "^5.1.0"
   },
   "dependencies": {
+    "@codemirror/theme-one-dark": "^6.1.2",
     "lite-server": "^2.6.1",
     "localforage": "^1.10.0",
     "lodash.assign": "v4.1.0",
+    "pixi.js": "^8.6.4",
     "segmentit": "2.0.3",
+    "wavesurfer.js": "^7.8.11",
     "web-audio-beat-detector": "^8.2.19"
   },
   "keywords": [],

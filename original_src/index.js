@@ -3567,6 +3567,8 @@ class AudioVisualizer {
     }
   }
 }
+import WaveSurfer from 'wavesurfer.js';
+// import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
 
 class waveSurferController {
   constructor(audioElement) {
@@ -3575,19 +3577,92 @@ class waveSurferController {
   }
 
   setupWavesurfer() {
+    // Initialize the Regions plugin
+    // const regions = RegionsPlugin.create();
     // Initialize Wavesurfer.js
     this.wavesurfer = WaveSurfer.create({
       container: '#wavesurfer_color_preview',
       media: this.audio,
-      responsive: true,
-      normalize: false,
-      interact: true,
-      mediaControls: false,
+      waveColor: 'rgb(200, 0, 200)',
+      progressColor: 'rgb(100, 0, 100)',
+      // plugins: [regions],
     });
+
+    // // Give regions a random color when they are created
+    // const random = (min, max) => Math.random() * (max - min) + min;
+    // const randomColor = () => `rgba(${random(0, 255)}, ${random(0, 255)}, ${random(0, 255)}, 0.5)`;
 
     this.wavesurfer.on('ready', () => {
       this.visualizerReady = true;
     });
+
+    // this.wavesurfer.on('decode', () => {
+    //   // Regions
+    //   regions.addRegion({
+    //     start: 0,
+    //     end: 8,
+    //     content: 'Resize me',
+    //     color: randomColor(),
+    //     drag: false,
+    //     resize: true,
+    //   });
+    //   regions.addRegion({
+    //     start: 9,
+    //     end: 10,
+    //     content: 'Cramped region',
+    //     color: randomColor(),
+    //     minLength: 1,
+    //     maxLength: 10,
+    //   });
+    //   regions.addRegion({
+    //     start: 12,
+    //     end: 17,
+    //     content: 'Drag me',
+    //     color: randomColor(),
+    //     resize: false,
+    //   });
+
+    //   // Markers (zero-length regions)
+    //   regions.addRegion({
+    //     start: 19,
+    //     content: 'Marker',
+    //     color: randomColor(),
+    //   });
+    //   regions.addRegion({
+    //     start: 20,
+    //     content: 'Second marker',
+    //     color: randomColor(),
+    //   });
+    // });
+
+    // regions.enableDragSelection({
+    //   color: 'rgba(255, 0, 0, 0.1)',
+    // });
+
+    // regions.on('region-updated', (region) => {
+    //   console.log('Updated region', region);
+    // });
+    // let activeRegion = null;
+    // regions.on('region-in', (region) => {
+    //   console.log('region-in', region);
+    //   activeRegion = region;
+    // });
+    // regions.on('region-out', (region) => {
+    //   console.log('region-out', region);
+    //   if (activeRegion === region) {
+    //     activeRegion = null;
+    //   }
+    // });
+    // regions.on('region-clicked', (region, e) => {
+    //   e.stopPropagation(); // prevent triggering a click on the waveform
+    //   activeRegion = region;
+    //   region.play();
+    //   region.setOptions({ color: randomColor() });
+    // });
+    // // Reset the active region when the user clicks anywhere in the waveform
+    // this.wavesurfer.on('interaction', () => {
+    //   activeRegion = null;
+    // });
   }
 
   loadAudio(url) {
