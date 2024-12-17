@@ -2,7 +2,7 @@
  * @Author: freysu
  * @Date: 2024-11-21 04:20:51
  * @LastEditors: freysu
- * @LastEditTime: 2024-12-14 00:57:26
+ * @LastEditTime: 2024-12-17 17:15:34
  * @Description: file content
 -->
 <!DOCTYPE html>
@@ -53,7 +53,7 @@
         </div>
       </div>
       <!-- Header -->
-      <header class="app-header py-3">
+      <header class="app-header">
         <div class="container">
           <div class="d-flex justify-content-between align-items-center">
             <h1 class="app-title mb-0">Mayday.Blue 预设工具</h1>
@@ -67,7 +67,8 @@
                   data-bs-target="#generate-tool"
                   role="tab"
                 >
-                  生成预设代码
+                <i class="material-icons">tab</i>
+                选项卡: 预设代码生成器
                 </button>
               </li>
               <li class="nav-item">
@@ -77,12 +78,25 @@
                   data-bs-target="#color-visualizer"
                   role="tab"
                 >
-                  可视化颜色预设
+                <i class="material-icons">tab</i>
+                选项卡: 预设代码可视化工具
                 </button>
               </li>
             </ul>
 
             <ul class="nav nav-tabs mb-0" role="tablist">
+              <li class="nav-item">
+                <a
+                  class="btn btn-outline-info rounded-pill"
+                  href="./editor.html"
+                  target="_blank"
+                  id="openEditor"
+                  title="预设代码编辑器"
+                >
+                  <i class="material-icons">edit</i>
+                  <b>预设代码编辑器</b>
+                </a>
+              </li>
               <li class="nav-item">
                 <a
                   class="btn btn-outline-danger rounded-pill"
@@ -98,7 +112,7 @@
               <li class="nav-item">
                 <div class="dropdown">
                   <button
-                    class="btn btn-secondary dropdown-toggle"
+                    class="btn btn-outline-secondary  rounded-pill dropdown-toggle"
                     type="button"
                     id="themeDropdown"
                     data-bs-toggle="dropdown"
@@ -135,7 +149,7 @@
       </header>
 
       <!-- Main Content -->
-      <main class="flex-grow-1 py-4">
+      <main class="flex-grow-1">
         <div class="container">
           <!-- Generate Tool Tab Content -->
           <div class="tab-content">
@@ -1087,7 +1101,7 @@
           </div>
         </div>
       </main>
-      <footer class="app-footer py-3">
+      <footer class="app-footer">
         <div class="container text-center">
           <p>
             版权所有 © 2024

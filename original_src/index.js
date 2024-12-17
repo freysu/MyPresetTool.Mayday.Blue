@@ -4594,14 +4594,47 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 <h6>网站功能简介：</h6>
 <ul>
-  <li><strong>生成工具🎨：</strong>提供你想做预设的音频文件,轻松配置荧光棒的颜色主题并生成 <strong><code style="font-family: 'Lato', sans-serif;">Mayday.Blue</code></strong> 场控预设代码。</li>
-  <li><strong>实时预览👀：</strong>可以把生成的预设代码添加进来，实时展示荧光棒使用到的电脑颜色效果。</li>
+  <li><strong>预设代码生成器：</strong>提供你想做预设的音频文件,轻松配置荧光棒的颜色主题并生成 <strong><code style="font-family: 'Lato', sans-serif;">Mayday.Blue</code></strong> 场控预设代码。</li>
+  <li><strong>预设代码可视化工具：</strong>可以把生成的预设代码添加进来，实时展示荧光棒使用到的电脑颜色效果。</li>
+  <li><strong>预设代码编辑器：</strong>请访问<a
+                  class="link-info"
+                  target="_blank"
+                  href="./editor.html"
+                  title="预设代码编辑器"
+                ><strong>预设代码编辑器</strong></a>页面</li>
 </ul>
 
 <h6>功能详细介绍：</h6>
 <ul>
   <li>生成工具🎨：请看<strong>预设代码生成器</strong>选项卡的使用指南</li>
-  <li>实时预览👀：请看<strong>预设可视化工具</strong>选项卡的使用指南</li>
+  <li>实时预览👀：请看<strong>预设代码可视化工具</strong>选项卡的使用指南</li>
+  <li>代码编辑✍️：
+<ol>
+  <li>
+    <strong>音频波形可视化</strong
+    >：上传音频文件后，编辑器会显示音频的波形图，方便你直观地查看音频结构。
+  </li>
+  <li>
+    <strong>颜色快速插入</strong
+    >：在编辑器下方的快速访问工具栏中有一个颜色调色板，点击任意颜色按钮，即可将对应的颜色代码自动插入到编辑器中，方便你根据节奏为荧光棒卡点。
+  </li>
+  <li>
+    <strong>语法高亮</strong>：编辑器支持语法高亮，代码格式为
+    <code>时间戳,颜色代码 //注释</code>，例如
+    <code>1,red4 //红色</code
+    >。时间戳、颜色代码和注释都会被高亮显示，便于阅读和编辑。
+  </li>
+  <li><strong>自动补全</strong>：编辑器支持自动补全功能，提高编码效率。</li>
+  <li>
+    <strong>代码校验与格式化</strong
+    >：编辑器能够实时校验和格式化你输入的预设代码，如果有错误会立即提示，并给出修改建议。
+  </li>
+  <li>
+    <strong>文件管理</strong
+    >：支持导入和导出预设代码，同时具备自动保存和备份功能，确保你的工作不会丢失。
+  </li>
+</ol>
+  </li>
 </ul>
 
 <h6>重要细节：</h6>
@@ -4655,7 +4688,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 {
                   element: '#fileFormCollapse',
                   popover: {
-                    description: `<p>要是想上传自己电脑里的音乐，就点 “上传本地音乐”（点了会变蓝）。然后点 “浏览...”，从自己电脑里选音乐文件就行，像 MP3、WAV、FLAC 这些格式都可以。</p><span class="text-muted">一万首的mp3 一万次疯狂的爱 灭不了一个渺小的孤单</span><img src="https://i.imgur.com/JqJyJqJ.png" width="300" height="auto"> </img>`,
+                    description: `<p>要是想上传自己电脑里的音乐，就点 “上传本地音乐”（点了会变蓝）。然后点 “浏览...”，从自己电脑里选音乐文件就行，像 MP3、WAV、FLAC 这些格式都可以。</p><span class="text-muted">一万首的mp3 一万次疯狂的爱 灭不了一个渺小的孤单</span>`,
                     position: 'right',
                   },
                 },
@@ -4765,14 +4798,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                   popover: {
                     description:
                       '如果你想把代码保存下来，以防万一，就点击这个“下载”按钮，它会把代码保存为一个方便的.json文件哦。',
-                    position: 'bottom',
-                  },
-                },
-                // 可视化
-                {
-                  element: '#guide1Heading',
-                  popover: {
-                    description: '这是如何预览已有的预设代码的使用指南。',
                     position: 'bottom',
                   },
                 },
