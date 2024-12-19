@@ -1560,7 +1560,53 @@ const completeStep = (currentStepId, nextStepId) => {
 };
 
 import localforage from 'localforage';
+// 初始化 localForage 配置
+localforage.config({
+  name: 'mayday_blue_tools',
+  storeName: 'app_cache',
+});
 import { guess } from 'web-audio-beat-detector';
+
+async function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), 10000);
+  try {
+    const response = await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    throw error;
+  }
+}
+async function getCountryByIP() {
+  try {
+    const cachedCountry = sessionStorage.getItem('country');
+    if (cachedCountry) {
+      return cachedCountry;
+    }
+
+    const geoResponse = await fetchWithTimeout('https://api.ip.sb/geoip/');
+    if (!geoResponse.ok) {
+      throw new Error('Failed to fetch geolocation data');
+    }
+    const geoData = await geoResponse.json();
+    if (!geoData || !geoData.country_code) {
+      throw new Error('Invalid geolocation data');
+    }
+
+    // 将国家代码存储到 localForage 中
+    sessionStorage.setItem('country', geoData.country_code);
+    return geoData.country_code;
+  } catch (error) {
+    console.error('Error fetching country by IP:', error);
+    return 'US'; // 默认为国外
+  }
+}
+
 class AudioAnalyzer {
   constructor() {
     this.state = {
@@ -1763,9 +1809,16 @@ class AudioAnalyzer {
             return;
           }
 
-          const searchUrl = `https://netease-cloud-music-api-freysu.glitch.me/cloudsearch?keywords=${encodeURIComponent(
-            keyword,
-          )}&type=${searchType}&limit=100&offset=0`;
+          const userCountry = await getCountryByIP();
+          const searchUrl =
+            userCountry === 'CN'
+              ? `https://1259025808-lghsuwkgbh.ap-guangzhou.tencentscf.com/cloudsearch?keywords=${encodeURIComponent(
+                  keyword,
+                )}&type=${searchType}&limit=100&offset=0`
+              : `https://netease-cloud-music-api-freysu.glitch.me/cloudsearch?keywords=${encodeURIComponent(
+                  keyword,
+                )}&type=${searchType}&limit=100&offset=0`;
+
           const response = await fetch(searchUrl);
 
           if (!response.ok) {
@@ -1786,6 +1839,8 @@ class AudioAnalyzer {
             });
           }
         } catch (error) {
+          console.log('error: ', error);
+
           handleSearchError(error);
         } finally {
           e.target.disabled = false;
@@ -1963,7 +2018,7 @@ class AudioAnalyzer {
         return;
       }
       const songUrl = `https://api.cenguigui.cn/api/netease/music_v1.php?id=${songId}&type=json&level=standard`;
-      const response = await fetch(songUrl);
+      const response = await fetchWithTimeout(songUrl);
       const data = await response.json();
       if (data.data && data.data.name != null && data.data.url) {
         console.log('data.data: ', data.data);
@@ -1988,7 +2043,7 @@ class AudioAnalyzer {
       this.state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
       // 从网络获取音频文件
-      const response = await fetch(url);
+      const response = await fetchWithTimeout(url);
       const arrayBuffer = await response.arrayBuffer();
       this.state.audioBuffer = await this.state.audioContext.decodeAudioData(arrayBuffer);
 
