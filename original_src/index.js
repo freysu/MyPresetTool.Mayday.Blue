@@ -1735,6 +1735,9 @@ class AudioAnalyzer {
   }
 
   async handleNetworkAudioEntry() {
+    let abortController = new AbortController();
+    let signal = abortController.signal;
+
     showModal(
       '在线音乐搜索',
       `
@@ -1767,6 +1770,11 @@ class AudioAnalyzer {
         dismissible: true,
       },
     );
+
+    document.getElementById('notificationModal').addEventListener('hidden.bs.modal', function (event) {
+      // 当模态框隐藏时，中断请求
+      abortController.abort();
+    });
 
     const searchInput = document.getElementById('searchInput');
     const searchButton = document.getElementById('searchButton');
@@ -1819,7 +1827,7 @@ class AudioAnalyzer {
                   keyword,
                 )}&type=${searchType}&limit=100&offset=0`;
 
-          const response = await fetch(searchUrl);
+          const response = await fetch(searchUrl, { signal }); // 将信号对象传递给 fetch 请求
 
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -1839,8 +1847,11 @@ class AudioAnalyzer {
             });
           }
         } catch (error) {
+          if (error.name === 'AbortError') {
+            // 请求被中断，不显示错误通知
+            return;
+          }
           console.log('error: ', error);
-
           handleSearchError(error);
         } finally {
           e.target.disabled = false;
