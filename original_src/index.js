@@ -4857,7 +4857,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                   },
                 },
               ];
-              const driver = window.driver.js.driver;
+              const driver = window.driver && window.driver.js.driver;
               // 启动 description.js 引导
               setTimeout(() => {
                 const driverObj = driver({
