@@ -94,9 +94,7 @@ out
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-backup/
 .vscode/
-test_js/
 
-webpack_dist/[0-9]*.bundle.js.map
-webpack_dist/bundle.js.map
+dist/[0-9]*.bundle.js.map
+dist/bundle.js.map

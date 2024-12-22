@@ -2,7 +2,7 @@
  * @Author: freysu
  * @Date: 2024-11-18 05:05:32
  * @LastEditors: freysu
- * @LastEditTime: 2024-12-20 19:58:52
+ * @LastEditTime: 2024-12-22 21:35:36
  * @Description: file content
  */
 // const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
@@ -10,13 +10,13 @@
 const path = require('path');
 
 module.exports = {
-  entry: './original_src/index.js',
+  entry: './js/index.js',
   mode: 'production',
   // mode: 'development',
   // devtool: 'inline-source-map',
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'webpack_dist'),
+    path: path.resolve(__dirname, 'dist'),
   },
   module: {
     rules: [

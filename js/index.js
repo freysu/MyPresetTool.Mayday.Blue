@@ -1771,10 +1771,12 @@ class AudioAnalyzer {
       },
     );
 
-    document.getElementById('notificationModal').addEventListener('hidden.bs.modal', function (event) {
-      // 当模态框隐藏时，中断请求
-      abortController.abort();
-    });
+    document
+      .getElementById('notificationModal')
+      .addEventListener('hidden.bs.modal', function (event) {
+        // 当模态框隐藏时，中断请求
+        abortController.abort();
+      });
 
     const searchInput = document.getElementById('searchInput');
     const searchButton = document.getElementById('searchButton');
@@ -1813,6 +1815,7 @@ class AudioAnalyzer {
           // Check cache first
           const cachedResults = await localforage.getItem(cacheKey);
           if (cachedResults) {
+            console.log('Using cached data for keyword:', keyword);
             displaySearchResults(cachedResults, keyword);
             return;
           }
@@ -2017,7 +2020,7 @@ class AudioAnalyzer {
     }
   }
 
-  async getNetworkAudioInfo(songId) {
+  async getNetworkAudioInfo_old(songId) {
     const cacheKey = `audioInfo_${songId}`;
     try {
       // 检查缓存中是否已有结果
@@ -2028,6 +2031,7 @@ class AudioAnalyzer {
         this.handleNetworkAudioLrc(cachedResult.lyric);
         return;
       }
+
       const songUrl = `https://api.cenguigui.cn/api/netease/music_v1.php?id=${songId}&type=json&level=standard`;
       const response = await fetchWithTimeout(songUrl);
       const data = await response.json();
@@ -2037,6 +2041,36 @@ class AudioAnalyzer {
         this.handleNetworkAudioLrc(data.data.lyric);
         // 将结果缓存起来
         await localforage.setItem(cacheKey, data.data);
+      } else {
+        console.error('No song URL found.');
+      }
+    } catch (error) {
+      console.error('Error fetching song URL:', error);
+    }
+  }
+
+  async getNetworkAudioInfo(songId) {
+    const cacheKey = `audioInfo_${songId}`;
+    try {
+      // 检查缓存中是否已有结果
+      const cachedResult = await localforage.getItem(cacheKey);
+      if (cachedResult) {
+        console.log('Using cached data for songId:', songId);
+        this.handleNetworkAudioSrc(cachedResult.music_url);
+        this.handleNetworkAudioLrc(cachedResult.lrc);
+        return;
+      }
+
+      const songUrl = `https://api.cenguigui.cn/api/music/netease/WyY_Dg.php?type=json&id=${songId}`;
+      const response = await fetchWithTimeout(songUrl);
+      const data = await response.json();
+
+      if (data.code == 200 && data.title != null && data.music_url) {
+        console.log('data: ', data);
+        this.handleNetworkAudioSrc(data.music_url);
+        this.handleNetworkAudioLrc(data.lrc);
+        // 将结果缓存起来
+        await localforage.setItem(cacheKey, data);
       } else {
         console.error('No song URL found.');
       }
@@ -2448,12 +2482,12 @@ class AudioAnalyzer {
     } catch (error) {
       my_debugger.showError(`Analysis failed: ${error.message}`, error);
 
-      // // Error notification
-      // showNotification('分析错误 🎧', error.message, {
-      //   type: 'error',
-      //   duration: 5000,
-      //   dismissible: true
-      // })
+      // Error notification
+      showNotification('分析错误 🎧', error.message, {
+        type: 'error',
+        duration: 5000,
+        dismissible: true,
+      });
     } finally {
       this.state.isAnalyzing = false;
       this.updateAnalyzeButtonState();
@@ -2491,8 +2525,7 @@ class AudioAnalyzer {
 
       let sentimentAnalyzer = {};
       if (this.state.lyrics) {
-        sentimentAnalyzer = sentimentAnalyzer = (await import('./sentiment-zh_cn_web.min.js'))
-          .default;
+        sentimentAnalyzer = (await import('./vendor/sentiment-zh_cn_web.min.js')).default;
       }
       const sortedLyrics = this.state.lyrics
         ? this.state.lyrics.scripts.sort((a, b) => a.start - b.start)
@@ -2571,11 +2604,16 @@ class AudioAnalyzer {
                 lastOffEffect = normalizedTime;
               }
 
-              console.log(
-                `---\n[歌词]: ${
-                  currentLyric ? currentLyric.text : '无'
-                }, [情感分数]: ${sentimentScore},\n [时间]: ${normalizedTime}, [颜色]: ${colorCode},\n [归一化频率]: ${normalizedFrequency}, [归一化幅度]: ${normalizedAmplitude}\n---\n`,
-              );
+              const processingLog = `\n[歌词]: ${
+                currentLyric ? currentLyric.text : '无'
+              },\n[情感分数]: ${sentimentScore},\n [时间]: ${normalizedTime},\n[颜色]: ${colorCode},\n[归一化频率]: ${normalizedFrequency},\n[归一化幅度]: ${normalizedAmplitude}\n`;
+              // console.log('processingLog: ', processingLog);
+
+              // 将处理日志添加到 #statusLogger 元素中
+              const statusLogger = document.getElementById('statusLogger');
+              const logElement = document.createElement('div');
+              logElement.textContent = processingLog;
+              statusLogger.appendChild(logElement);
 
               if (currentLyric) {
                 timelineData.push(`${normalizedTime},${colorCode} // ${currentLyric.text}`);
