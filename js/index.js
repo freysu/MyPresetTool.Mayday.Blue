@@ -2021,11 +2021,11 @@ class AudioAnalyzer {
   }
 
   async getNetworkAudioInfo_old(songId) {
-    const cacheKey = `audioInfo_${songId}`;
+    const cacheKey = `audioInfo_old_${songId}`;
     try {
       // 检查缓存中是否已有结果
       const cachedResult = await localforage.getItem(cacheKey);
-      if (cachedResult) {
+      if (cachedResult && cachedResult.url && cachedResult.lyric) {
         console.log('Using cached data for songId:', songId);
         this.handleNetworkAudioSrc(cachedResult.url);
         this.handleNetworkAudioLrc(cachedResult.lyric);
@@ -2054,7 +2054,7 @@ class AudioAnalyzer {
     try {
       // 检查缓存中是否已有结果
       const cachedResult = await localforage.getItem(cacheKey);
-      if (cachedResult) {
+      if (cachedResult && cachedResult.music_url && cachedResult.lrc) {
         console.log('Using cached data for songId:', songId);
         this.handleNetworkAudioSrc(cachedResult.music_url);
         this.handleNetworkAudioLrc(cachedResult.lrc);
@@ -2536,6 +2536,8 @@ class AudioAnalyzer {
       const timelineData = [];
       let currentIndex = 0;
       //import sentimentAnalyzer from './sentiment-zh_cn_web.min.js';
+
+      const fragment = document.createDocumentFragment();
       const processChunk = async (startIndex) => {
         try {
           const chunkSize = 100; // Process 100 intervals at a time
@@ -2610,10 +2612,9 @@ class AudioAnalyzer {
               // console.log('processingLog: ', processingLog);
 
               // 将处理日志添加到 #statusLogger 元素中
-              const statusLogger = document.getElementById('statusLogger');
               const logElement = document.createElement('div');
               logElement.textContent = processingLog;
-              statusLogger.appendChild(logElement);
+              fragment.appendChild(logElement);
 
               if (currentLyric) {
                 timelineData.push(`${normalizedTime},${colorCode} // ${currentLyric.text}`);
@@ -2637,7 +2638,8 @@ class AudioAnalyzer {
             }
             this.updateProgress((i / totalIntervals) * 100);
           }
-
+          // 将 DocumentFragment 添加到 #statusLogger 元素中
+          statusLogger.appendChild(fragment);
           currentIndex += chunkSize;
           if (currentIndex < totalIntervals) {
             requestAnimationFrame(() => processChunk(currentIndex));
@@ -2755,6 +2757,7 @@ class AudioAnalyzer {
 
   clearOutput() {
     document.getElementById('output-result').value = '';
+    document.getElementById('statusLogger').innerHTML = '';
     this.updateProgress(0);
   }
 
