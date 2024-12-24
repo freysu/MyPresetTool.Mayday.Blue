@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@codemirror/theme-one-dark": "^6.1.2",
+    "dompurify": "^3.2.3",
     "lite-server": "^2.6.1",
     "localforage": "^1.10.0",
     "lodash.assign": "v4.1.0",

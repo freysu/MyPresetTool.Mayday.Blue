@@ -1566,7 +1566,7 @@ localforage.config({
   storeName: 'app_cache',
 });
 import { guess } from 'web-audio-beat-detector';
-
+import DOMPurify from 'dompurify';
 async function fetchWithTimeout(url, options = {}) {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), 10000);
@@ -1809,7 +1809,7 @@ class AudioAnalyzer {
         });
 
         e.target.disabled = true;
-        const cacheKey = `${keyword}_${searchType}`;
+        const cacheKey = `searchResults_${keyword}_${searchType}`;
 
         try {
           // Check cache first
@@ -1949,16 +1949,20 @@ class AudioAnalyzer {
                   <div class="col">
                     <div class="d-flex justify-content-between align-items-start">
                       <div>
-                        <h5 class="card-title mb-2">${highlightKeyword(song.name, [keyword], {
-                          className: 'highlight-blue',
-                          wholeWord: false,
-                          caseSensitive: false,
-                        })}</h5>
+                        <h5 class="card-title mb-2">${highlightKeyword(
+                          DOMPurify.sanitize(song.name),
+                          [keyword],
+                          {
+                            className: 'highlight-blue',
+                            wholeWord: false,
+                            caseSensitive: false,
+                          },
+                        )}</h5>
                         <div class="text-body-secondary mb-1">
                           <i class="material-icons align-middle me-1" style="font-size: 16px;">person</i>
                           ${song.ar
                             .map((artist) =>
-                              highlightKeyword(artist.name, [keyword], {
+                              highlightKeyword(DOMPurify.sanitize(artist.name), [keyword], {
                                 className: 'highlight-blue',
                                 wholeWord: false,
                                 caseSensitive: false,
@@ -1968,7 +1972,7 @@ class AudioAnalyzer {
                         </div>
                         <div class="text-body-secondary mb-1">
                           <i class="material-icons align-middle me-1" style="font-size: 16px;">album</i>
-                          ${highlightKeyword(song.al.name, [keyword], {
+                          ${highlightKeyword(DOMPurify.sanitize(song.al.name), [keyword], {
                             className: 'highlight-blue',
                             wholeWord: false,
                             caseSensitive: false,
@@ -1981,7 +1985,7 @@ class AudioAnalyzer {
                       </div>
                       <div class="ms-3">
                         <button class="btn btn-primary btn-sm select-song-btn rounded-pill px-3"
-                                data-songid="${song.id}">
+                                data-songid="${DOMPurify.sanitize(song.id)}">
                           <i class="material-icons align-middle me-1">add</i>选择
                         </button>
                       </div>
@@ -2020,8 +2024,135 @@ class AudioAnalyzer {
     }
   }
 
+  async getNetworkAudioInfo(songId) {
+    const cacheKeyBase = `songInfo_${songId}`;
+    try {
+      // 检查缓存中是否已有结果
+      const cachedResult = await localforage.getItem(cacheKeyBase);
+      if (cachedResult && cachedResult.lrc && cachedResult.singer && cachedResult.title) {
+        console.log('Using cached data for songId:', songId);
+        this.handleNetworkAudioSrc(cachedResult.music_url, songId);
+        this.handleNetworkAudioLrc(cachedResult.lrc);
+        return;
+      }
+
+      const songUrl = `https://api.cenguigui.cn/api/music/netease/WyY_Dg.php?type=json&id=${songId}`;
+      const response = await fetchWithTimeout(songUrl);
+      const data = await response.json();
+      if (data.code === 200 && data.title !== null && data.music_url) {
+        console.log('data: ', data);
+
+        // 提取需要保存的字段
+        const songInfo = {
+          lrc: data.lrc,
+          singer: data.singer,
+          title: data.title,
+          music_url: data.music_url, // 保留 music_url 以便后续使用
+        };
+
+        this.handleNetworkAudioSrc(data.music_url, songId);
+        this.handleNetworkAudioLrc(data.lrc);
+        await localforage.setItem(cacheKeyBase, songInfo);
+      } else {
+        console.error('No song URL found.');
+      }
+    } catch (error) {
+      console.error('Error fetching song URL:', error);
+    }
+  }
+
+  async handleNetworkAudioSrc(url, songId) {
+    try {
+      // 初始化 AudioContext
+      if (this.state.audioContext) {
+        await this.cleanup();
+      }
+      this.state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+      // 缓存音频
+      const audioBlob = await cacheAudio(url, `audio_${songId}`);
+
+      const arrayBuffer = await audioBlob.arrayBuffer();
+      this.state.audioBuffer = await this.state.audioContext.decodeAudioData(arrayBuffer);
+
+      // 使用 web-audio-beat-detector 获取元数据
+      this.state.metadata = await this.getMetadata(this.state.audioBuffer);
+
+      // 更新 UI
+      this.updateFileInfo(
+        'audioFileInfo',
+        { name: '网络音频', size: this.state.audioBuffer.length },
+        this.state.metadata,
+      );
+      this.updateAnalyzeButtonState();
+      showNotification('你的音乐准备好了', '下一步：配置主题颜色方案~', {
+        type: 'success',
+        duration: 3000,
+      });
+      document.getElementById('processing').classList.remove('d-none');
+      this.showStatusNotStarted();
+    } catch (error) {
+      document.getElementById('processing').classList.add('d-none');
+      showNotification(
+        '哎呀，出错了！',
+        '音频加载失败，可能是网络问题或者文件格式不对。请检查后重试~',
+        {
+          type: 'error',
+          duration: 5000,
+        },
+      );
+      my_debugger.showError(`Error loading network audio: ${error.message}`, error);
+    }
+
+    async function cacheAudio(url, cacheKey = url) {
+      try {
+        // 检查音频是否已经被缓存
+        const cachedAudio = await localforage.getItem(cacheKey);
+        if (cachedAudio) {
+          console.log('音频已缓存，直接从缓存中加载');
+          return cachedAudio;
+        } else {
+          console.log('音频未缓存，从网络加载并缓存');
+          // 从网络加载音频
+          const response = await fetchWithTimeout(url);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const audioBlob = await response.blob();
+          // 将音频存储到缓存中
+          await localforage.setItem(cacheKey, audioBlob);
+          return audioBlob;
+        }
+      } catch (error) {
+        console.error('缓存音频时出错:', error);
+        throw error; // 重新抛出错误，以便调用者可以处理
+      }
+    }
+  }
+
+  async handleNetworkAudioLrc(text) {
+    try {
+      if (!String(text).startsWith('[0')) return;
+      this.state.lyrics = lrcParser(text);
+
+      // Update UI
+      // this.updateFileInfo('lrcFileInfo', file)
+      this.updateAnalyzeButtonState();
+      showNotification('成功', '加载LRC文件成功', {
+        type: 'success',
+        duration: 3000,
+      });
+    } catch (error) {
+      showNotification('错误', `加载LRC文件出错: ${error.message}`, {
+        type: 'error',
+        duration: 5000,
+      });
+      my_debugger.showError(`Error loading LRC file: ${error.message}`, error);
+    }
+  }
+
   async getNetworkAudioInfo_old(songId) {
-    const cacheKey = `audioInfo_old_${songId}`;
+    const cacheKey = `songInfo_old_${songId}}`;
     try {
       // 检查缓存中是否已有结果
       const cachedResult = await localforage.getItem(cacheKey);
@@ -2049,37 +2180,7 @@ class AudioAnalyzer {
     }
   }
 
-  async getNetworkAudioInfo(songId) {
-    const cacheKey = `audioInfo_${songId}`;
-    try {
-      // 检查缓存中是否已有结果
-      const cachedResult = await localforage.getItem(cacheKey);
-      if (cachedResult && cachedResult.music_url && cachedResult.lrc) {
-        console.log('Using cached data for songId:', songId);
-        this.handleNetworkAudioSrc(cachedResult.music_url);
-        this.handleNetworkAudioLrc(cachedResult.lrc);
-        return;
-      }
-
-      const songUrl = `https://api.cenguigui.cn/api/music/netease/WyY_Dg.php?type=json&id=${songId}`;
-      const response = await fetchWithTimeout(songUrl);
-      const data = await response.json();
-
-      if (data.code == 200 && data.title != null && data.music_url) {
-        console.log('data: ', data);
-        this.handleNetworkAudioSrc(data.music_url);
-        this.handleNetworkAudioLrc(data.lrc);
-        // 将结果缓存起来
-        await localforage.setItem(cacheKey, data);
-      } else {
-        console.error('No song URL found.');
-      }
-    } catch (error) {
-      console.error('Error fetching song URL:', error);
-    }
-  }
-
-  async handleNetworkAudioSrc(url) {
+  async handleNetworkAudioSrc_old(url) {
     try {
       // 初始化 AudioContext
       if (this.state.audioContext) {
@@ -2119,27 +2220,6 @@ class AudioAnalyzer {
         },
       );
       my_debugger.showError(`Error loading network audio: ${error.message}`, error);
-    }
-  }
-
-  async handleNetworkAudioLrc(text) {
-    try {
-      if (!String(text).startsWith('[0')) return;
-      this.state.lyrics = lrcParser(text);
-
-      // Update UI
-      // this.updateFileInfo('lrcFileInfo', file)
-      this.updateAnalyzeButtonState();
-      showNotification('成功', '加载LRC文件成功', {
-        type: 'success',
-        duration: 3000,
-      });
-    } catch (error) {
-      showNotification('错误', `加载LRC文件出错: ${error.message}`, {
-        type: 'error',
-        duration: 5000,
-      });
-      my_debugger.showError(`Error loading LRC file: ${error.message}`, error);
     }
   }
 
