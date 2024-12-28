@@ -1052,7 +1052,7 @@ class ThemeConfigForm {
                 <button type="button" class="btn btn-xs btn-outline-danger remove-color-btn"
                         data-section="${section}"
                         data-index="${index}">
-                    <i class="material-icons">delete</i>删除
+                    <i class="material-icons">delete</i>
                 </button>
             </div>
         `;
@@ -1541,6 +1541,43 @@ function convertTime(string) {
   return seconds;
 }
 
+function celebrate() {
+  const defaults = {
+    origin: { y: 0.7 },
+  };
+
+  function fire(particleRatio, opts) {
+    confetti({
+      ...defaults,
+      ...opts,
+      particleCount: Math.floor(200 * particleRatio),
+    });
+  }
+
+  fire(0.25, {
+    spread: 26,
+    startVelocity: 55,
+  });
+  fire(0.2, {
+    spread: 60,
+  });
+  fire(0.35, {
+    spread: 100,
+    decay: 0.91,
+    scalar: 0.8,
+  });
+  fire(0.1, {
+    spread: 120,
+    startVelocity: 25,
+    decay: 0.92,
+    scalar: 1.2,
+  });
+  fire(0.1, {
+    spread: 120,
+    startVelocity: 45,
+  });
+}
+
 /*
  * generate-tool
  */
@@ -1636,6 +1673,8 @@ class AudioAnalyzer {
       document.getElementById('statusNotStarted').classList.add('d-none');
       document.getElementById('statusProcessing').classList.add('d-none');
       document.getElementById('statusCompleted').classList.remove('d-none');
+
+      celebrate();
     };
   }
 
@@ -1822,7 +1861,7 @@ class AudioAnalyzer {
 
           const userCountry = await getCountryByIP();
           const searchUrl =
-            userCountry === 'CN'
+            userCountry === 'CN1'
               ? `https://1259025808-lghsuwkgbh.ap-guangzhou.tencentscf.com/cloudsearch?keywords=${encodeURIComponent(
                   keyword,
                 )}&type=${searchType}&limit=100&offset=0`
