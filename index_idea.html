@@ -1,471 +1,504 @@
 <!DOCTYPE html>
 <html lang="zh-CN" data-bs-theme="light">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Mayday.Blue - 五月天演唱会荧光棒预设工具">
-    <meta name="theme-color" content="#0d6efd">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Mayday.Blue - 五月天演唱会荧光棒预设工具" />
+    <meta name="theme-color" content="#0d6efd" />
     <title>Mayday.Blue 预设工具</title>
 
     <!-- Bootstrap 5 & Material Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="css/style.min.css" rel="stylesheet">
-</head>
-<body>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link href="css/style.min.css" rel="stylesheet" />
+  </head>
+  <body>
     <!-- Stage 1: Discovery & Entry -->
     <header class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-        <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <i class="material-icons me-2">light_mode</i>
-                Mayday.Blue
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
+      <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+          <i class="material-icons me-2">light_mode</i>
+          Mayday.Blue
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link active" href="#generator">
+                <i class="material-icons align-middle">auto_awesome</i>
+                预设生成器
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#visualizer">
+                <i class="material-icons align-middle">visibility</i>
+                效果预览
+              </a>
+            </li>
+          </ul>
+          <!-- User Role Selection -->
+          <div class="nav-item dropdown">
+            <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
+              <i class="material-icons align-middle">person</i>
+              选择用户角色
             </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#generator">
-                            <i class="material-icons align-middle">auto_awesome</i>
-                            预设生成器
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#visualizer">
-                            <i class="material-icons align-middle">visibility</i>
-                            效果预览
-                        </a>
-                    </li>
-                </ul>
-                <!-- User Role Selection -->
-                <div class="nav-item dropdown">
-                    <button class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="material-icons align-middle">person</i>
-                        选择用户角色
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#" data-role="audience">观众</a></li>
-                        <li><a class="dropdown-item" href="#" data-role="organizer">演唱会组织者</a></li>
-                    </ul>
-                </div>
-            </div>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#" data-role="audience">观众</a></li>
+              <li><a class="dropdown-item" href="#" data-role="organizer">演唱会组织者</a></li>
+            </ul>
+          </div>
         </div>
+      </div>
     </header>
 
     <main class="container py-4">
-        <!-- Stage 2: Initial Understanding -->
-        <section id="introduction" class="mb-5">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h2 class="card-title h5 mb-3">快速开始</h2>
-                    <div class="row g-4">
-                        <div class="col-md-4">
-                            <div class="text-center">
-                                <i class="material-icons display-4 text-primary">upload_file</i>
-                                <h3 class="h6 mt-2">1. 上传音频</h3>
-                                <p class="small text-muted">支持 MP3/WAV 格式</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="text-center">
-                                <i class="material-icons display-4 text-primary">palette</i>
-                                <h3 class="h6 mt-2">2. 配置颜色</h3>
-                                <p class="small text-muted">设置基础色与动态范围</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="text-center">
-                                <i class="material-icons display-4 text-primary">code</i>
-                                <h3 class="h6 mt-2">3. 生成预设</h3>
-                                <p class="small text-muted">获取荧光棒控制代码</p>
-                            </div>
-                        </div>
-                    </div>
+      <!-- Stage 2: Initial Understanding -->
+      <section id="introduction" class="mb-5">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h2 class="card-title h5 mb-3">快速开始</h2>
+            <div class="row g-4">
+              <div class="col-md-4">
+                <div class="text-center">
+                  <i class="material-icons display-4 text-primary">upload_file</i>
+                  <h3 class="h6 mt-2">1. 上传音频</h3>
+                  <p class="small text-muted">支持 MP3/WAV 格式</p>
                 </div>
+              </div>
+              <div class="col-md-4">
+                <div class="text-center">
+                  <i class="material-icons display-4 text-primary">palette</i>
+                  <h3 class="h6 mt-2">2. 配置颜色</h3>
+                  <p class="small text-muted">设置基础色与动态范围</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="text-center">
+                  <i class="material-icons display-4 text-primary">code</i>
+                  <h3 class="h6 mt-2">3. 生成预设</h3>
+                  <p class="small text-muted">获取荧光棒控制代码</p>
+                </div>
+              </div>
             </div>
-        </section>
-      
+          </div>
+        </div>
+      </section>
+
       <!-- Enhanced Introduction Section -->
-<section id="introduction" class="mb-5">
-    <div class="card shadow-sm">
-        <div class="card-body">
+      <section id="introduction" class="mb-5">
+        <div class="card shadow-sm">
+          <div class="card-body">
             <h2 class="h5 mb-4">🎮 快速上手指南</h2>
-            
+
             <!-- Step-by-Step Guide -->
             <ol class="list-unstyled">
-                <!-- Step 1: Music Selection -->
-                <li class="mb-4">
-                    <h5 class="h6 mb-2">1. 选择音乐</h5>
-                    <ul class="mb-3 ps-3">
-                        <li class="mb-3">
-                            <i class="material-icons align-middle text-primary me-2">search</i>
-                            <span class="fw-bold">在线搜索</span>
-                            <br>
-                            输入歌曲名称，从在线音乐库中选择！
-                        </li>
-                        <li>
-                            <i class="material-icons align-middle text-primary me-2">upload_file</i>
-                            <span class="fw-bold">本地上传</span>
-                            <br>
-                            上传本地音频文件，支持 MP3、WAV、FLAC 格式！
-                        </li>
-                    </ul>
-                </li>
+              <!-- Step 1: Music Selection -->
+              <li class="mb-4">
+                <h5 class="h6 mb-2">1. 选择音乐</h5>
+                <ul class="mb-3 ps-3">
+                  <li class="mb-3">
+                    <i class="material-icons align-middle text-primary me-2">search</i>
+                    <span class="fw-bold">在线搜索</span>
+                    <br />
+                    输入歌曲名称，从在线音乐库中选择！
+                  </li>
+                  <li>
+                    <i class="material-icons align-middle text-primary me-2">upload_file</i>
+                    <span class="fw-bold">本地上传</span>
+                    <br />
+                    上传本地音频文件，支持 MP3、WAV、FLAC 格式！
+                  </li>
+                </ul>
+              </li>
 
-                <!-- Step 2: Preset Code -->
-                <li class="mb-4">
-                    <h5 class="h6 mb-2">2. 预设代码</h5>
-                    <ul class="mb-3 ps-3">
-                        <li class="mb-3">
-                            <i class="material-icons align-middle text-primary me-2">upload_file</i>
-                            <span class="fw-bold">上传预设文件</span>
-                            <br>
-                            可以上传一个预设代码文件，帮助系统更好地理解音乐情感和节奏！
+              <!-- Step 2: Preset Code -->
+              <li class="mb-4">
+                <h5 class="h6 mb-2">2. 预设代码</h5>
+                <ul class="mb-3 ps-3">
+                  <li class="mb-3">
+                    <i class="material-icons align-middle text-primary me-2">upload_file</i>
+                    <span class="fw-bold">上传预设文件</span>
+                    <br />
+                    可以上传一个预设代码文件，帮助系统更好地理解音乐情感和节奏！
+                  </li>
+                  <li>
+                    <i class="material-icons align-middle text-primary me-2">edit</i>
+                    <span class="fw-bold text-danger">手动输入代码</span>
+                    <br />
+                    如果没有文件，别担心，你可以直接输入代码！
+                    <br />
+                    <div class="mt-2 bg-light p-3 rounded">
+                      <span class="fw-bold text-info">代码格式说明：</span>
+                      <ul class="mt-2 mb-0">
+                        <li>时间戳必须为 100ms 的整数倍</li>
+                        <li>相邻时间点之间的最小间隔为 200ms</li>
+                        <li>
+                          支持注释，注释需以
+                          <code>//</code>
+                          开头
                         </li>
                         <li>
-                            <i class="material-icons align-middle text-primary me-2">edit</i>
-                            <span class="fw-bold text-danger">手动输入代码</span>
-                            <br>
-                            如果没有文件，别担心，你可以直接输入代码！
-                            <br>
-                            <div class="mt-2 bg-light p-3 rounded">
-                                <span class="fw-bold text-info">代码格式说明：</span>
-                                <ul class="mt-2 mb-0">
-                                    <li>时间戳必须为 100ms 的整数倍</li>
-                                    <li>相邻时间点之间的最小间隔为 200ms</li>
-                                    <li>支持注释，注释需以 <code>//</code> 开头</li>
-                                    <li>
-                                        [格式]: 时间(ms), 颜色
-                                        <pre class="bg-dark text-light p-2 mt-2 rounded"><code>0,pin2 // 开始
+                          [格式]: 时间(ms), 颜色
+                          <pre class="bg-dark text-light p-2 mt-2 rounded"><code>0,pin2 // 开始
 500,pin2 
 1000,sky3
 1500,pin4</code></pre>
-                                    </li>
-                                </ul>
-                            </div>
                         </li>
-                    </ul>
-                </li>
-
-                <!-- Step 3: Preview Effects -->
-                <li class="mb-4">
-                    <h5 class="h6 mb-2">3. 查看预览效果</h5>
-                    <ul class="mb-3 ps-3">
-                        <li class="mb-3">
-                            <i class="material-icons align-middle text-primary me-2">palette</i>
-                            <span class="fw-bold">颜色预览</span>
-                            <br>
-                            看到颜色随时间变化，带来真实效果！
-                        </li>
-                        <li>
-                            <i class="material-icons align-middle text-primary me-2">music_note</i>
-                            <span class="fw-bold">音频可视化</span>
-                            <br>
-                            选择频谱图或波形图，看到音频的起伏，调整代码更精准！
-                        </li>
-                    </ul>
-                </li>
-
-                <!-- Step 4: Animation Control -->
-                <li>
-                    <h5 class="h6 mb-2">4. 控制动画播放</h5>
-                    <div class="bg-light p-3 rounded">
-                        <span class="fst-italic text-secondary d-block mb-3">
-                            <i class="material-icons align-middle me-1">tips_and_updates</i>
-                            提示: [Windows:Ctrl, OS X:Command] 按下 "Ctrl/Cmd + ." 可以查看快捷键说明！
-                        </span>
-                        <ul class="mb-0 ps-3">
-                            <li class="mb-2">
-                                <i class="material-icons align-middle text-success me-2">play_arrow</i>
-                                <span class="fw-bold">开始播放</span> (Ctrl/Cmd+Enter)
-                                <br>
-                                点击"开始"播放动画，跟随节奏变化！
-                            </li>
-                            <li class="mb-2">
-                                <i class="material-icons align-middle text-warning me-2">pause</i>
-                                <span class="fw-bold">暂停播放</span> (Space)
-                                <br>
-                                暂停动画，稍作休息！
-                            </li>
-                            <li class="mb-2">
-                                <i class="material-icons align-middle text-success me-2">play_arrow</i>
-                                <span class="fw-bold">继续播放</span> (Space)
-                                <br>
-                                继续播放，重新享受精彩！
-                            </li>
-                            <li class="mb-2">
-                                <i class="material-icons align-middle text-danger me-2">stop</i>
-                                <span class="fw-bold">停止</span> (Esc 或 Ctrl/Cmd+S)
-                                <br>
-                                停止播放，准备重新调整。
-                            </li>
-                            <li class="mb-2">
-                                <i class="material-icons align-middle text-info me-2">replay</i>
-                                <span class="fw-bold">重新开始</span> (Ctrl/Cmd+R)
-                                <br>
-                                从头开始，回顾每一个精彩瞬间！
-                            </li>
-                            <li>
-                                <i class="material-icons align-middle text-secondary me-2">clear</i>
-                                <span class="fw-bold">清除</span> (Ctrl/Cmd+Backspace)
-                                <br>
-                                清除所有设置，重新开始。
-                            </li>
-                        </ul>
+                      </ul>
                     </div>
-                </li>
+                  </li>
+                </ul>
+              </li>
+
+              <!-- Step 3: Preview Effects -->
+              <li class="mb-4">
+                <h5 class="h6 mb-2">3. 查看预览效果</h5>
+                <ul class="mb-3 ps-3">
+                  <li class="mb-3">
+                    <i class="material-icons align-middle text-primary me-2">palette</i>
+                    <span class="fw-bold">颜色预览</span>
+                    <br />
+                    看到颜色随时间变化，带来真实效果！
+                  </li>
+                  <li>
+                    <i class="material-icons align-middle text-primary me-2">music_note</i>
+                    <span class="fw-bold">音频可视化</span>
+                    <br />
+                    选择频谱图或波形图，看到音频的起伏，调整代码更精准！
+                  </li>
+                </ul>
+              </li>
+
+              <!-- Step 4: Animation Control -->
+              <li>
+                <h5 class="h6 mb-2">4. 控制动画播放</h5>
+                <div class="bg-light p-3 rounded">
+                  <span class="fst-italic text-secondary d-block mb-3">
+                    <i class="material-icons align-middle me-1">tips_and_updates</i>
+                    提示: [Windows:Ctrl, OS X:Command] 按下 "Ctrl/Cmd + ." 可以查看快捷键说明！
+                  </span>
+                  <ul class="mb-0 ps-3">
+                    <li class="mb-2">
+                      <i class="material-icons align-middle text-success me-2">play_arrow</i>
+                      <span class="fw-bold">开始播放</span>
+                      (Ctrl/Cmd+Enter)
+                      <br />
+                      点击"开始"播放动画，跟随节奏变化！
+                    </li>
+                    <li class="mb-2">
+                      <i class="material-icons align-middle text-warning me-2">pause</i>
+                      <span class="fw-bold">暂停播放</span>
+                      (Space)
+                      <br />
+                      暂停动画，稍作休息！
+                    </li>
+                    <li class="mb-2">
+                      <i class="material-icons align-middle text-success me-2">play_arrow</i>
+                      <span class="fw-bold">继续播放</span>
+                      (Space)
+                      <br />
+                      继续播放，重新享受精彩！
+                    </li>
+                    <li class="mb-2">
+                      <i class="material-icons align-middle text-danger me-2">stop</i>
+                      <span class="fw-bold">停止</span>
+                      (Esc 或 Ctrl/Cmd+S)
+                      <br />
+                      停止播放，准备重新调整。
+                    </li>
+                    <li class="mb-2">
+                      <i class="material-icons align-middle text-info me-2">replay</i>
+                      <span class="fw-bold">重新开始</span>
+                      (Ctrl/Cmd+R)
+                      <br />
+                      从头开始，回顾每一个精彩瞬间！
+                    </li>
+                    <li>
+                      <i class="material-icons align-middle text-secondary me-2">clear</i>
+                      <span class="fw-bold">清除</span>
+                      (Ctrl/Cmd+Backspace)
+                      <br />
+                      清除所有设置，重新开始。
+                    </li>
+                  </ul>
+                </div>
+              </li>
             </ol>
 
             <!-- Quick Start Button -->
             <div class="text-center mt-4">
-                <button class="btn btn-primary btn-lg">
-                    <i class="material-icons align-middle me-2">rocket_launch</i>
-                    开始创建
-                </button>
+              <button class="btn btn-primary btn-lg">
+                <i class="material-icons align-middle me-2">rocket_launch</i>
+                开始创建
+              </button>
             </div>
+          </div>
         </div>
-    </div>
-</section>
+      </section>
 
-
-        <!-- Stage 3: Deep Exploration of Preset Generator -->
-        <section id="generator" class="mb-5">
-            <div class="row g-4">
-                <!-- Configuration Panel -->
-                <div class="col-12 col-lg-4">
-                    <!-- File Upload Card -->
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-white">
-                            <h5 class="card-title mb-0">
-                                <i class="material-icons align-middle me-2">upload_file</i>
-                                文件上传
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <!-- Audio Upload -->
-                            <div class="upload-zone p-4 text-center border rounded mb-4" id="audioDropZone">
-                                <i class="material-icons display-4 text-primary">music_note</i>
-                                <p class="mb-2">拖放音频文件或点击上传</p>
-                                <small class="d-block text-muted mb-3">支持的格式: MP3, WAV</small>
-                                <button class="btn btn-primary btn-sm">
-                                    <i class="material-icons align-middle">add</i>
-                                    选择文件
-                                </button>
-                                <input type="file" class="d-none" accept="audio/*" id="audioInput">
-                            </div>
-
-                            <!-- Lyrics Upload -->
-                            <div class="upload-zone p-4 text-center border rounded" id="lyricsDropZone">
-                                <i class="material-icons display-4 text-primary">description</i>
-                                <p class="mb-2">拖放歌词文件或点击上传（可选）</p>
-                                <small class="d-block text-muted mb-3">支持的格式: .lrc</small>
-                                <button class="btn btn-outline-primary btn-sm">
-                                    <i class="material-icons align-middle">add</i>
-                                    选择文件
-                                </button>
-                                <input type="file" class="d-none" accept=".lrc" id="lyricsInput">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Color Configuration Card -->
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white">
-                            <h5 class="card-title mb-0">
-                                <i class="material-icons align-middle me-2">palette</i>
-                                颜色配置
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <!-- Base Color -->
-                            <div class="mb-4">
-                                <label class="form-label d-flex align-items-center">
-                                    <i class="material-icons me-2 small">color_lens</i>
-                                    基础颜色
-                                </label>
-                                <select class="form-select" id="baseColor">
-                                    <option value="">选择基础颜色...</option>
-                                </select>
-                            </div>
-
-                            <!-- Dynamic Color Ranges -->
-                            <div class="mb-4">
-                                <label class="form-label d-flex align-items-center">
-                                    <i class="material-icons me-2 small">tune</i>
-                                    频率范围颜色
-                                </label>
-                                <div class="mb-3">
-                                    <label class="form-label small">低频范围</label>
-                                    <input type="range" class="form-range" id="lowRange">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label small">中频范围</label>
-                                    <input type="range" class="form-range" id="midRange">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label small">高频范围</label>
-                                    <input type="range" class="form-range" id="highRange">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label small">重点颜色</label>
-                                    <input type="range" class="form-range" id="accentRange">
-                                </div>
-                            </div>
-
-                            <!-- Configuration Import/Export -->
-                            <div class="d-flex justify-content-between">
-                                <button class="btn btn-outline-primary btn-sm" id="importConfig">
-                                    <i class="material-icons align-middle">file_upload</i>
-                                    导入配置
-                                </button>
-                                <button class="btn btn-outline-primary btn-sm" id="exportConfig">
-                                    <i class="material-icons align-middle">file_download</i>
-                                    导出配置
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+      <!-- Stage 3: Deep Exploration of Preset Generator -->
+      <section id="generator" class="mb-5">
+        <div class="row g-4">
+          <!-- Configuration Panel -->
+          <div class="col-12 col-lg-4">
+            <!-- File Upload Card -->
+            <div class="card shadow-sm mb-4">
+              <div class="card-header bg-white">
+                <h5 class="card-title mb-0">
+                  <i class="material-icons align-middle me-2">upload_file</i>
+                  文件上传
+                </h5>
+              </div>
+              <div class="card-body">
+                <!-- Audio Upload -->
+                <div class="upload-zone p-4 text-center border rounded mb-4" id="audioDropZone">
+                  <i class="material-icons display-4 text-primary">music_note</i>
+                  <p class="mb-2">拖放音频文件或点击上传</p>
+                  <small class="d-block text-muted mb-3">支持的格式: MP3, WAV</small>
+                  <button class="btn btn-primary btn-sm">
+                    <i class="material-icons align-middle">add</i>
+                    选择文件
+                  </button>
+                  <input type="file" class="d-none" accept="audio/*" id="audioInput" />
                 </div>
 
-                <!-- Preview & Generation Panel -->
-                <div class="col-12 col-lg-8">
-                    <!-- Stage 4: Visualization -->
-                    <div class="card shadow-sm mb-4">
-                        <div class="card-header bg-white">
-                            <h5 class="card-title mb-0">
-                                <i class="material-icons align-middle me-2">preview</i>
-                                效果预览
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="preview-container bg-dark rounded" style="height: 300px;">
-                                <!-- Preview canvas will be inserted here -->
-                            </div>
-                            <div class="d-flex justify-content-center align-items-center mt-3">
-                                <button class="btn btn-outline-primary mx-2" id="playBtn">
-                                    <i class="material-icons">play_arrow</i>
-                                </button>
-                                <button class="btn btn-outline-primary mx-2" id="pauseBtn">
-                                    <i class="material-icons">pause</i>
-                                </button>
-                                <button class="btn btn-outline-primary mx-2" id="stopBtn">
-                                    <i class="material-icons">stop</i>
-                                </button>
-                                <div class="progress flex-grow-1 mx-3" style="height: 8px;">
-                                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
-                                </div>
-                                <span class="text-muted small" id="timeDisplay">00:00</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Stage 5: Preset Code Generation -->
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white">
-                            <h5 class="card-title mb-0">
-                                <i class="material-icons align-middle me-2">code</i>
-                                预设代码
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <textarea class="form-control font-monospace" rows="10" readonly id="presetCode"></textarea>
-                            </div>
-                            <div class="d-flex justify-content-between">
-                                <button class="btn btn-primary" id="generateBtn">
-                                    <i class="material-icons align-middle">bolt</i>
-                                    生成预设
-                                </button>
-                                <div>
-                                    <button class="btn btn-outline-primary me-2" id="copyBtn">
-                                        <i class="material-icons align-middle">content_copy</i>
-                                        复制代码
-                                    </button>
-                                    <button class="btn btn-outline-primary" id="downloadBtn">
-                                        <i class="material-icons align-middle">download</i>
-                                        下载预设
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Lyrics Upload -->
+                <div class="upload-zone p-4 text-center border rounded" id="lyricsDropZone">
+                  <i class="material-icons display-4 text-primary">description</i>
+                  <p class="mb-2">拖放歌词文件或点击上传（可选）</p>
+                  <small class="d-block text-muted mb-3">支持的格式: .lrc</small>
+                  <button class="btn btn-outline-primary btn-sm">
+                    <i class="material-icons align-middle">add</i>
+                    选择文件
+                  </button>
+                  <input type="file" class="d-none" accept=".lrc" id="lyricsInput" />
                 </div>
+              </div>
             </div>
-        </section>
 
-        <!-- Stage 6: Application Guide -->
-        <section id="application-guide" class="mb-5 d-none">
+            <!-- Color Configuration Card -->
             <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="card-title mb-0">
-                        <i class="material-icons align-middle me-2">help_outline</i>
-                        应用指南
-                    </h5>
+              <div class="card-header bg-white">
+                <h5 class="card-title mb-0">
+                  <i class="material-icons align-middle me-2">palette</i>
+                  颜色配置
+                </h5>
+              </div>
+              <div class="card-body">
+                <!-- Base Color -->
+                <div class="mb-4">
+                  <label class="form-label d-flex align-items-center">
+                    <i class="material-icons me-2 small">color_lens</i>
+                    基础颜色
+                  </label>
+                  <select class="form-select" id="baseColor">
+                    <option value="">选择基础颜色...</option>
+                  </select>
                 </div>
-                <div class="card-body">
-                    <!-- Application steps will be dynamically loaded based on user role -->
+
+                <!-- Dynamic Color Ranges -->
+                <div class="mb-4">
+                  <label class="form-label d-flex align-items-center">
+                    <i class="material-icons me-2 small">tune</i>
+                    频率范围颜色
+                  </label>
+                  <div class="mb-3">
+                    <label class="form-label small">低频范围</label>
+                    <input type="range" class="form-range" id="lowRange" />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label small">中频范围</label>
+                    <input type="range" class="form-range" id="midRange" />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label small">高频范围</label>
+                    <input type="range" class="form-range" id="highRange" />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label small">重点颜色</label>
+                    <input type="range" class="form-range" id="accentRange" />
+                  </div>
                 </div>
+
+                <!-- Configuration Import/Export -->
+                <div class="d-flex justify-content-between">
+                  <button class="btn btn-outline-primary btn-sm" id="importConfig">
+                    <i class="material-icons align-middle">file_upload</i>
+                    导入配置
+                  </button>
+                  <button class="btn btn-outline-primary btn-sm" id="exportConfig">
+                    <i class="material-icons align-middle">file_download</i>
+                    导出配置
+                  </button>
+                </div>
+              </div>
             </div>
-        </section>
+          </div>
+
+          <!-- Preview & Generation Panel -->
+          <div class="col-12 col-lg-8">
+            <!-- Stage 4: Visualization -->
+            <div class="card shadow-sm mb-4">
+              <div class="card-header bg-white">
+                <h5 class="card-title mb-0">
+                  <i class="material-icons align-middle me-2">preview</i>
+                  效果预览
+                </h5>
+              </div>
+              <div class="card-body">
+                <div class="preview-container bg-dark rounded" style="height: 300px">
+                  <!-- Preview canvas will be inserted here -->
+                </div>
+                <div class="d-flex justify-content-center align-items-center mt-3">
+                  <button class="btn btn-outline-primary mx-2" id="playBtn">
+                    <i class="material-icons">play_arrow</i>
+                  </button>
+                  <button class="btn btn-outline-primary mx-2" id="pauseBtn">
+                    <i class="material-icons">pause</i>
+                  </button>
+                  <button class="btn btn-outline-primary mx-2" id="stopBtn">
+                    <i class="material-icons">stop</i>
+                  </button>
+                  <div class="progress flex-grow-1 mx-3" style="height: 8px">
+                    <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                  </div>
+                  <span class="text-muted small" id="timeDisplay">00:00</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stage 5: Preset Code Generation -->
+            <div class="card shadow-sm">
+              <div class="card-header bg-white">
+                <h5 class="card-title mb-0">
+                  <i class="material-icons align-middle me-2">code</i>
+                  预设代码
+                </h5>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <textarea
+                    class="form-control font-monospace"
+                    rows="10"
+                    readonly
+                    id="presetCode"
+                  ></textarea>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <button class="btn btn-primary" id="generateBtn">
+                    <i class="material-icons align-middle">bolt</i>
+                    生成预设
+                  </button>
+                  <div>
+                    <button class="btn btn-outline-primary me-2" id="copyBtn">
+                      <i class="material-icons align-middle">content_copy</i>
+                      复制代码
+                    </button>
+                    <button class="btn btn-outline-primary" id="downloadBtn">
+                      <i class="material-icons align-middle">download</i>
+                      下载预设
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stage 6: Application Guide -->
+      <section id="application-guide" class="mb-5 d-none">
+        <div class="card shadow-sm">
+          <div class="card-header bg-white">
+            <h5 class="card-title mb-0">
+              <i class="material-icons align-middle me-2">help_outline</i>
+              应用指南
+            </h5>
+          </div>
+          <div class="card-body">
+            <!-- Application steps will be dynamically loaded based on user role -->
+          </div>
+        </div>
+      </section>
     </main>
 
     <!-- Stage 7: Feedback -->
     <footer class="bg-white border-top py-3 mt-5">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-12 col-md-6 text-center text-md-start">
-                    <p class="mb-0">© 2024 Mayday.Blue</p>
-                </div>
-                <div class="col-12 col-md-6 text-center text-md-end">
-                    <button class="btn btn-link text-decoration-none text-muted" data-bs-toggle="modal" data-bs-target="#feedbackModal">
-                        <i class="material-icons align-middle">feedback</i>
-                        反馈建议
-                    </button>
-                    <button class="btn btn-link text-decoration-none text-muted" data-bs-toggle="modal" data-bs-target="#helpModal">
-                        <i class="material-icons align-middle">help</i>
-                        使用帮助
-                    </button>
-                </div>
-            </div>
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-12 col-md-6 text-center text-md-start">
+            <p class="mb-0">© 2024 Mayday.Blue</p>
+          </div>
+          <div class="col-12 col-md-6 text-center text-md-end">
+            <button
+              class="btn btn-link text-decoration-none text-muted"
+              data-bs-toggle="modal"
+              data-bs-target="#feedbackModal"
+            >
+              <i class="material-icons align-middle">feedback</i>
+              反馈建议
+            </button>
+            <button
+              class="btn btn-link text-decoration-none text-muted"
+              data-bs-toggle="modal"
+              data-bs-target="#helpModal"
+            >
+              <i class="material-icons align-middle">help</i>
+              使用帮助
+            </button>
+          </div>
         </div>
+      </div>
     </footer>
 
     <!-- Feedback Modal -->
     <div class="modal fade" id="feedbackModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">反馈建议</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="feedbackForm">
-                        <div class="mb-3">
-                            <label class="form-label">您的反馈</label>
-                            <textarea class="form-control" rows="4" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">提交反馈</button>
-                    </form>
-                </div>
-            </div>
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">反馈建议</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <form id="feedbackForm">
+              <div class="mb-3">
+                <label class="form-label">您的反馈</label>
+                <textarea class="form-control" rows="4" required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">提交反馈</button>
+            </form>
+          </div>
         </div>
+      </div>
     </div>
 
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-none">
-        <div class="d-flex align-items-center justify-content-center h-100">
-            <div class="text-center text-white">
-                <div class="spinner-border" role="status">
-                    <span class="visually-hidden">处理中...</span>
-                </div>
-                <p class="mt-2" id="loadingMessage">正在处理...</p>
-            </div>
+    <div
+      id="loadingOverlay"
+      class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-75 d-none"
+    >
+      <div class="d-flex align-items-center justify-content-center h-100">
+        <div class="text-center text-white">
+          <div class="spinner-border" role="status">
+            <span class="visually-hidden">处理中...</span>
+          </div>
+          <p class="mt-2" id="loadingMessage">正在处理...</p>
         </div>
+      </div>
     </div>
 
     <!-- Bootstrap & Custom JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/app.js" type="module"></script>
-</body>
+  </body>
 </html>

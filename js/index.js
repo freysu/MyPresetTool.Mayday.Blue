@@ -1,3 +1,12 @@
+/*
+Five Server running at:
+> Network:  http://113.81.192.195:5500
+> Local:    http://localhost:5500
+> Network:  http://172.21.112.1:5500
+
+the file named `index.js`, it will webpacked to `dist/bundle.js`
+*/
+
 /*!
  * Color mode toggler for Bootstrap's docs (https://getbootstrap.com/)
  * Copyright 2011-2023 The Bootstrap Authors
@@ -1644,6 +1653,44 @@ async function getCountryByIP() {
   }
 }
 
+// Function to detect WeChat browser
+function isWeChatBrowser() {
+  const ua = window.navigator.userAgent.toLowerCase();
+  return ua.match(/MicroMessenger/i) == 'micromessenger' ? true : false;
+}
+
+// Function to create a temporary download link
+function createDownloadLink(blob, fileName) {
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = fileName;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  return link;
+}
+
+// Function to copy text to clipboard
+async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch (err) {
+    // Fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      return true;
+    } catch (err) {
+      document.body.removeChild(textArea);
+      return false;
+    }
+  }
+}
+
 class AudioAnalyzer {
   constructor() {
     this.state = {
@@ -1694,31 +1741,48 @@ class AudioAnalyzer {
       .getElementById('generate-btn')
       .addEventListener('click', () => debounce(this.startAnalysis(), 1500));
 
-    document.getElementById('copy-btn').addEventListener(
+    // document.getElementById('copy-btn').addEventListener(
+    //   'click',
+    //   debounce(async () => {
+    //     try {
+    //       const content = document.getElementById('output-result').value;
+    //       if (navigator.clipboard && navigator.clipboard.writeText) {
+    //         await navigator.clipboard.writeText(content);
+    //         showNotification('成功~🎉', '📋 已复制~可以直接粘贴使用啦！', {
+    //           type: 'success',
+    //           duration: 3000,
+    //         });
+    //       } else {
+    //         console.error('剪贴板 API 不可用');
+    //         // 回退方案：手动复制
+    //         const textarea = document.createElement('textarea');
+    //         textarea.value = content;
+    //         document.body.appendChild(textarea);
+    //         textarea.select();
+    //         document.execCommand('copy');
+    //         document.body.removeChild(textarea);
+    //         showNotification('成功~🎉', '📋 已手动复制~请使用 Ctrl+C 或 Cmd+C 粘贴', {
+    //           type: 'success',
+    //           duration: 3000,
+    //         });
+    //       }
+    //     } catch (err) {
+    //       my_debugger.showError('Failed to copy:', err);
+    //       showNotification('出错了~🤔', '📋 复制失败了，请重试哦！实在不行请手动复制！', {
+    //         type: 'error',
+    //         duration: 5000,
+    //       });
+    //     }
+    //   }, 1000),
+    // );
+
+    document.getElementById('download-btn').addEventListener(
       'click',
       debounce(async () => {
         try {
           const content = document.getElementById('output-result').value;
-          await navigator.clipboard.writeText(content);
-          showNotification('成功~🎉', '📋 已复制~可以直接粘贴使用啦！', {
-            type: 'success',
-            duration: 3000,
-          });
-        } catch (err) {
-          my_debugger.showError('Failed to copy:', err);
-          showNotification('出错了~🤔', '📋 复制失败了，请重试哦！实在不行请手动复制！', {
-            type: 'error',
-            duration: 5000,
-          });
-        }
-      }, 1000),
-    );
 
-    document.getElementById('download-btn').addEventListener(
-      'click',
-      debounce(() => {
-        try {
-          const content = document.getElementById('output-result').value;
+          // Content validation
           if (!content.trim() || !content.replace(/\s/g, '')) {
             showNotification('检查一下！💭', '还没有内容可以下载。先添加一些内容吧！', {
               type: 'warning',
@@ -1726,6 +1790,7 @@ class AudioAnalyzer {
             });
             return;
           }
+
           if (Timeline.parse(content).errors.length) {
             showNotification(
               '出错了~🤔',
@@ -1738,31 +1803,55 @@ class AudioAnalyzer {
             return;
           }
 
-          // 转义用户输入，防止XSS攻击
+          // Escape content and create blob
           const escapedContent = content.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-          // 使用 FileSaver.js 的 saveAs 方法来保存文件
           const blob = new Blob([escapedContent], {
             type: 'text/plain;charset=utf-8',
           });
 
-          // 文件保存
-          window.saveAs(blob, 'converted-output.txt');
+          if (isWeChatBrowser()) {
+            // Create a hidden download link
+            const downloadLink = createDownloadLink(blob, 'converted-output.txt');
 
-          // 添加成功通知
-          showNotification('下载中~✨', '文件已经开始下载，请稍等一会儿哦！', {
-            type: 'success',
-            duration: 3000,
-          });
+            // Copy the link to clipboard
+            const copied = await copyToClipboard(downloadLink.href);
+
+            if (copied) {
+              showNotification(
+                '微信浏览器提示 📱',
+                '请点击右上角菜单，选择"在浏览器打开"后下载文件',
+                {
+                  type: 'info',
+                  duration: 8000,
+                },
+              );
+            } else {
+              showNotification('提示 ℹ️', '请点击右上角菜单，选择"在浏览器打开"后下载文件', {
+                type: 'warning',
+                duration: 8000,
+              });
+            }
+
+            // Clean up
+            setTimeout(() => {
+              URL.revokeObjectURL(downloadLink.href);
+              document.body.removeChild(downloadLink);
+            }, 60000);
+          } else {
+            // Normal browser download using FileSaver
+            window.saveAs(blob, 'converted-output.txt');
+            showNotification('下载中~✨', '文件已经开始下载，请稍等一会儿哦！', {
+              type: 'success',
+              duration: 3000,
+            });
+          }
         } catch (error) {
-          // 添加错误通知
           showNotification('出错了~ 🤔', '下载失败了，请检查文件内容后再试！', {
             type: 'error',
             duration: 5000,
             dismissible: true,
           });
 
-          // 确保my_debugger.showError存在
           if (typeof my_debugger !== 'undefined' && typeof my_debugger.showError === 'function') {
             my_debugger.showError('Download error:', error);
           } else {
@@ -1786,7 +1875,7 @@ class AudioAnalyzer {
       </div>
       <div class="card-body">
         <div class="search-section d-flex align-items-center">
-          <input type="text" class="form-control" placeholder="搜索音频" id="searchInput">
+          <input type="text" class="form-control" placeholder="搜索音频" id="searchInput" enterkeyhint="search">
           <select class="form-select" id="searchTypeSelect">
             <option value="1">单曲</option>
             <option value="10" disabled>专辑</option>
@@ -4265,6 +4354,14 @@ function formatTimestamp(milliseconds, format = 'dd HH:mm:ss') {
     .replace('ms', formattedMilliseconds);
 }
 
+window.addEventListener('keyboardWillShow', function (e) {
+  e.preventDefault();
+});
+window.addEventListener('keyboardWillHide', function (e) {
+  e.preventDefault();
+});
+
+
 window.addEventListener('load', () => {
   const fileInputs = document.querySelectorAll('input[type="file"]');
   const hasAutoFilled = Array.from(fileInputs).some((input) => input.value !== '');
@@ -4310,6 +4407,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
   tooltipTriggerList.forEach((tooltipTriggerEl) => {
     new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+
+  var clipboard = new ClipboardJS('#copy-btn');
+
+  // 复制成功回调
+  clipboard.on('success', (e) => {
+    console.log('文本已复制到剪贴板:', e.text);
+    showNotification('成功~🎉', '📋 已复制~可以直接粘贴使用啦！', {
+      type: 'success',
+      duration: 3000,
+    });
+    e.clearSelection(); // 清除选中的文本
+  });
+
+  // 复制失败回调
+  clipboard.on('error', (e) => {
+    console.error('复制失败:', e.action);
+    showNotification('复制失败~😢', '请手动复制文本', { type: 'error', duration: 3000 });
   });
 
   document.querySelectorAll('input[name="musicSource"]').forEach((radio) => {

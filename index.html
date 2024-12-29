@@ -2,7 +2,7 @@
  * @Author: freysu
  * @Date: 2024-11-21 04:20:51
  * @LastEditors: freysu
- * @LastEditTime: 2024-12-25 13:28:45
+ * @LastEditTime: 2024-12-29 19:23:19
  * @Description: file content
 -->
 <!DOCTYPE html>
@@ -17,6 +17,10 @@
     <meta http-equiv="windows-Target" contect="_top" />
     <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico" />
     <title>Mayday.Blue 预设工具</title>
+    <script
+      async="true"
+      src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"
+    ></script>
     <!-- Bootstrap 5 CSS -->
     <link href="css/vendor/atom-one-dark.min.css" rel="stylesheet" />
     <link href="css/vendor/bootstrap.min.css" rel="stylesheet" />
@@ -67,8 +71,8 @@
                   data-bs-target="#generate-tool"
                   role="tab"
                 >
-                  <i class="material-icons">tab</i>
-                  选项卡: 预设代码生成器
+                  <i class="material-icons">auto_awesome</i>
+                  预设生成器
                 </button>
               </li>
               <li class="nav-item">
@@ -78,12 +82,11 @@
                   data-bs-target="#color-visualizer"
                   role="tab"
                 >
-                  <i class="material-icons">tab</i>
-                  选项卡: 预设代码可视化工具
+                  <i class="material-icons">visibility</i>
+                  效果预览页
                 </button>
               </li>
             </ul>
-            
 
             <ul class="nav nav-tabs mb-0" role="tablist">
               <li class="nav-item">
@@ -104,10 +107,10 @@
                   href="https://sx5w7odpp7p.feishu.cn/docx/IcuIdkFKJofwhsxfW4GcVdGSnQd"
                   target="_blank"
                   id="openHelperPage"
-                  title="提交反馈"
+                  title="使用帮助/反馈建议"
                 >
                   <i class="material-icons">help</i>
-                  <b>提交反馈</b>
+                  <b>使用帮助/反馈建议</b>
                 </a>
               </li>
               <li class="nav-item">
@@ -567,7 +570,7 @@
                               word-break: break-all;
                             }
                           </style>
-                        <h6 class="h6 mb-0">处理日志</h6>
+                          <h6 class="h6 mb-0">处理日志</h6>
                           <div id="statusLogger">
                             <!-- 这里将动态添加处理过程的信息 -->
                           </div>
@@ -696,7 +699,11 @@
                       >
                         <h2 class="h5 w-100">生成结果</h2>
                         <div class="flex-shrink-1 text-end">
-                          <button class="btn btn-outline-primary btn-sm" id="copy-btn">
+                          <button
+                            class="btn btn-outline-primary btn-sm"
+                            id="copy-btn"
+                            data-clipboard-target="#output-result"
+                          >
                             <i class="material-icons me-2">content_copy</i>
                             复制
                           </button>
@@ -710,7 +717,6 @@
                         <textarea
                           id="output-result"
                           class="form-control font-monospace"
-                          readonly
                           spellcheck="false"
                           placeholder="生成的代码会出现在这里..."
                           style="resize: vertical"
@@ -1138,29 +1144,43 @@
           </div>
         </div>
       </main>
-      <footer class="app-footer">
-        <div class="container text-center">
-          <p>
-            版权所有 © 2024
-            <a
-              href="https://www.xiaohongshu.com/user/profile/5c1610720000000005018c49"
-              target="_blank"
-            >
-              小红书@那一转眼只剩我🥕
-            </a>
-          </p>
-          <p>
-            感谢
-            <a
-              href="https://www.xiaohongshu.com/user/profile/5d7e751900000000010010bd"
-              target="_blank"
-            >
-              小红书@Diu🥕
-            </a>
-            大佬开发的
-            <code style="font-family: Lato, sans-serif">Mayday.Blue</code>
-            小程序
-          </p>
+      <footer class="bg-white border-top py-3 mt-5">
+        <div class="container">
+          <div class="row align-items-center">
+            <div class="col-12 col-md-6 text-center text-md-start">
+              <p class="mb-0">
+                ©2024 版权所有：
+                <a
+                  href="https://www.xiaohongshu.com/user/profile/5c1610720000000005018c49"
+                  target="_blank"
+                >
+                  小红书@那一转眼只剩我🥕
+                </a>
+                <br />
+                感谢
+                <a
+                  href="https://www.xiaohongshu.com/user/profile/5d7e751900000000010010bd"
+                  target="_blank"
+                >
+                  小红书@Diu🥕
+                </a>
+                大佬开发的
+                <code style="font-family: Lato, sans-serif">Mayday.Blue</code>
+                小程序
+              </p>
+            </div>
+            <div class="col-12 col-md-6 text-center text-md-end text-muted">
+              <small id="busuanzi_container_page_pv" style="display: inline">
+                本页总访客量：
+                <span id="busuanzi_value_site_uv">0</span>
+                次 | 本站总访问量：
+                <span id="busuanzi_value_site_pv">0</span>
+                次 | 本页总阅读量：
+                <span id="busuanzi_value_page_pv">0</span>
+                次
+              </small>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
@@ -1238,9 +1258,18 @@
         </div>
       </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer="true" crossorigin="anonymous"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"
+      defer="true"
+      crossorigin="anonymous"
+    ></script>
     <script
       src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"
+      crossorigin="anonymous"
+      defer="true"
+    ></script>
+    <script
+      src="https://unpkg.com/clipboard@2/dist/clipboard.min.js"
       crossorigin="anonymous"
       defer="true"
     ></script>
