@@ -2,7 +2,7 @@
  * @Author: freysu
  * @Date: 2024-11-21 04:20:51
  * @LastEditors: freysu
- * @LastEditTime: 2024-12-29 19:23:19
+ * @LastEditTime: 2024-12-31 06:26:27
  * @Description: file content
 -->
 <!DOCTYPE html>
@@ -37,7 +37,6 @@
       crossorigin="anonymous"
     ></script>
   </head>
-
   <body>
     <div class="app-wrapper d-flex flex-column min-vh-100">
       <div
@@ -91,14 +90,14 @@
             <ul class="nav nav-tabs mb-0" role="tablist">
               <li class="nav-item">
                 <a
-                  class="btn btn-outline-info rounded-pill"
+                  class="btn btn-outline-primary rounded-pill"
                   href="./editor.html"
                   target="_blank"
                   id="openEditor"
-                  title="预设代码编辑器"
+                  title="预设编辑器"
                 >
                   <i class="material-icons">edit</i>
-                  <b>预设代码编辑器</b>
+                  预设编辑器
                 </a>
               </li>
               <li class="nav-item">
@@ -107,11 +106,24 @@
                   href="https://sx5w7odpp7p.feishu.cn/docx/IcuIdkFKJofwhsxfW4GcVdGSnQd"
                   target="_blank"
                   id="openHelperPage"
-                  title="使用帮助/反馈建议"
+                  title="使用说明"
                 >
                   <i class="material-icons">help</i>
-                  <b>使用帮助/反馈建议</b>
+                  <b>使用说明</b>
                 </a>
+              </li>
+              <li class="nav-item">
+                <button
+                  class="btn btn-outline-secondary rounded-pill"
+                  id="proSettings"
+                  class="btn btn-secondary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#configModal"
+                  title="高级设置"
+                >
+                  <i class="material-icons">settings</i>
+                  高级设置
+                </button>
               </li>
               <li class="nav-item">
                 <div class="dropdown">
@@ -122,7 +134,7 @@
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                   >
-                    <i class="material-icons">settings</i>
+                    <i class="material-icons">brightness_medium</i>
                     <b>外观设置</b>
                   </button>
                   <ul class="dropdown-menu" aria-labelledby="themeDropdown">
@@ -386,7 +398,7 @@
                           aria-expanded="true"
                           aria-controls="fileFormCollapse"
                         >
-                          （一）配置文件
+                          上传音频
                         </h2>
                       </div>
                       <div
@@ -401,9 +413,6 @@
                           </h6>
 
                           <div class="mb-3">
-                            <label class="form-label d-flex align-items-center">
-                              请选择音乐来源
-                            </label>
                             <div class="form-check">
                               <input
                                 class="form-check-input"
@@ -490,12 +499,13 @@
                     <div class="card shadow-sm mb-4">
                       <div class="btn-group btn-group-lg>">
                         <button
-                          class="btn btn-primary btn-lg d-flex align-items-center justify-content-center"
+                          class="btn btn-outline-secondary btn-lg d-flex align-items-center justify-content-center"
                           id="generate-btn"
                           data-bs-toggle="tooltip"
                           data-bs-placement="top"
                           title="请先上传音乐文件哦~"
                           disabled
+                          style="font-size: larger !important"
                         >
                           <i class="material-icons me-2">bolt</i>
                           生成预设代码
@@ -593,7 +603,7 @@
                           aria-expanded="true"
                           aria-controls="themeConfigCollapse"
                         >
-                          （二）颜色主题配置
+                          配置颜色
                         </h2>
                         <div>
                           <label for="presetSelect" class="form-label me-2">选择预设:</label>
@@ -660,6 +670,157 @@
                         aria-labelledby="themeConfigHeading"
                       >
                         <div class="card-body">
+                          <!-- <div id="configPanel" class="config-panel p-4 rounded shadow mt-4">
+                            <h5 class="mb-3">自定义阈值</h5>
+                            <div class="mb-3">
+                              <label for="lowFreqThreshold" class="form-label">低频阈值:</label>
+                              <div class="input-group">
+                                <input
+                                  type="number"
+                                  class="form-control"
+                                  id="lowFreqThreshold"
+                                  value="0.33"
+                                  step="0.01"
+                                  min="0"
+                                  max="1"
+                                />
+                                <span class="input-group-text">
+                                  <i class="material-icons">tune</i>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="midFreqThreshold" class="form-label">中频阈值:</label>
+                              <div class="input-group">
+                                <input
+                                  type="number"
+                                  class="form-control"
+                                  id="midFreqThreshold"
+                                  value="0.66"
+                                  step="0.01"
+                                  min="0"
+                                  max="1"
+                                />
+                                <span class="input-group-text">
+                                  <i class="material-icons">tune</i>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="highFreqThreshold" class="form-label">高频阈值:</label>
+                              <div class="input-group">
+                                <input
+                                  type="number"
+                                  class="form-control"
+                                  id="highFreqThreshold"
+                                  value="1.0"
+                                  step="0.01"
+                                  min="0"
+                                  max="1"
+                                />
+                                <span class="input-group-text">
+                                  <i class="material-icons">tune</i>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="accentIntensityThreshold" class="form-label">
+                                强调颜色强度阈值:
+                              </label>
+                              <div class="input-group">
+                                <input
+                                  type="number"
+                                  class="form-control"
+                                  id="accentIntensityThreshold"
+                                  value="0.7"
+                                  step="0.01"
+                                  min="0"
+                                  max="1"
+                                />
+                                <span class="input-group-text">
+                                  <i class="material-icons">tune</i>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="perceivedLoudnessThreshold" class="form-label">
+                                感知响度阈值:
+                              </label>
+                              <div class="input-group">
+                                <input
+                                  type="number"
+                                  class="form-control"
+                                  id="perceivedLoudnessThreshold"
+                                  value="0.6"
+                                  step="0.01"
+                                  min="0"
+                                  max="1"
+                                />
+                                <span class="input-group-text">
+                                  <i class="material-icons">tune</i>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="sentimentScoreThreshold" class="form-label">
+                                情感分数阈值:
+                              </label>
+                              <div class="input-group">
+                                <input
+                                  type="number"
+                                  class="form-control"
+                                  id="sentimentScoreThreshold"
+                                  value="0.75"
+                                  step="0.01"
+                                  min="0"
+                                  max="1"
+                                />
+                                <span class="input-group-text">
+                                  <i class="material-icons">tune</i>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="adjustedLoudnessThreshold" class="form-label">
+                                调整响度阈值:
+                              </label>
+                              <div class="input-group">
+                                <input
+                                  type="number"
+                                  class="form-control"
+                                  id="adjustedLoudnessThreshold"
+                                  value="0.98"
+                                  step="0.01"
+                                  min="0"
+                                  max="1"
+                                />
+                                <span class="input-group-text">
+                                  <i class="material-icons">tune</i>
+                                </span>
+                              </div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="flickerEffectThreshold" class="form-label">
+                                闪烁效果阈值:
+                              </label>
+                              <div class="input-group">
+                                <input
+                                  type="number"
+                                  class="form-control"
+                                  id="flickerEffectThreshold"
+                                  value="0.5"
+                                  step="0.01"
+                                  min="0"
+                                  max="1"
+                                />
+                                <span class="input-group-text">
+                                  <i class="material-icons">tune</i>
+                                </span>
+                              </div>
+                            </div>
+                            <button id="saveConfig" class="btn btn-primary">保存配置</button>
+                          </div> -->
+
                           <!-- 表单 -->
                           <form id="themeConfigForm">
                             <!-- 基础颜色选择 -->
@@ -705,11 +866,11 @@
                             data-clipboard-target="#output-result"
                           >
                             <i class="material-icons me-2">content_copy</i>
-                            复制
+                            复制代码
                           </button>
                           <button class="btn btn-outline-primary btn-sm" id="download-btn">
                             <i class="material-icons me-2">download</i>
-                            下载
+                            下载预设
                           </button>
                         </div>
                       </div>
@@ -1144,7 +1305,7 @@
           </div>
         </div>
       </main>
-      <footer class="bg-white border-top py-3 mt-5">
+      <footer class="border-top py-3 mt-5">
         <div class="container">
           <div class="row align-items-center">
             <div class="col-12 col-md-6 text-center text-md-start">
@@ -1179,10 +1340,47 @@
                 <span id="busuanzi_value_page_pv">0</span>
                 次
               </small>
+              <br />
             </div>
           </div>
         </div>
       </footer>
+      <div
+        id="feedbackTrigger"
+        style="
+          position: fixed;
+          right: 5%;
+          top: 50%;
+          width: 40px;
+          height: 40px;
+          transform: translate(50%, -50%);
+          z-index: 1000;
+        "
+      >
+        <button
+          type="button"
+          class="mb-3 btn btn-primary"
+          id="groupButton"
+          data-bs-trigger="hover focus"
+          data-bs-html="true"
+          data-bs-placement="left"
+          data-bs-content='<img class="w-100" src="assets/img/soical_xhs_q.jpg" alt="Group QR Code" style="height: 80px;">'
+          title="扫描二维码加群"
+        >
+          <i class="material-icons">group</i>
+        </button>
+        <button
+          type="button"
+          class="mb-3 btn btn-primary"
+          data-bs-trigger="hover focus"
+          data-bs-html="true"
+          data-bs-placement="left"
+          data-bs-content='<img class="w-100" src="assets/img/soical_xhs.png" alt="Feedback QR Code" style="width: 150px;">'
+          title="私我反馈"
+        >
+          <i class="material-icons">feedback</i>
+        </button>
+      </div>
     </div>
     <!-- Toast Container -->
     <div
@@ -1204,6 +1402,169 @@
         <div class="toast-body">
           <span id="toastMessage"></span>
           <div id="toastButtons" class="mt-2 pt-2 border-top d-flex gap-2"></div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="modal fade"
+      id="configModal"
+      tabindex="-1"
+      aria-labelledby="configModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="configModalLabel">配置设置</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div id="configPanel" class="config-panel p-4 rounded shadow mt-4">
+              <h5 class="mb-3">自定义阈值</h5>
+              <div class="mb-3">
+                <label for="lowFreqThreshold" class="form-label">低频阈值:</label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="lowFreqThreshold"
+                    value="0.33"
+                    step="0.01"
+                    min="0"
+                    max="1"
+                  />
+                  <span class="input-group-text">
+                    <i class="material-icons">tune</i>
+                  </span>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="midFreqThreshold" class="form-label">中频阈值:</label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="midFreqThreshold"
+                    value="0.66"
+                    step="0.01"
+                    min="0"
+                    max="1"
+                  />
+                  <span class="input-group-text">
+                    <i class="material-icons">tune</i>
+                  </span>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="highFreqThreshold" class="form-label">高频阈值:</label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="highFreqThreshold"
+                    value="1.0"
+                    step="0.01"
+                    min="0"
+                    max="1"
+                  />
+                  <span class="input-group-text">
+                    <i class="material-icons">tune</i>
+                  </span>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="accentIntensityThreshold" class="form-label">强调颜色强度阈值:</label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="accentIntensityThreshold"
+                    value="0.7"
+                    step="0.01"
+                    min="0"
+                    max="1"
+                  />
+                  <span class="input-group-text">
+                    <i class="material-icons">tune</i>
+                  </span>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="perceivedLoudnessThreshold" class="form-label">感知响度阈值:</label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="perceivedLoudnessThreshold"
+                    value="0.6"
+                    step="0.01"
+                    min="0"
+                    max="1"
+                  />
+                  <span class="input-group-text">
+                    <i class="material-icons">tune</i>
+                  </span>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="sentimentScoreThreshold" class="form-label">情感分数阈值:</label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="sentimentScoreThreshold"
+                    value="0.75"
+                    step="0.01"
+                    min="0"
+                    max="1"
+                  />
+                  <span class="input-group-text">
+                    <i class="material-icons">tune</i>
+                  </span>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="adjustedLoudnessThreshold" class="form-label">调整响度阈值:</label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="adjustedLoudnessThreshold"
+                    value="0.98"
+                    step="0.01"
+                    min="0"
+                    max="1"
+                  />
+                  <span class="input-group-text">
+                    <i class="material-icons">tune</i>
+                  </span>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="flickerEffectThreshold" class="form-label">闪烁效果阈值:</label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    class="form-control"
+                    id="flickerEffectThreshold"
+                    value="0.5"
+                    step="0.01"
+                    min="0"
+                    max="1"
+                  />
+                  <span class="input-group-text">
+                    <i class="material-icons">tune</i>
+                  </span>
+                </div>
+              </div>
+              <button id="saveConfig" class="btn btn-primary">保存配置</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1269,7 +1630,7 @@
       defer="true"
     ></script>
     <script
-      src="https://unpkg.com/clipboard@2/dist/clipboard.min.js"
+      src="https://unpkg.com/clipboard@2.0.11/dist/clipboard.min.js"
       crossorigin="anonymous"
       defer="true"
     ></script>

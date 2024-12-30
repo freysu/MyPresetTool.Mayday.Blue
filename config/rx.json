@@ -1,0 +1,43 @@
+{
+  "name": "任性",
+  "themeColors": {
+    "low": [
+      {
+        "color": "yel",
+        "per": "100%"
+      }
+    ],
+    "mid": [
+      {
+        "color": "sky",
+        "per": "30%"
+      },
+      {
+        "color": "ora",
+        "per": "70%"
+      }
+    ],
+    "high": [
+      {
+        "color": "ora",
+        "per": "30%"
+      },
+      {
+        "color": "sky",
+        "per": "70%"
+      }
+    ],
+    "accent": [
+      {
+        "color": "sky",
+        "per": "30%"
+      },
+      {
+        "color": "ora",
+        "per": "70%"
+      }
+    ],
+    "base": "ora"
+  },
+  "version": "v1"
+}

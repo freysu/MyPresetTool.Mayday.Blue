@@ -899,34 +899,24 @@ class ThemeConfigForm {
     this.presets = JSON.parse(JSON.stringify(presets)) || [];
     this.themeConfig = this.presets.filter((item) => item.default === true)[0];
     this.sections = ['low', 'mid', 'high', 'accent'];
+    this.eventListenersInitialized = false;
   }
 
   _addEventListeners() {
     if (this.eventListenersInitialized) return; // 如果已初始化，直接返回
-    // Add Color buttons
-    document.querySelectorAll('.add-color-btn').forEach((button) => {
-      button.addEventListener('click', (e) => {
-        const section = e.currentTarget.dataset.section;
-        this.addColorItem(section);
-      });
-    });
 
-    // Export button
-    const exportBtn = document.querySelector('#themeConfig_exportConfig');
-    if (exportBtn) {
-      exportBtn.addEventListener('click', () => debounce(this.exportConfig(), 1000));
-    }
-
-    // Import input
-    const importInput = document.querySelector('#themeConfig_importConfig');
-    if (importInput) {
-      importInput.addEventListener('change', (e) => debounce(this.importConfig(e.target), 1000));
-    }
-
-    const saveInput = document.querySelector('#themeConfig_saveConfig');
-    if (saveInput) {
-      saveInput.addEventListener('click', (e) => debounce(this.saveConfig(), 1000));
-    }
+    document.getElementById('themeConfig_exportConfig')?.addEventListener(
+      'click',
+      debounce(() => this.exportConfig(), 500),
+    );
+    document.getElementById('themeConfig_importConfig')?.addEventListener(
+      'change',
+      debounce((e) => this.importConfig(e.target), 500),
+    );
+    document.getElementById('themeConfig_saveConfig')?.addEventListener(
+      'click',
+      debounce(() => this.saveConfig(), 500),
+    );
 
     document.getElementById('confirm-reset-btn').addEventListener(
       'click',
@@ -938,7 +928,7 @@ class ThemeConfigForm {
           duration: 3000,
         });
         bootstrap.Modal.getInstance(document.getElementById('resetModal')).hide();
-      }, 1000),
+      }, 500),
     );
     const presetSelect = document.getElementById('presetSelect');
 
@@ -970,7 +960,6 @@ class ThemeConfigForm {
       const presetIndex = parseInt(e.target.value);
       if (!isNaN(presetIndex) && this.presets[presetIndex]) {
         this.themeConfig = JSON.parse(JSON.stringify(this.presets[presetIndex]));
-        this.eventListenersInitialized = false;
         this.initializeForm();
         showNotification('预设已应用', '', { type: 'success', duration: 3000 });
       }
@@ -1005,6 +994,20 @@ class ThemeConfigForm {
     });
 
     colorSections.appendChild(fragment);
+    // Add Color buttons
+    const addColorButtonHandler = debounce((e) => {
+      // Find the closest button element that matches the selector
+      const button = e.target.closest('.add-color-btn');
+      if (!button) return; // Guard clause if button not found
+
+      const { section } = button.dataset;
+      this.addColorItem(section);
+    }, 500);
+
+    document.querySelectorAll('.add-color-btn').forEach((button) => {
+      button.removeEventListener('click', addColorButtonHandler);
+      button.addEventListener('click', addColorButtonHandler);
+    });
   }
 
   getSectionDescription(section) {
@@ -1077,20 +1080,40 @@ class ThemeConfigForm {
         }
       };
 
-      const rmbtn = itemDiv.querySelector('button.remove-color-btn');
-      rmbtn.addEventListener('click', (e) => {
-        const { section, index } = e.target.dataset;
-        this.removeColorItem(section, parseInt(index, 10));
-      });
+      // const rmbtn = itemDiv.querySelector('button.remove-color-btn');
+      // const removeColorButtonHandler = debounce((e) => {
+      //   // Find the closest button element that matches the selector
+      //   const button = e.target.closest('.remove-color-btn');
+      //   if (!button) return; // Guard clause if button not found
+
+      //   const { section, index } = button.dataset;
+      //   console.log('removeColorButtonHandler-{ section, index }: ', { section, index });
+      //   this.removeColorItem(section, parseInt(index, 10));
+      // }, 500);
+      // rmbtn.removeEventListener('click', removeColorButtonHandler);
+      // rmbtn.addEventListener('click', removeColorButtonHandler);
 
       const perInput = itemDiv.querySelector('input.percentage-input');
-      perInput.addEventListener('change', (e) => {
-        const { section, index } = e.target.dataset;
-        this.updatePercentage(section, parseInt(index, 10), e.target.value);
-      });
+      perInput.addEventListener(
+        'change',
+        debounce((e) => {
+          const { section, index } = e.target.dataset;
+          this.updatePercentage(section, parseInt(index, 10), e.target.value);
+        }, 300),
+      );
     });
 
     container.appendChild(fragment);
+
+    // 使用事件委托来管理 remove-color-btn 的点击事件
+    container.addEventListener('click', (e) => {
+      const rmbtn = e.target.closest('.remove-color-btn');
+      if (!rmbtn) return;
+
+      const { section, index } = rmbtn.dataset;
+      console.log('removeColorButtonHandler-{ section, index }: ', { section, index });
+      this.removeColorItem(section, parseInt(index, 10));
+    });
   }
 
   createColorSelect(section, index, currentValue) {
@@ -1120,17 +1143,20 @@ class ThemeConfigForm {
     });
 
     // 当选择改变时，更新颜色样本 (Swatch) 和选中的颜色
-    select.addEventListener('change', (e) => {
-      const newColor = e.target.value;
-      const newHexColor = ColorCodeManager.AVAILABLE_COLOR_CODES_TO_HEX[newColor];
+    select.addEventListener(
+      'change',
+      debounce((e) => {
+        const newColor = e.target.value;
+        const newHexColor = ColorCodeManager.AVAILABLE_COLOR_CODES_TO_HEX[newColor];
 
-      // 更新对应颜色项的 swatch 背景色
-      swatch.style.backgroundColor = newHexColor;
-      swatch.title = newHexColor;
+        // 更新对应颜色项的 swatch 背景色
+        swatch.style.backgroundColor = newHexColor;
+        swatch.title = newHexColor;
 
-      // 更新配置中的颜色
-      index !== null && this.updateColor(section, index, newColor);
-    });
+        // 更新配置中的颜色
+        index !== null && this.updateColor(section, index, newColor);
+      }, 500),
+    );
 
     // 将 Swatch 和 Select 插入 div 中
     div.appendChild(swatch);
@@ -1178,6 +1204,10 @@ class ThemeConfigForm {
   }
 
   removeColorItem(section, index) {
+    console.log(
+      'removeColorItem-this.themeConfig.themeColors[section]: ',
+      this.themeConfig.themeColors[section],
+    );
     this.themeConfig.themeColors[section].splice(index, 1);
     if (this.themeConfig.themeColors[section].length === 0) {
       this.addColorItem(section);
@@ -1202,16 +1232,12 @@ class ThemeConfigForm {
   // 更新百分比，避免出现0%的情况
   updatePercentage(section, index, value) {
     const percentage = parseInt(value, 10);
-    if (percentage === 0) {
-      showNotification(
-        '无效百分比！⚠️',
-        '百分比不能为0哦，这样会影响颜色配置效果，请设置一个大于0且小于等于100的百分比值呢~',
-        {
-          type: 'error',
-          duration: 3000,
-        },
-      );
-      return;
+    if (isNaN(percentage) || percentage < 0 || percentage > 100) {
+      showNotification('非法输入', '百分比应该介于1%和100%之间', {
+        type: 'warning',
+        duration: 2000,
+      });
+      return false;
     }
     this.themeConfig.themeColors[section][index].per = `${percentage}%`;
     this.validatePercentages(section);
@@ -1290,7 +1316,7 @@ class ThemeConfigForm {
         base: 'blu',
       },
     };
-    this.eventListenersInitialized = false;
+    this.eventListenersInitialized = true;
     this.initializeForm();
   }
 
@@ -1463,6 +1489,57 @@ class ThemeConfigForm {
     });
     // Add event listeners to the newly created buttons
     this._addEventListeners();
+
+    // 加载自定义阈值
+    this.loadCustomThresholds();
+
+    // 添加事件监听器来保存配置
+    document.getElementById('saveConfig').addEventListener('click', () => {
+      this.saveCustomThresholds();
+    });
+
+    // 添加事件监听器来动态更新阈值
+    document.querySelectorAll('#configPanel input[type="number"]').forEach((input) => {
+      input.addEventListener('change', () => {
+        this.updateThreshold(input.id, parseFloat(input.value));
+      });
+    });
+  }
+
+  loadCustomThresholds() {
+    const thresholds = JSON.parse(localStorage.getItem('customThresholds')) || {};
+    for (const [key, value] of Object.entries(thresholds)) {
+      const input = document.getElementById(key);
+      if (input) {
+        input.value = value;
+        ColorCodeManager.CUSTOM_THRESHOLDS[key] = parseFloat(value);
+      }
+    }
+  }
+
+  saveCustomThresholds() {
+    const thresholds = {};
+    document.querySelectorAll('#configPanel input[type="number"]').forEach((input) => {
+      thresholds[input.id] = parseFloat(input.value);
+    });
+    localStorage.setItem('customThresholds', JSON.stringify(thresholds));
+    showNotification('配置已保存！💾', '您的自定义阈值已成功保存', {
+      type: 'success',
+      duration: 3000,
+    });
+  }
+
+  updateThreshold(key, value) {
+    ColorCodeManager.CUSTOM_THRESHOLDS[key] = value;
+    // 重新计算颜色映射或更新相关逻辑
+    this.renderColorItems('low');
+    this.renderColorItems('mid');
+    this.renderColorItems('high');
+    this.renderColorItems('accent');
+    showNotification('阈值已更新！🔄', '您的自定义阈值已更新', {
+      type: 'info',
+      duration: 2000,
+    });
   }
 }
 
@@ -1728,7 +1805,7 @@ class AudioAnalyzer {
   setupEventListeners() {
     document
       .getElementById('searchEntry__generate_tool')
-      .addEventListener('click', () => debounce(this.handleNetworkAudioEntry(), 1000));
+      .addEventListener('click', () => debounce(this.handleNetworkAudioEntry(), 500));
     document
       .getElementById('audioFileInput_generate_tool')
       .addEventListener('change', (e) => this.handleAudioFileSelect(e));
@@ -1858,7 +1935,7 @@ class AudioAnalyzer {
             console.error('Download error:', error);
           }
         }
-      }, 1500),
+      }, 500),
     );
   }
 
@@ -2802,7 +2879,7 @@ class AudioAnalyzer {
 
               const isOffEffect = normalizedTime - lastOffEffect >= 800;
 
-              const colorCode = ColorCodeManager.getColorCode(
+              let { colorCode, rangeName } = ColorCodeManager.getColorCode(
                 normalizedFrequency,
                 normalizedAmplitude,
                 sentimentScore,
@@ -2816,7 +2893,9 @@ class AudioAnalyzer {
 
               const processingLog = `\n[歌词]: ${
                 currentLyric ? currentLyric.text : '无'
-              },\n[情感分数]: ${sentimentScore},\n [时间]: ${normalizedTime},\n[颜色]: ${colorCode},\n[归一化频率]: ${normalizedFrequency},\n[归一化幅度]: ${normalizedAmplitude}\n`;
+              },\n[情感分数]: ${sentimentScore},\n[时间]: ${normalizedTime},\n[颜色]: ${colorCode},\n[归一化频率]: ${normalizedFrequency},\n[归一化幅度]: ${normalizedAmplitude}\n${
+                rangeName ? `[范围]: ${rangeName}\n` : ''
+              }`;
               // console.log('processingLog: ', processingLog);
 
               // 将处理日志添加到 #statusLogger 元素中
@@ -2825,9 +2904,15 @@ class AudioAnalyzer {
               fragment.appendChild(logElement);
 
               if (currentLyric) {
-                timelineData.push(`${normalizedTime},${colorCode} // ${currentLyric.text}`);
+                timelineData.push(
+                  `${normalizedTime},${colorCode} // ${currentLyric.text} ${
+                    rangeName ? `// ${rangeName}` : ''
+                  }`,
+                );
               } else {
-                timelineData.push(`${normalizedTime},${colorCode}`);
+                timelineData.push(
+                  `${normalizedTime},${colorCode} ${rangeName ? `// ${rangeName}` : ''}`,
+                );
               }
             } catch (error) {
               if (error.message && error.message.includes('Reached end of file')) {
@@ -3043,6 +3128,16 @@ class ColorCodeManager {
     rai: new Set(['4']),
   };
 
+  static CUSTOM_THRESHOLDS = {
+    lowFreqThreshold: 0.33,
+    midFreqThreshold: 0.66,
+    highFreqThreshold: 1.0,
+    accentIntensityThreshold: 0.7,
+    sentimentScoreThreshold: 0.75,
+    adjustedLoudnessThreshold: 0.98,
+    flickerEffectThreshold: 0.5,
+  };
+
   /**
    * 获取颜色代码映射
    */
@@ -3196,7 +3291,7 @@ class ColorCodeManager {
     return '1';
   }
 
-  static mapFrequencyToColorInRange(frequency, range) {
+  static mapFrequencyToColorInRange(range) {
     if (!Array.isArray(range) || range.length === 0) {
       return null;
     }
@@ -3211,12 +3306,11 @@ class ColorCodeManager {
       return slots[Math.floor(Math.random() * slots.length)];
     }
 
-    const randomValue = Math.random();
     let accumulator = 0;
 
     for (const colorInfo of range) {
       accumulator += parseFloat(colorInfo.per) / 100;
-      if (randomValue <= accumulator) {
+      if (accumulator >= 1) {
         return colorInfo.color;
       }
     }
@@ -3224,29 +3318,12 @@ class ColorCodeManager {
     return range[range.length - 1].color;
   }
 
-  static mapFrequencyToColor(normalizedFreq, themeColors) {
-    let range = {};
-    if (normalizedFreq < 0.33) {
-      range = themeColors.low;
-    } else if (normalizedFreq < 0.66) {
-      range = themeColors.mid;
-    } else {
-      range = themeColors.high;
-    }
-
-    if (!Array.isArray(range) || range.length === 0) {
-      throw new Error('Invalid color range');
-    }
-
-    return this.mapFrequencyToColorInRange(normalizedFreq, range);
-  }
-
   static getAccentColor(themeColors) {
     if (!Array.isArray(themeColors.accent) || themeColors.accent.length === 0) {
       throw new Error('Invalid accent color range');
     }
 
-    return this.mapFrequencyToColorInRange(Math.random(), themeColors.accent);
+    return this.mapFrequencyToColorInRange(themeColors.accent);
   }
 
   static getColorCode(
@@ -3256,6 +3333,16 @@ class ColorCodeManager {
     themeColors,
     useOffEffect = false,
   ) {
+    const {
+      lowFreqThreshold,
+      midFreqThreshold,
+      highFreqThreshold,
+      accentIntensityThreshold,
+      sentimentScoreThreshold,
+      adjustedLoudnessThreshold,
+      flickerEffectThreshold,
+    } = this.CUSTOM_THRESHOLDS;
+
     // Apply Stevens' power law for perceived loudness (exponent ~0.6 for loudness)
     const perceivedLoudness = Math.pow(weightedAmplitude, 0.6);
     // Fletcher-Munson curves suggest that human hearing is most sensitive around 2-4 kHz
@@ -3264,18 +3351,32 @@ class ColorCodeManager {
     const adjustedLoudness = perceivedLoudness * sensitivityFactor;
 
     let color = '';
+    let rangeName = '';
     try {
-      color = this.mapFrequencyToColor(normalizedFreq, themeColors);
+      if (normalizedFreq < lowFreqThreshold) {
+        color = this.mapFrequencyToColorInRange(themeColors.low);
+        rangeName = 'low';
+      } else if (normalizedFreq < midFreqThreshold) {
+        color = this.mapFrequencyToColorInRange(themeColors.mid);
+        rangeName = 'mid';
+      } else if (normalizedFreq < highFreqThreshold) {
+        color = this.mapFrequencyToColorInRange(themeColors.high);
+        rangeName = 'high';
+      } else {
+        throw new Error('Invalid frequency range');
+      }
     } catch (error) {
       my_debugger.showError(`Error in mapFrequencyToColor: ${error}. Using base color.`, 'warn');
       color = themeColors.base;
+      rangeName = 'base';
     }
 
     // Use accent colors for extreme sentiments or high amplitudes
     // Reduced threshold for using accent colors, with less emphasis on sentiment
-    if (adjustedLoudness >= 0.7) {
+    if (adjustedLoudness >= accentIntensityThreshold) {
       try {
         color = this.getAccentColor(themeColors);
+        rangeName = 'accent';
       } catch (error) {
         my_debugger.showError(`Error in getAccentColor: ${error}. Using original color.`, 'warn');
       }
@@ -3286,23 +3387,26 @@ class ColorCodeManager {
 
     // Adjust intensity based on sentiment
     // Using a more gradual scale based on the circumplex model of affect
-    if (sentimentScore > 0.75) {
-      intensity = Math.min(parseInt(intensity) + Math.ceil(sentimentScore * 0.75), 4).toString();
-    } else if (sentimentScore < -0.75) {
+    if (sentimentScore > sentimentScoreThreshold) {
+      intensity = Math.min(
+        parseInt(intensity) + Math.ceil(sentimentScore * sentimentScoreThreshold),
+        4,
+      ).toString();
+    } else if (sentimentScore < -sentimentScoreThreshold) {
       intensity = Math.max(
-        parseInt(intensity) - Math.ceil(Math.abs(sentimentScore) * 0.75),
+        parseInt(intensity) - Math.ceil(Math.abs(sentimentScore) * sentimentScoreThreshold),
         1,
       ).toString();
     }
 
     // Use flicker effect for high amplitudes or extreme sentiments
     // Threshold based on research on visual flicker fusion threshold
-    if (adjustedLoudness > 0.98) {
+    if (adjustedLoudness > flickerEffectThreshold) {
       intensity = 'T';
     }
 
-    if (useOffEffect && adjustedLoudness >= 0.5) {
-      return 'off4';
+    if (useOffEffect && adjustedLoudness >= adjustedLoudnessThreshold) {
+      return { colorCode: 'off4', rangeName: null };
     }
 
     let colorCode = `${color}${intensity}`;
@@ -3325,7 +3429,7 @@ class ColorCodeManager {
       }
     }
 
-    return colorCode;
+    return { colorCode, rangeName };
   }
 
   static getSensitivityFactor(normalizedFreq) {
@@ -4361,7 +4465,6 @@ window.addEventListener('keyboardWillHide', function (e) {
   e.preventDefault();
 });
 
-
 window.addEventListener('load', () => {
   const fileInputs = document.querySelectorAll('input[type="file"]');
   const hasAutoFilled = Array.from(fileInputs).some((input) => input.value !== '');
@@ -4407,6 +4510,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
   tooltipTriggerList.forEach((tooltipTriggerEl) => {
     new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+
+  var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-trigger="hover focus"]'));
+  popoverTriggerList.forEach((popoverTriggerEl) => {
+    new bootstrap.Popover(popoverTriggerEl);
   });
 
   var clipboard = new ClipboardJS('#copy-btn');
