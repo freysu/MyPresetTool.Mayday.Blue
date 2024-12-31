@@ -2,7 +2,7 @@
  * @Author: freysu
  * @Date: 2024-11-21 04:20:51
  * @LastEditors: freysu
- * @LastEditTime: 2024-12-31 06:26:27
+ * @LastEditTime: 2024-12-31 08:36:59
  * @Description: file content
 -->
 <!DOCTYPE html>
@@ -1425,6 +1425,12 @@
           </div>
           <div class="modal-body">
             <div id="configPanel" class="config-panel p-4 rounded shadow mt-4">
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="detailedOutputCheckbox" checked>
+                <label class="form-check-label" for="detailedOutputCheckbox">
+                  包含歌词的详细输出
+                </label>
+              </div>
               <h5 class="mb-3">自定义阈值</h5>
               <div class="mb-3">
                 <label for="lowFreqThreshold" class="form-label">低频阈值:</label>
@@ -1562,7 +1568,8 @@
                   </span>
                 </div>
               </div>
-              <button id="saveConfig" class="btn btn-primary">保存配置</button>
+              <button id="resetThresholds" class="btn btn-secondary">重置阈值</button>
+              <button id="saveThresholds" class="btn btn-primary">保存阈值配置</button>
             </div>
           </div>
         </div>

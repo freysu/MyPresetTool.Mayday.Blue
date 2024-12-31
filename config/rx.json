@@ -39,5 +39,15 @@
     ],
     "base": "ora"
   },
-  "version": "v1"
+  "version": "v1",
+  "customThresholds": {
+    "lowFreqThreshold": 0.25,
+    "midFreqThreshold": 0.85,
+    "highFreqThreshold": 1.5,
+    "accentIntensityThreshold": 1.5,
+    "perceivedLoudnessThreshold": 1.5,
+    "sentimentScoreThreshold": 0.66,
+    "adjustedLoudnessThreshold": 1.5,
+    "flickerEffectThreshold": 1.5
+  }
 }

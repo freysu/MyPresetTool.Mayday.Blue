@@ -1,12 +1,3 @@
-/*
-Five Server running at:
-> Network:  http://113.81.192.195:5500
-> Local:    http://localhost:5500
-> Network:  http://172.21.112.1:5500
-
-the file named `index.js`, it will webpacked to `dist/bundle.js`
-*/
-
 /*!
  * Color mode toggler for Bootstrap's docs (https://getbootstrap.com/)
  * Copyright 2011-2023 The Bootstrap Authors
@@ -1490,11 +1481,8 @@ class ThemeConfigForm {
     // Add event listeners to the newly created buttons
     this._addEventListeners();
 
-    // 加载自定义阈值
-    this.loadCustomThresholds();
-
     // 添加事件监听器来保存配置
-    document.getElementById('saveConfig').addEventListener('click', () => {
+    document.getElementById('saveThresholds').addEventListener('click', () => {
       this.saveCustomThresholds();
     });
 
@@ -1504,6 +1492,26 @@ class ThemeConfigForm {
         this.updateThreshold(input.id, parseFloat(input.value));
       });
     });
+
+    document.getElementById('resetThresholds').addEventListener('click', () => {
+      this.resetThresholds();
+    });
+
+    // 加载自定义阈值
+    this.loadCustomThresholds();
+  }
+
+  // 重置阈值的函数
+  resetThresholds() {
+    ColorCodeManager.resetThresholds();
+    localStorage.setItem('customThresholds', JSON.stringify(ColorCodeManager.CUSTOM_THRESHOLDS));
+    for (const [key, value] of Object.entries(ColorCodeManager.CUSTOM_THRESHOLDS)) {
+      document.getElementById(key).value = value;
+    }
+    showNotification('阈值已重置！🔄', '您的自定义阈值已重置为默认值', {
+      type: 'info',
+      duration: 2000,
+    });
   }
 
   loadCustomThresholds() {
@@ -1512,6 +1520,12 @@ class ThemeConfigForm {
       const input = document.getElementById(key);
       if (input) {
         input.value = value;
+        if (
+          ColorCodeManager.CUSTOM_THRESHOLDS[key] == undefined ||
+          ColorCodeManager.CUSTOM_THRESHOLDS == null
+        ) {
+          ColorCodeManager.CUSTOM_THRESHOLDS[key] = ColorCodeManager.DEFAULT_THRESHOLDS[key];
+        }
         ColorCodeManager.CUSTOM_THRESHOLDS[key] = parseFloat(value);
       }
     }
@@ -1768,6 +1782,69 @@ async function copyToClipboard(text) {
   }
 }
 
+function mergeLyrics(parsedLrcData, formatB) {
+  // Pre-process scripts array for faster lookups
+  const scripts = (parsedLrcData.scripts || []).map((script) => ({
+    start: Math.round(script.start * 1000),
+    end: Math.round(script.end * 1000),
+    text: script.text,
+  }));
+
+  // Create a time range map for O(1) lookups
+  const timeRangeMap = new Map();
+  scripts.forEach((script) => {
+    for (let time = script.start; time <= script.end; time++) {
+      timeRangeMap.set(time, script.text);
+    }
+  });
+
+  // Process format B lines in a single pass
+  const lines = formatB.split('\n');
+  const result = [];
+  let currentLyric = null;
+  let currentGroup = [];
+
+  // Avoid repeated string splits by using a more efficient method
+  const processLine = (line) => {
+    const commaIndex = line.indexOf(',');
+    return {
+      time: parseInt(line.slice(0, commaIndex)),
+      content: line.slice(commaIndex + 1).trim(),
+    };
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim()) continue;
+
+    const { time, content } = processLine(line);
+    const lyricText = timeRangeMap.get(time) || '';
+
+    if (lyricText !== currentLyric) {
+      if (currentGroup.length > 0) {
+        if (currentLyric) {
+          result.push(`// ${currentLyric}`);
+        }
+        result.push(currentGroup.join('\n'));
+      }
+      currentLyric = lyricText;
+      currentGroup = [line];
+    } else {
+      currentGroup.push(line);
+    }
+  }
+
+  // Handle the last group
+  if (currentGroup.length > 0) {
+    if (currentLyric) {
+      result.push(`// ${currentLyric}`);
+    }
+    result.push(currentGroup.join('\n'));
+  }
+
+  return result.join('\n');
+}
+
 class AudioAnalyzer {
   constructor() {
     this.state = {
@@ -1777,7 +1854,10 @@ class AudioAnalyzer {
       metadata: null,
       lyrics: null,
       themeColors: null,
+      detailedOutput: JSON.parse(localStorage.getItem('detailedOutput')) || false,
     };
+
+    document.getElementById('detailedOutputCheckbox').checked = this.state.detailedOutput;
 
     this.setupEventListeners();
     // 控制状态显示的函数
@@ -1813,45 +1893,24 @@ class AudioAnalyzer {
       .getElementById('lrcFileInput_generate_tool')
       .addEventListener('change', (e) => this.handleLrcFileSelect(e));
 
+    document.getElementById('detailedOutputCheckbox').addEventListener('change', (event) => {
+      this.state.detailedOutput = event.target.checked;
+      localStorage.setItem('detailedOutput', JSON.stringify(this.state.detailedOutput));
+      // 使用showNotification函数来提供用户操作反馈
+      showNotification(
+        '修改提醒-高级设置',
+        `${this.state.detailedOutput ? '已开启' : '已关闭'}详细输出模式`,
+        {
+          type: 'info',
+          duration: 3000,
+        },
+      );
+    });
+
     // Analysis button
     document
       .getElementById('generate-btn')
       .addEventListener('click', () => debounce(this.startAnalysis(), 1500));
-
-    // document.getElementById('copy-btn').addEventListener(
-    //   'click',
-    //   debounce(async () => {
-    //     try {
-    //       const content = document.getElementById('output-result').value;
-    //       if (navigator.clipboard && navigator.clipboard.writeText) {
-    //         await navigator.clipboard.writeText(content);
-    //         showNotification('成功~🎉', '📋 已复制~可以直接粘贴使用啦！', {
-    //           type: 'success',
-    //           duration: 3000,
-    //         });
-    //       } else {
-    //         console.error('剪贴板 API 不可用');
-    //         // 回退方案：手动复制
-    //         const textarea = document.createElement('textarea');
-    //         textarea.value = content;
-    //         document.body.appendChild(textarea);
-    //         textarea.select();
-    //         document.execCommand('copy');
-    //         document.body.removeChild(textarea);
-    //         showNotification('成功~🎉', '📋 已手动复制~请使用 Ctrl+C 或 Cmd+C 粘贴', {
-    //           type: 'success',
-    //           duration: 3000,
-    //         });
-    //       }
-    //     } catch (err) {
-    //       my_debugger.showError('Failed to copy:', err);
-    //       showNotification('出错了~🤔', '📋 复制失败了，请重试哦！实在不行请手动复制！', {
-    //         type: 'error',
-    //         duration: 5000,
-    //       });
-    //     }
-    //   }, 1000),
-    // );
 
     document.getElementById('download-btn').addEventListener(
       'click',
@@ -2903,11 +2962,10 @@ class AudioAnalyzer {
               logElement.textContent = processingLog;
               fragment.appendChild(logElement);
 
+              console.log('currentLyric: ', currentLyric);
               if (currentLyric) {
                 timelineData.push(
-                  `${normalizedTime},${colorCode} // ${currentLyric.text} ${
-                    rangeName ? `// ${rangeName}` : ''
-                  }`,
+                  `${normalizedTime},${colorCode} ${rangeName ? `// ${rangeName}` : ''}`,
                 );
               } else {
                 timelineData.push(
@@ -3036,7 +3094,12 @@ class AudioAnalyzer {
 
   handleAnalysisResult(timelineData) {
     const output = document.getElementById('output-result');
-    output.value = this.formatTimelineData(timelineData);
+    const rst = this.formatTimelineData(timelineData);
+    output.value = this.state.detailedOutput
+      ? this.state.lyrics
+        ? mergeLyrics(this.state.lyrics, rst)
+        : rst
+      : rst;
   }
 
   formatTimelineData(timelineData) {
@@ -3128,7 +3191,7 @@ class ColorCodeManager {
     rai: new Set(['4']),
   };
 
-  static CUSTOM_THRESHOLDS = {
+  static DEFAULT_THRESHOLDS = {
     lowFreqThreshold: 0.33,
     midFreqThreshold: 0.66,
     highFreqThreshold: 1.0,
@@ -3137,6 +3200,12 @@ class ColorCodeManager {
     adjustedLoudnessThreshold: 0.98,
     flickerEffectThreshold: 0.5,
   };
+
+  static CUSTOM_THRESHOLDS = { ...this.DEFAULT_THRESHOLDS };
+
+  static resetThresholds() {
+    this.CUSTOM_THRESHOLDS = { ...this.DEFAULT_THRESHOLDS };
+  }
 
   /**
    * 获取颜色代码映射
@@ -4512,7 +4581,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     new bootstrap.Tooltip(tooltipTriggerEl);
   });
 
-  var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-trigger="hover focus"]'));
+  var popoverTriggerList = [].slice.call(
+    document.querySelectorAll('[data-bs-trigger="hover focus"]'),
+  );
   popoverTriggerList.forEach((popoverTriggerEl) => {
     new bootstrap.Popover(popoverTriggerEl);
   });
@@ -5027,15 +5098,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     my_debugger.showError('Highlight.js not found. Skipping code highlighting.');
   }
 
-  const ANNOUNCEMENT_CONTENT_backup = `
+  const ANNOUNCEMENT_CONTENT_NEW_USER = `
 <div class="card shadow-sm mb-4">
         <div class="card-header">
           <h2 class="modal-title" id="announcementModalLabel">欢迎wmls来玩 Mayday.Blue 预设工具~</h2>
         </div>
         <div class="modal-body">
-<h6>制作者<a
+<h6><a
   href="https://www.xiaohongshu.com/user/profile/5c1610720000000005018c49"
-  target="_blank">（小红书@那一转眼只剩我🥕)</a>留言：</h6>
+  target="_blank">(关注作者：小红书@那一转眼只剩我🥕(点我直达))</a>留言：</h6>
 <p>你只需要选择你喜欢的音乐文件并配置好主题颜色方案，剩下的交给我~<br>生成的质量还再不停优化!<br>感谢<a
       href="https://www.xiaohongshu.com/user/profile/5d7e751900000000010010bd"
       target="_blank">小红书@Diu🥕</a>大佬开发的<strong><code style="font-family: 'Lato', sans-serif;">Mayday.Blue</code></strong>小程序!
@@ -5095,15 +5166,94 @@ document.addEventListener('DOMContentLoaded', async () => {
       </div>
   `;
 
+  const ANNOUNCEMENT_CONTENT_OLD_USER = `
+  <div class="card shadow-sm mb-4">
+  <div class="modal-body">
+    <h2>欢迎来到Mayday.Blue 预设工具~</h2>
+    <h5 class="text-danger">
+      老师先别关! 熟练后，生成预设代码只用<strong>1分钟</strong>不到!
+      重点就在颜色搭配上，尽情发挥创意吧!!一起补全五月天所有歌曲场控吧!
+    </h5>
+    <hr>
+    <h3>快速上手</h3>
+    <h4>1. 选音乐</h4>
+    <ul>
+      <li>
+        <h5>直接搜索或本地上传你喜欢的音乐，能上传歌词的话更佳哦，这会让效果更出彩！</h5>
+      </li>
+    </ul>
+    <h4>2. 配颜色</h4>
+    <ul>
+      <li>
+        <h5>先在脑海里构思好颜色搭配，像整体颜色、高潮部分的颜色呈现等，也可以直接用我写好的预设模板。</h5>
+      </li>
+      <li>
+        <h6>颜色主题配置能导出导入，方便保存和分享创意，多写几套不同风格的模版以后就轻松很多啦~</h6>
+      </li>
+      <li><h6>若需调整，打开导航栏 “高级设置” 探索一番。</h6></li>
+    </ul>
+    <h4>3. 生成代码</h4>
+    <ul>
+      <li>
+      <h5>配置好颜色后，记得点<code>保存</code>，然后点<code>生成预设代码</code></h5>
+      </li>
+    </ul>
+    <h4>4. 应用代码</h4>
+    <ul>
+      <li>
+        <h5>把代码复制粘贴到<code>Mayday.Blue</code>小程序里。不清楚操作？看这个视频<a href="https://www.xiaohongshu.com/user/profile/5d7e751900000000010010bd">（视频链接,点我直达）</a></h5>
+      </li>
+      <li>
+        <h6>想先预览效果？将生成的代码复制到输入框，上传对应歌曲文件就行，控制面板和音频进度条都能自由操作。</h6>
+      </li>
+    </ul>
+    <h4>5. 优化代码（可选）</h4>
+    <ul>
+      <li>
+        <h5>对生成结果不满意？可以进小红书群找我帮你调一下,也可以访问编辑器（点我直达）</h5>
+      </li>
+      <li>
+        <h6>编辑器功能强大:音频波形可视化,颜色快速插入，语法高亮,自动补全，代码校验与格式化，自动保存备份(这里说的功能可以不用懂,我只是想炫耀一下,求夸!)</h6>
+      </li>
+    </ul>
+       <hr>
+       <h5>
+      感谢<strong
+        ><code style="font-family: 'Lato', sans-serif"
+          >Mayday.Blue</code
+        ></strong
+      >小程序的开发者老师：<a
+        href="https://www.xiaohongshu.com/user/profile/5d7e751900000000010010bd"
+        target="_blank"
+        >小红书@Diu🥕（点我直达）</a
+      >!
+    </h5>
+    <h5>
+      欢迎关注我的<a
+        href="https://www.xiaohongshu.com/user/profile/5c1610720000000005018c49"
+        target="_blank"
+        >小红书@那一转眼只剩我🥕（点我直达）</a
+      >,虽然在做的这个工具没什么用,但我还是希望能帮助到更多的wmls,还有想做场控的你！<br /></h5>
+      <h5>欢迎进群一起分享创意,有什么不懂的也可以来小红书找我~</h5>
+      <img
+        class="w-100 text-center mb-1"
+        src="assets/img/soical_xhs_q.jpg"
+        alt="小红书群聊二维码"
+      />
+  </div>
+</div>
+
+  `;
+
   // 检查是否为新用户
   if (!localStorage.getItem('isNewUser')) {
     try {
-      showModal('公告📢 - 2024/11/23 15:20', ANNOUNCEMENT_CONTENT_backup, {
+      showModal('公告📢 - 2024/11/23 15:20', ANNOUNCEMENT_CONTENT_OLD_USER, {
         type: 'info',
         size: 'large',
         buttons: [
           {
-            text: '开始使用（不再展示)',
+            text: '开始使用',
             class: 'btn btn-primary',
             onClick: () => {
               // 存储用户选择开始使用
@@ -5300,6 +5450,37 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.querySelector(
         '#notificationModal #modalBody',
       ).innerHTML = `<iframe id="myIframe" src="https://sx5w7odpp7p.feishu.cn/docx/IcuIdkFKJofwhsxfW4GcVdGSnQd" width="100%" height="600px"></iframe>`;
+    }
+  } else if (!sessionStorage.getItem('hasVisited')) {
+    try {
+      showModal('公告📢 - 2024/12/31 11:00', ANNOUNCEMENT_CONTENT_OLD_USER, {
+        type: 'info',
+        size: 'medium',
+        buttons: [
+          {
+            text: '我知道了',
+            class: 'btn btn-primary',
+            onClick: () => {
+              // 存储用户已访问过
+              sessionStorage.setItem('hasVisited', 'true');
+
+              // 关闭模态框
+              const modal = document.querySelector('#notificationModal');
+              if (modal && modal.classList.contains('show')) {
+                const bootstrapModal = new bootstrap.Modal(modal);
+                bootstrapModal.hide();
+              }
+            },
+          },
+        ],
+        html: true,
+        dismissible: false,
+      });
+    } catch (error) {
+      console.error('显示公告时发生错误:', error);
+      document.querySelector(
+        '#notificationModal #modalBody',
+      ).innerHTML = `<p>欢迎再次使用 Mayday.Blue 预设工具！如有问题，请查看使用指南。</p>`;
     }
   }
 });
