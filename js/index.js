@@ -91,292 +91,6 @@ function escapeHtml(unsafe) {
     .replace(/'/g, '&#039;');
 }
 
-///////// test-start
-
-/*
-<h1 class="text-center mb-4">Theme Color Configurator</h1>
-<div class="d-flex justify-content-between mt-4">
-  <div>
-    <label for="presetSelect" class="me-2">选择预设:</label>
-    <select id="presetSelect" class="form-select form-select-sm me-2">
-      <!-- 预设选项将在这里动态生成 -->
-    </select>
-  </div>
-  <button id="themeConfig_importConfig" class="btn btn-primary">导入配置</button>
-  <button id="themeConfig_resetConfig" class="btn btn-warning">重置配置</button>
-  <button id="themeConfig_exportConfig" class="btn btn-success">导出配置</button>
-</div>
-<div id="configurator">
-  <!-- 动态生成的配置区域 -->
-</div>
-*/
-/*
-class ThemeColorConfigurator {
-  constructor(containerId, defaultConfig, presets) {
-    this.container = document.getElementById(containerId);
-    this.defaultConfig = JSON.parse(JSON.stringify(defaultConfig));
-    this.config = JSON.parse(JSON.stringify(defaultConfig));
-    this.presets = presets || [];
-    this.init();
-  }
-
-  init() {
-    this.renderSections();
-    this.bindExportImportEvents();
-    this.bindResetEvent();
-    this.bindPresetEvents();
-  }
-
-  bindResetEvent() {
-    document.getElementById('themeConfig_resetConfig').addEventListener('click', () => {
-      if (confirm('确定要重置配置吗？这将恢复到默认设置。')) {
-        this.config = JSON.parse(JSON.stringify(this.defaultConfig));
-        this.renderSections();
-        showNotification('配置已重置为默认值', '', { type: 'success', duration: 3000 });
-      }
-    });
-  }
-
-  renderSections() {
-    this.container.innerHTML = '';
-    for (const section in this.config.themeColors) {
-      if (section !== 'base') {
-        this.renderSection(section, this.config.themeColors[section]);
-      }
-    }
-    this.renderBaseColor();
-  }
-
-  renderSection(section, items) {
-    const sectionContainer = document.createElement('div');
-    sectionContainer.className = `mb-4`;
-    sectionContainer.innerHTML = `
-      <h5>${section.toUpperCase()}</h5>
-      <small class="form-text text-muted">${this.getSectionDescription(section)}</small>
-    `;
-    const colorSections = document.createElement('div');
-    colorSections.className = `${section}Container`;
-    sectionContainer.appendChild(colorSections);
-    items.forEach((item, index) => {
-      colorSections.appendChild(this.createColorItem(section, item, index));
-    });
-    const addButton = document.createElement('button');
-    addButton.className = 'btn btn-sm btn-outline-primary mt-2';
-    addButton.textContent = `添加颜色到 ${section}`;
-    addButton.onclick = () => this.addColorItem(section);
-    sectionContainer.appendChild(addButton);
-    this.container.appendChild(sectionContainer);
-  }
-
-  getSectionDescription(section) {
-    switch (section) {
-      case 'low':
-        return '低频部分（如前奏、慢节奏段落）';
-      case 'mid':
-        return '中频部分（如主歌、节奏适中的段落）';
-      case 'high':
-        return '高频部分（如副歌、高潮段落）';
-      case 'accent':
-        return '关键转折处的颜色（如情感爆发点）';
-      default:
-        return '';
-    }
-  }
-
-  renderBaseColor() {
-    const baseContainer = document.createElement('div');
-    baseContainer.className = 'mb-4';
-    baseContainer.innerHTML = `
-      <h5>Base Color</h5>
-      <select class="form-select" id="baseColor">
-        ${Object.entries(ColorCodeManager.AVAILABLE_COLOR_CODES_TO_HEX)
-          .map(
-            ([code, hex]) =>
-              `<option value="${code}" ${
-                this.config.themeColors.base === code ? 'selected' : ''
-              }>${code.toUpperCase()} (${hex})</option>`,
-          )
-          .join('')}
-      </select>
-    `;
-    baseContainer.querySelector('#baseColor').addEventListener('change', (e) => {
-      this.config.themeColors.base = e.target.value;
-      showNotification('基础颜色已更新', '', {
-        type: 'success',
-        duration: 3000,
-      });
-    });
-    this.container.appendChild(baseContainer);
-  }
-
-  createColorItem(section, item, index) {
-    const itemDiv = document.createElement('div');
-    itemDiv.className = 'color-item mb-2 d-flex justify-content-between align-items-center';
-    itemDiv.innerHTML = `
-      <div class="input-group">
-        <span class="input-group-text color-swatch"   style="background-color: ${
-          ColorCodeManager.AVAILABLE_COLOR_CODES_TO_HEX[item.color]
-        };"></span>
-        <select class="form-select">
-          ${Object.entries(ColorCodeManager.AVAILABLE_COLOR_CODES_TO_HEX)
-            .map(
-              ([code, hex]) =>
-                `<option value="${code}" ${
-                  item.color === code ? 'selected' : ''
-                }>${code.toUpperCase()}</option>`,
-            )
-            .join('')}
-        </select>
-        <input type="number" class="form-control" value="${parseInt(item.per)}" min="0" max="100">
-        <span class="input-group-text">%</span>
-        <button class="btn btn-sm btn-outline-danger">删除</button>
-      </div>
-    `;
-    const select = itemDiv.querySelector('select');
-    select.addEventListener('change', (e) => {
-      const selectedColor = e.target.value;
-      if (
-        this.config.themeColors[section].some(
-          (colorItem) => colorItem.color === selectedColor && colorItem !== item,
-        )
-      ) {
-        showNotification('颜色已存在！', '', { type: 'warning', duration: 4000 });
-        e.target.value = item.color; // Revert to previous value
-        return;
-      }
-      item.color = selectedColor;
-      itemDiv.querySelector('.color-swatch').style.backgroundColor =
-        ColorCodeManager.AVAILABLE_COLOR_CODES_TO_HEX[selectedColor];
-      this.validateAndUpdate(section);
-    });
-    const input = itemDiv.querySelector('input');
-    input.addEventListener(
-      'input',
-      debounce((e) => {
-        item.per = e.target.value + '%';
-        this.validateAndUpdate(section);
-      }, 1500),
-    );
-    itemDiv.querySelector('button').addEventListener('click', () => {
-      if (this.config.themeColors[section].length <= 1) {
-        showNotification('至少需要一个颜色！', '', { type: 'error', duration: 4000 });
-        return;
-      }
-      this.config.themeColors[section].splice(index, 1);
-      this.renderSections();
-      showNotification('颜色已删除', '', { type: 'warning', duration: 4000 });
-    });
-    return itemDiv;
-  }
-
-  addColorItem(section) {
-    if (this.config.themeColors[section].length >= 10) {
-      showNotification('无法添加更多颜色！ 🎨', '该部分的颜色数量已达到上限（10）', {
-        type: 'warning',
-        duration: 4000,
-      });
-      return;
-    }
-    const remainingPercentage =
-      100 - this.config.themeColors[section].reduce((sum, item) => sum + parseInt(item.per), 0);
-    if (remainingPercentage <= 0)
-      return showNotification('无法添加更多颜色！ 🎨', '剩余百分比不足', {
-        type: 'error',
-        duration: 4000,
-      });
-
-    this.config.themeColors[section].push({ color: 'red', per: `${remainingPercentage}%` });
-    this.renderSections();
-    showNotification('添加颜色', '已添加新的颜色选项', {
-      type: 'success',
-      duration: 3000,
-    });
-  }
-
-  validateAndUpdate(section) {
-    const sectionContainer = this.container.querySelector(`.${section}Container`);
-    const total = this.config.themeColors[section].reduce(
-      (sum, item) => sum + parseInt(item.per.replace('%', ''), 10),
-      0,
-    );
-    if (total > 100) {
-      sectionContainer.classList.add('is-invalid');
-      showNotification('百分比总和超过100%！', '请调整各颜色的百分比', {
-        type: 'error',
-        duration: 5000,
-      });
-      return false;
-    }
-    if (total < 100) {
-      sectionContainer.classList.add('is-invalid');
-      showNotification('百分比总和不足100%！', '请调整各颜色的百分比', {
-        type: 'warning',
-        duration: 4000,
-      });
-      return false;
-    }
-    sectionContainer.classList.remove('is-invalid');
-    return true;
-  }
-
-  bindExportImportEvents() {
-    document.getElementById('themeConfig_exportConfig').addEventListener('click', () => {
-      const blob = new Blob([JSON.stringify(this.config, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${this.config.name || 'themeColors'}_${this.config.version || 'v1'}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      showNotification('配置已导出', '', { type: 'success', duration: 3000 });
-    });
-
-    document.getElementById('themeConfig_importConfig').addEventListener('click', () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'application/json';
-      input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            try {
-              this.config = JSON.parse(e.target.result);
-              this.renderSections();
-              showNotification('配置已导入', '', { type: 'success', duration: 3000 });
-            } catch {
-              showNotification('配置文件格式错误', '', { type: 'error', duration: 4000 });
-            }
-          };
-          reader.readAsText(file);
-        }
-      };
-      input.click();
-    });
-  }
-
-  bindPresetEvents() {
-    const presetSelect = document.getElementById('presetSelect');
-    this.presets.forEach((preset, index) => {
-      const option = document.createElement('option');
-      option.value = index;
-      option.textContent = preset.name;
-      presetSelect.appendChild(option);
-    });
-    presetSelect.addEventListener('change', (e) => {
-      const presetIndex = parseInt(e.target.value);
-      if (!isNaN(presetIndex) && this.presets[presetIndex]) {
-        this.config = JSON.parse(JSON.stringify(this.presets[presetIndex]));
-        this.renderSections();
-        showNotification('预设已应用', '', { type: 'success', duration: 3000 });
-      }
-    });
-  }
-}
-*/
-
-////////////////// test-end
-
 // 简单的去抖函数实现
 function debounce(fn, delay) {
   let timeout;
@@ -476,22 +190,38 @@ my_debugger.showError = (message, error = null) => {
 if (!document.querySelector('.toast-container')) {
   document.body.insertAdjacentHTML(
     'beforeend',
-    `
-    <!-- Toast Container -->
-    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1111100; transform: translate3d(0px, 36px, 0px);">
-      <div id="programToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-          <span id="toastIcon" class="me-2 fw-bold"></span>
-          <strong id="toastTitle" class="me-auto"></strong>
-          <small id="toastTimeDiff" class="text-muted"></small>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body">
-          <span id="toastMessage"></span>
-          <div id="toastButtons" class="mt-2 pt-2 border-top d-flex gap-2"></div>
+    `<div class="toast-container position-fixed top-0 end-0 p-2" style="z-index: 1111100">
+    <div
+      id="programToast"
+      class="toast toast-sm"
+      role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
+    >
+      <div class="toast-header py-2 px-3">
+        <span id="toastIcon" class="material-icons me-2 fs-6"></span>
+        <strong id="toastTitle" class="me-auto text-light small"></strong>
+        <small id="toastTimeDiff" class="text-muted ms-2" style="font-size: 0.75rem"></small>
+        <button
+          type="button"
+          class="btn-close btn-close-sm ms-2"
+          data-bs-dismiss="toast"
+          aria-label="Close"
+        >
+          <span class="visually-hidden">Close</span>
+        </button>
+      </div>
+      <div class="toast-body p-3">
+        <p id="toastMessage" class="mb-2 small"></p>
+        <div
+          id="toastButtons"
+          class="d-flex flex-wrap gap-1 justify-content-end border-top pt-2 mt-2"
+        >
+          <!-- Action buttons will be dynamically inserted here -->
         </div>
       </div>
     </div>
+  </div>
 
     <!-- Modal Template -->
     <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
@@ -891,6 +621,7 @@ class ThemeConfigForm {
     this.themeConfig = this.presets.filter((item) => item.default === true)[0];
     this.sections = ['low', 'mid', 'high', 'accent'];
     this.eventListenersInitialized = false;
+    this.hasUnsavedChanges = false;
   }
 
   _addEventListeners() {
@@ -914,10 +645,11 @@ class ThemeConfigForm {
       debounce(() => {
         // 清空所有设置或执行其他重置操作
         this.resetSettings();
-        showNotification('已重置', '所有设置已被清除！', {
+        showNotification('已重置', '', {
           type: 'info',
           duration: 3000,
         });
+        this.hasUnsavedChanges = false;
         bootstrap.Modal.getInstance(document.getElementById('resetModal')).hide();
       }, 500),
     );
@@ -950,9 +682,13 @@ class ThemeConfigForm {
     presetSelect.addEventListener('change', (e) => {
       const presetIndex = parseInt(e.target.value);
       if (!isNaN(presetIndex) && this.presets[presetIndex]) {
-        this.themeConfig = JSON.parse(JSON.stringify(this.presets[presetIndex]));
-        this.initializeForm();
-        showNotification('预设已应用', '', { type: 'success', duration: 3000 });
+        try {
+          this.themeConfig = JSON.parse(JSON.stringify(this.presets[presetIndex]));
+          this.initializeForm();
+          showNotification('预设已应用', '', { type: 'success', duration: 3000 });
+        } catch (error) {
+          showNotification('出错了', '未能应用预设!', { type: 'error', duration: 5000 });
+        }
       }
     });
     this.eventListenersInitialized = true; // 设置标志位为已初始化
@@ -1184,22 +920,20 @@ class ThemeConfigForm {
       color: ColorCodeManager.ALL_SUPPORTED_COLOR_CODES.BLU,
       per: '1%',
     }); // 设置最小1%的百分比
+    this.hasUnsavedChanges = true;
     this.renderColorItems(section);
     this.validatePercentages(section);
     this.calculateTotalPercentage(section);
 
-    showNotification('颜色已添加! ✨', '新的颜色选项已添加到您的调色板', {
-      type: 'success',
-      duration: 2000,
-    });
+    // showNotification('颜色已添加! ✨', '新的颜色选项已添加到您的调色板', {
+    //   type: 'success',
+    //   duration: 2000,
+    // });
   }
 
   removeColorItem(section, index) {
-    console.log(
-      'removeColorItem-this.themeConfig.themeColors[section]: ',
-      this.themeConfig.themeColors[section],
-    );
     this.themeConfig.themeColors[section].splice(index, 1);
+    this.hasUnsavedChanges = true;
     if (this.themeConfig.themeColors[section].length === 0) {
       this.addColorItem(section);
     }
@@ -1207,14 +941,17 @@ class ThemeConfigForm {
     this.calculateTotalPercentage(section); // 重新计算并显示总百分比
     this.validatePercentages(section);
 
-    showNotification('颜色已移除! 🗑️', '该颜色已从调色板中移除', {
-      type: 'info',
-      duration: 2000,
-    });
+    // showNotification('颜色已移除! 🗑️', '该颜色已从调色板中移除', {
+    //   type: 'info',
+    //   duration: 2000,
+    // });
   }
 
   updateColor(section, index, value) {
-    this.themeConfig.themeColors[section][index].color = value;
+    if (this.themeConfig.themeColors[section][index].color !== value) {
+      this.themeConfig.themeColors[section][index].color = value;
+      this.hasUnsavedChanges = true;
+    }
     // 调用渲染方法来重新计算总百分比并更新显示
     this.calculateTotalPercentage(section);
     this.renderColorItems(section);
@@ -1312,24 +1049,28 @@ class ThemeConfigForm {
   }
 
   exportConfig() {
-    // Validate all sections before export
-    const isValid = ['low', 'mid', 'high', 'accent'].every((section) =>
-      this.validatePercentages(section),
-    );
+    try {
+      // Validate all sections before export
+      const isValid = ['low', 'mid', 'high', 'accent'].every((section) =>
+        this.validatePercentages(section),
+      );
 
-    if (!isValid) return;
+      if (!isValid) return;
 
-    const configString = JSON.stringify(this.themeConfig, null, 2);
-    const blob = new Blob([configString], { type: 'application/json' });
+      const configString = JSON.stringify(this.themeConfig, null, 2);
+      const blob = new Blob([configString], { type: 'application/json' });
 
-    // 使用 FileSaver.js 的 saveAs 来直接保存文件
-    window.saveAs(blob, 'theme-config.json');
+      // 使用 FileSaver.js 的 saveAs 来直接保存文件
+      window.saveAs(blob, 'theme-config.json');
 
-    // 显示导出成功通知
-    showNotification('导出成功！📦', '你的设置已保存为文件，快留作纪念吧~', {
-      type: 'success',
-      duration: 3000,
-    });
+      // 显示导出成功通知
+      showNotification('导出成功！📦', '你的设置已保存为文件，快留作纪念吧~', {
+        type: 'success',
+        duration: 3000,
+      });
+    } catch (error) {
+      showNotification('导出失败', '请稍后重试!', { type: 'error', duration: 4000 });
+    }
   }
 
   saveConfig() {
@@ -1344,17 +1085,22 @@ class ThemeConfigForm {
         duration: 5000,
       });
 
-    window.AudioAnalyzer &&
-      window.AudioAnalyzer.handleThemeChange_manual(this.themeConfig) &&
-      showNotification(
-        '主题颜色方案准备好了！',
-        '下一步：点击“生成预设代码”按钮，创造你的灯光秀吧！',
-        {
-          type: 'info',
-          duration: 4000,
-        },
-      );
-    localStorage.setItem('lastThemeColors', JSON.stringify(this.themeConfig));
+    try {
+      window.AudioAnalyzer &&
+        window.AudioAnalyzer.handleThemeChange_manual(this.themeConfig) &&
+        showNotification(
+          '主题颜色方案准备好了！',
+          '下一步：点击“生成预设代码”按钮，创造你的灯光秀吧！',
+          {
+            type: 'info',
+            duration: 4000,
+          },
+        );
+      localStorage.setItem('lastThemeColors', JSON.stringify(this.themeConfig));
+      this.hasUnsavedChanges = false;
+    } catch (error) {
+      showNotification('保存失败', '未做出更改!', { type: 'error', duration: 5000 });
+    }
   }
 
   importConfig(input) {
@@ -1374,20 +1120,21 @@ class ThemeConfigForm {
 
         this.themeConfig = imported;
         this.initializeForm();
-        showNotification('已导入！📥', '你的颜色偏好已成功导入', {
+        showNotification('导入成功！📥', '你的颜色偏好已成功导入', {
           type: 'success',
           duration: 3000,
         });
         this.saveConfig();
+        this.hasUnsavedChanges = true;
       } catch (error) {
-        showNotification('错误', '出了一点问题，请再试一次。', {
+        showNotification('导入失败', '出了一点问题，请再试一次。', {
           type: 'error',
           duration: 5000,
         });
       }
     };
     reader.onerror = () => {
-      showNotification('错误', '文件读取失败，请再试一次。', {
+      showNotification('导入错误', '文件读取失败，请再试一次。', {
         type: 'error',
         duration: 5000,
       });
@@ -1454,6 +1201,14 @@ class ThemeConfigForm {
     }
 
     return true;
+  }
+
+  beforeUnload(event) {
+    if (this.hasUnsavedChanges) {
+      event.preventDefault();
+      event.returnValue = '';
+      return '';
+    }
   }
 
   initializeForm() {
@@ -4653,6 +4408,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('error-initializeForm: ', error);
   }
   themeConfigForm.initializeForm();
+
+  window.addEventListener('beforeunload', (e) => themeConfigForm.beforeUnload(e));
 
   // const configurator = new ThemeColorConfigurator(
   //   'configurator',
