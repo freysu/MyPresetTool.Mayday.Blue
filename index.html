@@ -2,7 +2,7 @@
  * @Author: freysu
  * @Date: 2024-11-21 04:20:51
  * @LastEditors: freysu
- * @LastEditTime: 2024-12-31 12:14:47
+ * @LastEditTime: 2025-01-03 19:21:12
  * @Description: file content
 -->
 <!DOCTYPE html>
@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="css/style.min.css" />
     <script src="./js/vendor/driver.js.iife.js" defer="true"></script>
     <link rel="stylesheet" href="css/vendor/driver.css" />
+
     <script
       src="https://js.fundebug.cn/fundebug.2.8.6.min.js"
       apikey="33af664e86e0eb2b56643810e04d20105e3621fd117e7751f112b09929efe908"
@@ -280,7 +281,6 @@
           </div>
         </div>
       </header>
-
       <!-- Main Content -->
       <main class="flex-grow-1 mt-3">
         <div class="container">
@@ -1295,6 +1295,7 @@
                                   max="100"
                                   value="0"
                                   step="0.1"
+                                  disabled
                                 />
                                 <div class="d-flex justify-content-left" id="audioDuration">
                                   <span id="currentTime">00:00</span>
@@ -1618,7 +1619,7 @@
       aria-labelledby="configModalLabel"
       aria-hidden="true"
     >
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="configModalLabel">配置设置</h5>
@@ -1630,7 +1631,7 @@
             ></button>
           </div>
           <div class="modal-body">
-            <div id="configPanel" class="config-panel p-4 rounded shadow mt-4">
+            <div id="configPanel" class="config-panel p-4 rounded shadow">
               <div class="form-check mb-3">
                 <input
                   class="form-check-input"
@@ -1794,7 +1795,7 @@
       aria-labelledby="modalTitle"
       aria-hidden="true"
     >
-      <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="modalTitle"></h5>
@@ -1818,7 +1819,7 @@
       aria-labelledby="resetModalLabel"
       aria-hidden="true"
     >
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="resetModalLabel">确认重置设置</h5>

@@ -191,41 +191,41 @@ if (!document.querySelector('.toast-container')) {
   document.body.insertAdjacentHTML(
     'beforeend',
     `<div class="toast-container position-fixed top-0 end-0 p-2" style="z-index: 1111100">
-    <div
-      id="programToast"
-      class="toast toast-sm"
-      role="alert"
-      aria-live="assertive"
-      aria-atomic="true"
-    >
-      <div class="toast-header py-2 px-3">
-        <span id="toastIcon" class="material-icons me-2 fs-6"></span>
-        <strong id="toastTitle" class="me-auto text-light small"></strong>
-        <small id="toastTimeDiff" class="text-muted ms-2" style="font-size: 0.75rem"></small>
-        <button
-          type="button"
-          class="btn-close btn-close-sm ms-2"
-          data-bs-dismiss="toast"
-          aria-label="Close"
-        >
-          <span class="visually-hidden">Close</span>
-        </button>
-      </div>
-      <div class="toast-body p-3">
-        <p id="toastMessage" class="mb-2 small"></p>
-        <div
-          id="toastButtons"
-          class="d-flex flex-wrap gap-1 justify-content-end border-top pt-2 mt-2"
-        >
-          <!-- Action buttons will be dynamically inserted here -->
+      <div
+        id="programToast"
+        class="toast toast-sm"
+        role="alert"
+        aria-live="assertive"
+        aria-atomic="true"
+      >
+        <div class="toast-header py-2 px-3">
+          <span id="toastIcon" class="material-icons me-2 fs-6"></span>
+          <strong id="toastTitle" class="me-auto text-light small"></strong>
+          <small id="toastTimeDiff" class="text-muted ms-2" style="font-size: 0.75rem"></small>
+          <button
+            type="button"
+            class="btn-close btn-close-sm ms-2"
+            data-bs-dismiss="toast"
+            aria-label="Close"
+          >
+            <span class="visually-hidden">Close</span>
+          </button>
+        </div>
+        <div class="toast-body p-3">
+          <p id="toastMessage" class="mb-2 small"></p>
+          <div
+            id="toastButtons"
+            class="d-flex flex-wrap gap-1 justify-content-end border-top pt-2 mt-2"
+          >
+            <!-- Action buttons will be dynamically inserted here -->
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
     <!-- Modal Template -->
     <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title text-light" id="modalTitle"></h5>
@@ -267,7 +267,7 @@ const notificationConfig = {
     info: 'text-dark',
     success: 'text-white',
     warning: 'text-dark',
-    error: 'text-white',
+    error: 'text-dark',
   },
 };
 
@@ -537,7 +537,7 @@ function showModal(title, message, config) {
     const dialogEl = modalEl.querySelector('.modal-dialog');
 
     // Set modal size
-    dialogEl.className = `modal-dialog modal-dialog-centered ${
+    dialogEl.className = `modal-dialog modal-dialog-scrollable modal-dialog-centered ${
       config.size === 'large' ? 'modal-lg' : config.size === 'small' ? 'modal-sm' : ''
     }`;
 
@@ -4034,6 +4034,7 @@ class AudioController {
         type: 'warning',
         duration: 3000,
       });
+      document.querySelector('#audioProgress').disabled = true
     }
   }
 
@@ -4061,6 +4062,7 @@ class AudioController {
 
     this.updateControlButtons(true);
     document.querySelector('#run').disabled = false;
+    document.querySelector('#audioProgress').disabled = false;
     // // Initialize visualizer after loading audio
     if (!this.waveSurferController) {
       this.waveSurferController = new waveSurferController(this.audio);
@@ -5212,7 +5214,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       showModal('公告📢 - 2024/12/31 11:00', ANNOUNCEMENT_CONTENT_OLD_USER, {
         type: 'info',
-        size: 'medium',
+        size: 'large',
         buttons: [
           {
             text: '我知道了',
