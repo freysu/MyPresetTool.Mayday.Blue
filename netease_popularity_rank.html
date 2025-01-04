@@ -3,122 +3,316 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Music Popularity Rankings</title>
-    <!-- Bootstrap CSS -->
+    <title>Music Analytics Dashboard</title>
+    <!-- Add these to your head section if not already present -->
     <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
-      .search-container {
-        margin: 20px auto;
-        max-width: 600px;
-      }
-      .results-container {
-        margin: 20px auto;
-        max-width: 800px;
-      }
-      .loading {
-        display: none;
-        text-align: center;
-        margin: 20px;
-      }
       .crawl-controls {
-        max-width: 800px;
-        margin: 20px auto;
+        --bs-card-border-radius: 1rem;
       }
-      .progress {
-        height: 5px;
+
+      .crawl-controls .card {
+        transition: all 0.3s ease;
       }
-      .btn-group .btn {
-        margin-left: 5px;
+
+      .crawl-controls .card:hover {
+        transform: translateY(-2px);
       }
-      .table-container {
-        max-height: 600px;
-        overflow-y: auto;
+
+      .crawl-controls .progress {
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 1rem;
+        overflow: hidden;
       }
-      .table thead th {
-        position: sticky;
-        top: 0;
+
+      .crawl-controls .progress-bar {
+        background: linear-gradient(45deg, #007bff, #6610f2);
+        border-radius: 1rem;
+      }
+
+      .crawl-controls .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+
+      .crawl-controls .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .crawl-controls .btn:active {
+        transform: translateY(0);
+      }
+
+      .crawl-controls .badge {
+        padding: 0.5em 0.8em;
+        border-radius: 0.5rem;
+      }
+
+      /* Status indicator animations */
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+
+      .crawl-controls .status-indicator.active {
+        animation: pulse 1.5s infinite;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .crawl-controls .card-body {
+          padding: 1rem;
+        }
+
+        .crawl-controls .btn {
+          padding: 0.4rem 0.8rem;
+          font-size: 0.875rem;
+        }
+      }
+
+      /* Button states */
+      .crawl-controls #stopCrawlBtn {
+        display: none;
+      }
+
+      .crawl-controls.crawling #stopCrawlBtn {
+        display: inline-flex;
+      }
+
+      .crawl-controls.crawling #crawlNextBtn,
+      .crawl-controls.crawling #crawlAllBtn {
+        display: none;
+      }
+
+      /* Progress bar states */
+      .crawl-controls .progress.done .progress-bar {
+        background: linear-gradient(45deg, #28a745, #20c997);
+      }
+
+      .crawl-controls .progress.error .progress-bar {
+        background: linear-gradient(45deg, #dc3545, #f86032);
+      }
+
+      .dashboard-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        padding: 1.5rem;
+      }
+
+      .card {
         background: white;
-        z-index: 1;
+        border-radius: 1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
       }
-      .export-btn {
-        margin: 10px 0;
+
+      .card:hover {
+        transform: translateY(-5px);
+      }
+
+      .song-grid {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .stats-container {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .stat-card {
+        flex: 1;
+        min-width: 200px;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+      }
+
+      .album-cover {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        object-fit: cover;
+      }
+
+      .search-bar {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 2rem;
+        padding: 0.5rem 1rem;
       }
     </style>
   </head>
-  <body>
-    <div class="container">
-      <div class="search-container">
-        <h1 class="text-center mb-4">Music Search & Rankings</h1>
-        <div class="input-group">
+  <body class="bg-light min-vh-100">
+    <div class="container my-4">
+      <!-- Search Section -->
+      <div class="py-6">
+        <div class="search-bar d-flex align-items-center">
           <input
             type="text"
             id="searchInput"
-            class="form-control"
-            placeholder="Enter keywords..."
+            class="form-control flex-grow-1 me-3"
+            placeholder="Search for music..."
           />
-          <button class="btn btn-primary" id="searchButton">Search</button>
+          <button id="searchButton" class="btn btn-primary">Search</button>
         </div>
       </div>
 
-      <div class="crawl-controls mt-3 mb-3">
-        <div class="alert alert-info" role="alert">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <span class="crawl-status">
-                Found
-                <strong class="total-count">0</strong>
-                results.
-              </span>
-              <span class="progress-status"></span>
+      <!-- Crawl Controls Section -->
+      <div class="crawl-controls mt-4 mb-4">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <!-- Status Information -->
+              <div class="col-12 col-md-6">
+                <div class="d-flex align-items-center">
+                  <div class="status-indicator me-3">
+                    <div
+                      class="spinner-border spinner-border-sm text-primary"
+                      role="status"
+                      id="crawlSpinner"
+                      style="display: none"
+                    >
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                  <div class="status-text">
+                    <p class="mb-0">
+                      <span class="crawl-status">
+                        Found
+                        <span class="badge bg-primary total-count">0</span>
+                        results
+                      </span>
+                    </p>
+                    <small class="text-muted progress-status">All pages crawled!</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Control Buttons -->
+              <div class="col-12 col-md-6">
+                <div class="d-flex justify-content-md-end mt-3 mt-md-0 gap-2">
+                  <button
+                    class="btn btn-outline-primary btn-sm d-flex align-items-center"
+                    id="crawlNextBtn"
+                  >
+                    <i class="bi bi-arrow-right me-1"></i>
+                    Next Page
+                  </button>
+                  <button class="btn btn-success btn-sm d-flex align-items-center" id="crawlAllBtn">
+                    <i class="bi bi-play-fill me-1"></i>
+                    Auto Crawl
+                  </button>
+                  <button class="btn btn-danger btn-sm d-flex align-items-center" id="stopCrawlBtn">
+                    <i class="bi bi-stop-fill me-1"></i>
+                    Stop
+                  </button>
+                </div>
+              </div>
             </div>
-            <div class="btn-group" role="group">
-              <button class="btn btn-primary btn-sm" id="crawlNextBtn" style="display: none">
-                Crawl Next Page
-              </button>
-              <button class="btn btn-success btn-sm" id="crawlAllBtn" style="display: none">
-                Auto Crawl All
-              </button>
-              <button class="btn btn-danger btn-sm" id="stopCrawlBtn" style="display: none">
-                Stop Crawling
-              </button>
+
+            <!-- Progress Bar -->
+            <div class="mt-3">
+              <div class="progress" style="height: 8px">
+                <div
+                  class="progress-bar progress-bar-striped progress-bar-animated"
+                  role="progressbar"
+                  style="width: 0%"
+                  aria-valuenow="0"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+              </div>
+              <div class="d-flex justify-content-between mt-1">
+                <small class="text-muted">Progress</small>
+                <small class="text-muted progress-percentage">0%</small>
+              </div>
             </div>
           </div>
-          <div class="progress mt-2" style="display: none">
-            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Analytics Dashboard -->
+      <div class="dashboard-container d-none" id="dashboardContainer">
+        <!-- Popularity Chart -->
+        <div class="card p-4">
+          <h3 class="fs-5 fw-bold mb-4">Top 10 Most Popular Songs</h3>
+          <div class="chart-container" style="height: 400px">
+            <canvas id="popularityChart"></canvas>
           </div>
         </div>
-      </div>
 
-      <div class="loading" id="loading">
-        <div class="spinner-border" role="status">
-          <span class="visually-hidden">Loading...</span>
+        <!-- Comments Chart -->
+        <div class="card p-4">
+          <h3 class="fs-5 fw-bold mb-4">Top 10 Most Commented Songs</h3>
+          <div class="chart-container" style="height: 400px">
+            <canvas id="commentsChart"></canvas>
+          </div>
         </div>
+
+        <!-- Distribution Chart -->
+        <div class="card p-4">
+          <h3 class="fs-5 fw-bold mb-4">Popularity vs Comments Distribution</h3>
+          <div class="chart-container" style="height: 400px">
+            <canvas id="distributionChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Statistics Summary -->
+        <div id="statsContainer" class="stats-container d-none"></div>
       </div>
 
-      <div class="results-container">
-        <button id="exportBtn" class="btn btn-secondary export-btn" style="display: none">
-          Export to CSV
-        </button>
-        <div class="table-container">
-          <table class="table table-striped" id="resultsTable">
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Song Name</th>
-                <th>Artist</th>
-                <th>Popularity</th>
-                <th>Comments</th>
-              </tr>
-            </thead>
-            <tbody id="resultsBody"></tbody>
-          </table>
+      <!-- Results Table -->
+      <div class="mt-8 d-none" id="resultsContainer">
+        <div class="card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fs-4 fw-bold">Rankings</h2>
+            <button id="exportBtn" class="btn btn-success">Export CSV</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr class="bg-light">
+                  <th scope="col">Rank</th>
+                  <th scope="col">Song</th>
+                  <th scope="col">Artist</th>
+                  <th scope="col">Album</th>
+                  <th scope="col">Popularity</th>
+                  <th scope="col">Comments</th>
+                </tr>
+              </thead>
+              <tbody id="resultsBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
-
     <!-- Required Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -148,7 +342,7 @@
           searchInput: $('#searchInput'),
           searchButton: $('#searchButton'),
           resultsBody: $('#resultsBody'),
-          loading: $('#loading'),
+          loading: $('#crawlSpinner'),
           crawlNextBtn: $('#crawlNextBtn'),
           crawlAllBtn: $('#crawlAllBtn'),
           stopCrawlBtn: $('#stopCrawlBtn'),
@@ -317,6 +511,18 @@
           };
         }
 
+        const formatTimestamp = (ms) => {
+          const totalSeconds = Math.floor(ms / 1000);
+          const hours = Math.floor(totalSeconds / 3600);
+          const minutes = Math.floor((totalSeconds % 3600) / 60);
+          const seconds = totalSeconds % 60;
+          return hours > 0
+            ? `${hours}:${minutes.toString().padStart(2, '0')}:${seconds
+                .toString()
+                .padStart(2, '0')}`
+            : `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        };
+
         async function fetchWithRetry(url, options = {}, retries = CONFIG.MAX_RETRIES) {
           try {
             const controller = new AbortController();
@@ -421,21 +627,286 @@
         function displayResults(songs) {
           elements.resultsBody.empty();
           elements.totalCount.text(songs.length);
-
           songs.forEach((song, index) => {
-            const artists = song.ar.map((artist) => DOMPurify.sanitize(artist.name)).join(', ');
+            const renderSongRow = (song, index) => {
+              const artists = song.ar.map((artist) => artist.name).join(', ');
+              return `
+<tr class="table-hover">
+    <td>${index + 1}</td>
+    <td>
+        <div class="d-flex align-items-center">
+            <img src="${song.al.picUrl}" alt="" class="album-cover me-3">
+            <div>
+                <div class="fw-medium">${song.name}</div>
+                <div class="text-secondary small">${formatTimestamp(song.dt)}</div>
+            </div>
+        </div>
+    </td>
+    <td>${artists}</td>
+    <td>${song.al.name}</td>
+    <td>
+        <div class="d-flex align-items-center">
+            <div class="progress w-50 me-2">
+                <div class="progress-bar bg-primary" role="progressbar" style="width: ${
+                  (song.pop / 100) * 100
+                }%;" aria-valuenow="${song.pop}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <span>${song.pop}</span>
+        </div>
+    </td>
+    <td>${song.commentCount}</td>
+</tr>
+            `;
+            };
 
-            const row = `
-                        <tr>
-                            <td>${index + 1}</td>
-                            <td>${DOMPurify.sanitize(song.name)}</td>
-                            <td>${artists}</td>
-                            <td>${song.pop}</td>
-                            <td>${song.commentCount}</td>
-                        </tr>
-                    `;
-            elements.resultsBody.append(row);
+            elements.resultsBody.append(renderSongRow(song, index));
           });
+
+          updateCharts(songs);
+          updateStatistics(songs);
+        }
+
+        // Chart Configuration and Utilities
+        const chartColors = {
+          primary: 'rgba(99, 102, 241, 0.5)',
+          secondary: 'rgba(139, 92, 246, 0.5)',
+          border: {
+            primary: 'rgb(99, 102, 241)',
+            secondary: 'rgb(139, 92, 246)',
+          },
+          gradient: {
+            start: 'rgba(99, 102, 241, 0.1)',
+            end: 'rgba(139, 92, 246, 0.1)',
+          },
+        };
+
+        const createGradient = (ctx, height) => {
+          const gradient = ctx.createLinearGradient(0, 0, 0, height);
+          gradient.addColorStop(0, chartColors.gradient.start);
+          gradient.addColorStop(1, chartColors.gradient.end);
+          return gradient;
+        };
+
+        // Chart Initialization Function
+        function initializeCharts(songs) {
+          // Sort songs by popularity and comments for better visualization
+          const sortedByPop = [...songs].sort((a, b) => b.pop - a.pop).slice(0, 10);
+          const sortedByComments = [...songs]
+            .sort((a, b) => b.commentCount - a.commentCount)
+            .slice(0, 10);
+
+          // Initialize Popularity Chart
+          const popularityCtx = document.getElementById('popularityChart').getContext('2d');
+          const popularityGradient = createGradient(popularityCtx, 400);
+
+          new Chart(popularityCtx, {
+            type: 'bar',
+            data: {
+              labels: sortedByPop.map((song) => truncateString(song.name, 15)),
+              datasets: [
+                {
+                  label: 'Popularity Score',
+                  data: sortedByPop.map((song) => song.pop),
+                  backgroundColor: chartColors.primary,
+                  borderColor: chartColors.border.primary,
+                  borderWidth: 1,
+                  borderRadius: 5,
+                  barThickness: 20,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'top',
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false,
+                  callbacks: {
+                    label: (context) => {
+                      const song = sortedByPop[context.dataIndex];
+                      return `Popularity: ${song.pop}`;
+                    },
+                  },
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  grid: {
+                    drawBorder: false,
+                    color: 'rgba(0, 0, 0, 0.1)',
+                  },
+                },
+                x: {
+                  grid: {
+                    display: false,
+                  },
+                },
+              },
+            },
+          });
+
+          // Initialize Comments Analysis Chart
+          const commentsCtx = document.getElementById('commentsChart').getContext('2d');
+
+          new Chart(commentsCtx, {
+            type: 'line',
+            data: {
+              labels: sortedByComments.map((song) => truncateString(song.name, 15)),
+              datasets: [
+                {
+                  label: 'Comment Count',
+                  data: sortedByComments.map((song) => song.commentCount),
+                  fill: true,
+                  backgroundColor: popularityGradient,
+                  borderColor: chartColors.border.secondary,
+                  tension: 0.4,
+                  pointRadius: 4,
+                  pointBackgroundColor: chartColors.border.secondary,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'top',
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false,
+                  callbacks: {
+                    label: (context) => {
+                      const song = sortedByComments[context.dataIndex];
+                      return `Comments: ${song.commentCount.toLocaleString()}`;
+                    },
+                  },
+                },
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  grid: {
+                    drawBorder: false,
+                    color: 'rgba(0, 0, 0, 0.1)',
+                  },
+                  ticks: {
+                    callback: (value) => value.toLocaleString(),
+                  },
+                },
+                x: {
+                  grid: {
+                    display: false,
+                  },
+                },
+              },
+            },
+          });
+
+          // Initialize Distribution Chart (Scatter plot of popularity vs comments)
+          const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+
+          new Chart(distributionCtx, {
+            type: 'scatter',
+            data: {
+              datasets: [
+                {
+                  label: 'Popularity vs Comments',
+                  data: songs.map((song) => ({
+                    x: song.pop,
+                    y: song.commentCount,
+                  })),
+                  backgroundColor: chartColors.primary,
+                  borderColor: chartColors.border.primary,
+                  pointRadius: 5,
+                  pointHoverRadius: 8,
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                tooltip: {
+                  callbacks: {
+                    label: (context) => {
+                      const song = songs[context.dataIndex];
+                      return [
+                        `Song: ${song.name}`,
+                        `Popularity: ${song.pop}`,
+                        `Comments: ${song.commentCount.toLocaleString()}`,
+                      ];
+                    },
+                  },
+                },
+              },
+              scales: {
+                x: {
+                  title: {
+                    display: true,
+                    text: 'Popularity Score',
+                  },
+                },
+                y: {
+                  title: {
+                    display: true,
+                    text: 'Comment Count',
+                  },
+                  ticks: {
+                    callback: (value) => value.toLocaleString(),
+                  },
+                },
+              },
+            },
+          });
+        }
+
+        // Utility function to truncate strings
+        function truncateString(str, length) {
+          return str.length > length ? str.substring(0, length) + '...' : str;
+        }
+
+        // Update charts when new data is available
+        function updateCharts(newSongs) {
+          // Clear existing charts
+          const charts = Object.values(Chart.instances);
+          charts.forEach((chart) => chart.destroy());
+
+          // Reinitialize with new data
+          initializeCharts(newSongs);
+        }
+
+        function updateStatistics(songs) {
+          const stats = {
+            totalSongs: songs.length,
+            avgPopularity: songs.reduce((acc, song) => acc + song.pop, 0) / songs.length,
+            avgComments: songs.reduce((acc, song) => acc + song.commentCount, 0) / songs.length,
+            maxComments: Math.max(...songs.map((song) => song.commentCount)),
+            maxPopularity: Math.max(...songs.map((song) => song.pop)),
+          };
+
+          // Update statistics in the DOM
+          document.getElementById('statsContainer').innerHTML = `
+        <div class="stat-card">
+            <h3>Total Songs</h3>
+            <p>${stats.totalSongs}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Average Popularity</h3>
+            <p>${stats.avgPopularity.toFixed(2)}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Average Comments</h3>
+            <p>${stats.avgComments.toLocaleString()}</p>
+        </div>
+    `;
         }
 
         // Core Functions
@@ -534,7 +1005,7 @@
 
             const result = await crawlPage(1);
             if (!result) {
-              elements.resultsBody.html(
+              elements.progressStatus.html(
                 '<tr><td colspan="5" class="text-center">No results found</td></tr>',
               );
               return;
@@ -549,7 +1020,7 @@
             updateCrawlControls();
           } catch (error) {
             console.error('Search error:', error);
-            elements.resultsBody.html(
+            elements.progressStatus.html(
               '<tr><td colspan="5" class="text-center text-danger">' +
                 'An error occurred while fetching results. Please try again later.</td></tr>',
             );
@@ -580,26 +1051,43 @@
         // Export Function
         function exportToCSV() {
           const songs = Array.from(crawlState.allSongs.values());
-          let csv = 'Rank,Name,Artists,Popularity,Comments\n';
+          let csv = 'Rank,Name,Artists,Album,Popularity,Comments,Duration,Album Cover URL\n';
 
           songs.forEach((song, index) => {
-            const artists = song.ar
-              .map((artist) => artist.name)
-              .join(';')
-              .replace(/"/g, '""');
+            const artists = song.ar.map((artist) => escapeCsvField(artist.name)).join(';');
 
-            csv += `${index + 1},"${song.name.replace(/"/g, '""')}","${artists}",${song.pop},${
-              song.commentCount
-            }\n`;
+            const duration = formatTimestamp(song.dt);
+            const albumCoverUrl = song.al.picUrl;
+
+            csv += `${index + 1},${escapeCsvField(song.name)},${artists},${escapeCsvField(
+              song.al.name,
+            )},${song.pop},${song.commentCount},${duration},${albumCoverUrl}\n`;
           });
 
           const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
           const link = document.createElement('a');
           link.href = URL.createObjectURL(blob);
           link.download = `music_rankings_${new Date().toISOString().slice(0, 10)}.csv`;
+          document.body.appendChild(link);
           link.click();
+          document.body.removeChild(link);
         }
 
+        // Helper function to escape CSV fields
+        function escapeCsvField(field) {
+          if (field === null || field === undefined) {
+            return '';
+          }
+          const escapedField = field.toString().replace(/"/g, '""'); // Escape double quotes by doubling them
+          if (
+            escapedField.includes(',') ||
+            escapedField.includes('\n') ||
+            escapedField.includes('"')
+          ) {
+            return `"${escapedField}"`; // Enclose in double quotes if necessary
+          }
+          return escapedField;
+        }
         // Event Handlers
         const debouncedSearch = debounce((keywords) => {
           if (keywords) {
